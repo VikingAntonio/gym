@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Nutrición - GYM PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50">
+    <nav id="main-nav"></nav>
+
+    <header class="bg-slate-800 py-10 text-white text-center">
+        <h1 class="text-3xl font-bold">Administrar Nutrición</h1>
+        <p class="mt-2 text-slate-400">Agrega nuevas recetas saludables al sistema.</p>
+    </header>
+
+    <main class="container mx-auto px-4 py-12 max-w-2xl">
+        <form id="recipe-form" class="bg-white p-8 rounded-xl shadow-lg space-y-6">
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Título de la Receta</label>
+                <input type="text" id="title" required class="input-field" placeholder="Ej: Ensalada de Quinoa con Pollo">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Categoría</label>
+                    <select id="category" class="input-field">
+                        <option value="Desayuno">Desayuno</option>
+                        <option value="Almuerzo">Almuerzo</option>
+                        <option value="Cena">Cena</option>
+                        <option value="Snack">Snack</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Imagen de la Receta</label>
+                    <input type="file" id="image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Descripción Corta</label>
+                <textarea id="description" rows="2" class="input-field" placeholder="Breve resumen de la receta..."></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Ingredientes (Separados por comas)</label>
+                <textarea id="ingredients" rows="3" required class="input-field" placeholder="Ej: 1 taza quinoa, 1 pechuga pollo, espinaca..."></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Instrucciones de Preparación</label>
+                <textarea id="instructions" rows="4" required class="input-field" placeholder="Paso 1: Cocinar quinoa... Paso 2: Grillar pollo..."></textarea>
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn-primary w-full">
+                <span id="btn-text">Guardar Receta</span>
+                <span id="btn-loading" class="hidden">Guardando...</span>
+            </button>
+            <div id="message" class="text-center mt-4 hidden"></div>
+        </form>
+    </main>
+
+    <script type="module">
+        import { supabase, uploadToCloudinary, renderNavbar } from './js/utils.js';
+        renderNavbar();
+
+        const form = document.getElementById('recipe-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnLoading = document.getElementById('btn-loading');
+        const messageDiv = document.getElementById('message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // UI Loading
+            submitBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+            messageDiv.className = "text-center mt-4 hidden";
+
+            try {
+                const title = document.getElementById('title').value;
+                const category = document.getElementById('category').value;
+                const description = document.getElementById('description').value;
+                const ingredients = document.getElementById('ingredients').value;
+                const instructions = document.getElementById('instructions').value;
+                const imageFile = document.getElementById('image').files[0];
+
+                let imageUrl = '';
+                if (imageFile) {
+                    imageUrl = await uploadToCloudinary(imageFile);
+                }
+
+                const { data, error } = await supabase
+                    .from('gym_recipes')
+                    .insert([{
+                        title,
+                        category,
+                        description,
+                        ingredients,
+                        instructions,
+                        image_url: imageUrl
+                    }]);
+
+                if (error) throw error;
+
+                messageDiv.textContent = "¡Receta guardada con éxito!";
+                messageDiv.className = "text-center mt-4 text-green-600 font-bold";
+                messageDiv.classList.remove('hidden');
+                form.reset();
+
+            } catch (error) {
+                console.error(error);
+                messageDiv.textContent = "Error: " + error.message;
+                messageDiv.className = "text-center mt-4 text-red-600 font-bold";
+                messageDiv.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                btnLoading.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
