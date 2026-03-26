@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestros Entrenadores - GYM PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50">
+    <nav id="main-nav"></nav>
+
+    <header class="bg-green-600 py-16 text-white text-center">
+        <h1 class="text-4xl font-bold">Elige a tu Entrenador</h1>
+        <p class="mt-2 text-green-100">Profesionales dedicados a llevarte al siguiente nivel.</p>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <div id="trainers-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Cargando... -->
+            <div class="animate-pulse flex flex-col space-y-4">
+                <div class="bg-slate-200 h-64 rounded-xl"></div>
+                <div class="h-6 bg-slate-200 rounded w-3/4"></div>
+                <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para contacto -->
+    <div id="contact-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full relative animate-fade-in">
+            <button id="close-modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div id="modal-content" class="text-center">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase, renderNavbar } from './js/utils.js';
+        renderNavbar();
+
+        const modal = document.getElementById('contact-modal');
+        const modalContent = document.getElementById('modal-content');
+        const closeModal = document.getElementById('close-modal');
+
+        closeModal.onclick = () => modal.classList.add('hidden');
+        window.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
+
+        async function loadTrainers() {
+            const container = document.getElementById('trainers-container');
+            const { data, error } = await supabase
+                .from('gym_trainers')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                container.innerHTML = `<p class="text-red-500 col-span-full">Error al cargar entrenadores: ${error.message}</p>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 col-span-full text-center">No hay entrenadores registrados aún.</p>`;
+                return;
+            }
+
+            container.innerHTML = data.map(trainer => `
+                <div class="card bg-white group">
+                    <div class="relative overflow-hidden">
+                        <img src="${trainer.image_url || 'https://images.unsplash.com/photo-1594381898411-846e7d193883?auto=format&fit=crop&q=80&w=687'}" alt="${trainer.name}" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent flex items-end p-4">
+                            <span class="text-white font-bold">${trainer.specialty}</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">${trainer.name}</h3>
+                        <p class="text-slate-600 text-sm mb-4 line-clamp-2">${trainer.bio}</p>
+                        <button onclick="window.selectTrainer('${trainer.name}', '${trainer.contact_info}')" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition">Contactar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.selectTrainer = (name, contact) => {
+            modalContent.innerHTML = `
+                <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">¡Gran elección!</h3>
+                <p class="text-slate-600 mb-6">Has seleccionado a <strong>${name}</strong> como tu entrenador.</p>
+                <div class="bg-slate-50 p-4 rounded-xl mb-6">
+                    <p class="text-sm text-slate-500 mb-1">Información de contacto:</p>
+                    <p class="text-lg font-bold text-slate-800">${contact}</p>
+                </div>
+                <button onclick="document.getElementById('contact-modal').classList.add('hidden')" class="btn-primary w-full bg-slate-900 hover:bg-slate-800">Cerrar</button>
+            `;
+            modal.classList.remove('hidden');
+        };
+
+        loadTrainers();
+    </script>
+</body>
+</html>
