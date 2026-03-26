@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - GYM PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <header class="bg-slate-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-extrabold flex items-center">
+                <i class="fas fa-toolbox mr-4 text-blue-500"></i>
+                Panel de Administración
+            </h1>
+            <p class="text-slate-400 mt-2 text-lg">Gestiona contenidos, rutinas, nutrición y equipo profesional.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Nutrición -->
+            <a href="adminNutricion.html" class="group bg-white rounded-2xl shadow-md p-8 border border-slate-100 hover:shadow-2xl hover:border-blue-500 transition-all duration-300">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-apple-whole"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 mb-3">Nutrición</h3>
+                <p class="text-slate-500 mb-6">Carga recetas saludables, gestiona valores nutricionales y categorías de comida.</p>
+                <span class="text-emerald-600 font-bold flex items-center">
+                    Gestionar Recetas <i class="fas fa-arrow-right ml-2 group-hover:ml-4 transition-all"></i>
+                </span>
+            </a>
+
+            <!-- Rutinas -->
+            <a href="adminRutinas.html" class="group bg-white rounded-2xl shadow-md p-8 border border-slate-100 hover:shadow-2xl hover:border-orange-500 transition-all duration-300">
+                <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 mb-3">Rutinas</h3>
+                <p class="text-slate-500 mb-6">Diseña planes de entrenamiento semanales con ejercicios detallados y niveles.</p>
+                <span class="text-orange-600 font-bold flex items-center">
+                    Diseñar Rutinas <i class="fas fa-arrow-right ml-2 group-hover:ml-4 transition-all"></i>
+                </span>
+            </a>
+
+            <!-- Entrenadores -->
+            <a href="adminEntrenadores.html" class="group bg-white rounded-2xl shadow-md p-8 border border-slate-100 hover:shadow-2xl hover:border-indigo-500 transition-all duration-300">
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 mb-3">Entrenadores</h3>
+                <p class="text-slate-500 mb-6">Administra los perfiles de los profesionales, sus especialidades y contacto.</p>
+                <span class="text-indigo-600 font-bold flex items-center">
+                    Gestionar Equipo <i class="fas fa-arrow-right ml-2 group-hover:ml-4 transition-all"></i>
+                </span>
+            </a>
+        </div>
+
+        <section class="mt-20">
+            <h2 class="text-2xl font-bold text-slate-800 mb-8 border-b pb-4">Configuraciones Rápidas</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><i class="fas fa-database"></i></div>
+                    <div class="flex-grow">
+                        <h4 class="font-bold">Estado de Base de Datos</h4>
+                        <p class="text-sm text-slate-500">Conexión activa con Supabase</p>
+                    </div>
+                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm flex items-center space-x-4 opacity-50 cursor-not-allowed">
+                    <div class="p-3 bg-slate-50 text-slate-600 rounded-lg"><i class="fas fa-key"></i></div>
+                    <div>
+                        <h4 class="font-bold">Gestión de API Keys</h4>
+                        <p class="text-sm text-slate-500">Configurado en js/config.js</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { renderNavbar } from './js/utils.js';
+        renderNavbar();
+    </script>
+</body>
+</html>

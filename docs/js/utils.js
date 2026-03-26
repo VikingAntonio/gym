@@ -28,17 +28,20 @@ export function renderNavbar() {
     const nav = document.getElementById('main-nav');
     if (!nav) return;
 
-    nav.className = "bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-lg";
+    nav.className = "bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-lg border-b border-white/5";
     nav.innerHTML = `
         <div class="container mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold text-blue-500">GYM <span class="text-white">PRO</span></a>
-            <ul class="flex space-x-6 overflow-x-auto">
-                <li><a href="index.html" class="hover:text-blue-400 transition">Inicio</a></li>
-                <li><a href="nutricion.html" class="hover:text-blue-400 transition">Nutrición</a></li>
-                <li><a href="rutinas.html" class="hover:text-blue-400 transition">Rutinas</a></li>
-                <li><a href="entrenadores.html" class="hover:text-blue-400 transition">Entrenadores</a></li>
-                <li><a href="test.html" class="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 transition">Hacer Test</a></li>
+            <a href="index.html" class="text-2xl font-black tracking-tighter text-blue-500">GYM <span class="text-white">PRO</span></a>
+            <ul class="hidden md:flex space-x-8 items-center font-bold text-sm uppercase tracking-widest text-slate-300">
+                <li><a href="index.html" class="hover:text-blue-400 transition-colors">Inicio</a></li>
+                <li><a href="nutricion.html" class="hover:text-emerald-400 transition-colors">Nutrición</a></li>
+                <li><a href="rutinas.html" class="hover:text-orange-400 transition-colors">Rutinas</a></li>
+                <li><a href="entrenadores.html" class="hover:text-indigo-400 transition-colors">Equipo</a></li>
+                <li><a href="test.html" class="bg-blue-600 px-6 py-3 rounded-full text-white hover:bg-blue-700 transition shadow-lg shadow-blue-900/40">Hacer Test</a></li>
+                <li><a href="admin.html" class="text-slate-500 hover:text-white transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
             </ul>
+            <!-- Mobile Toggle -->
+            <button class="md:hidden text-white text-2xl"><i class="fas fa-bars"></i></button>
         </div>
     `;
 }
