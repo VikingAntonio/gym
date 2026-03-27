@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Nutrición Pro - GYM PRO</title>
+    <title>Chef Ultra Pro - GYM PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,120 +13,177 @@
     <nav id="main-nav"></nav>
 
     <div class="flex flex-col lg:flex-row">
-        <!-- Sidebar / Form -->
-        <aside class="w-full lg:w-1/3 bg-white border-r min-h-screen p-6 lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] overflow-y-auto">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
-                <i class="fas fa-carrot text-emerald-500 mr-2"></i> Nueva Receta
-            </h2>
+        <!-- Ultra Form -->
+        <aside class="w-full lg:w-1/3 bg-white border-r min-h-screen p-8 lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] overflow-y-auto">
+            <div class="mb-10">
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight mb-2">Chef Ultra Pro</h2>
+                <p class="text-slate-400 text-sm font-medium uppercase tracking-widest">Nutrición de Élite</p>
+            </div>
 
-            <form id="recipe-form" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre del Platillo</label>
-                    <input type="text" id="title" required class="input-field" placeholder="Ej: Bowl de Quinoa">
+            <form id="recipe-form" class="space-y-6">
+                <!-- Drag & Drop -->
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Imagen del Platillo (Drag & Drop)</label>
+                    <div id="drop-zone" class="w-full h-40 border-2 border-dashed border-slate-200 rounded-[30px] flex flex-col items-center justify-center text-slate-400 hover:border-emerald-400 hover:text-emerald-500 transition-all cursor-pointer overflow-hidden group bg-slate-50">
+                        <div id="drop-placeholder" class="text-center p-4">
+                            <i class="fas fa-utensils text-2xl mb-2 group-hover:rotate-12 transition-transform"></i>
+                            <p class="text-[10px] font-black uppercase tracking-widest">Sube tu creación</p>
+                        </div>
+                        <img id="preview-image" src="" class="hidden w-full h-full object-cover">
+                    </div>
+                    <input type="file" id="image-input" accept="image/*" class="hidden">
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Categoría</label>
-                        <select id="category" class="input-field">
-                            <option>Desayuno</option>
-                            <option>Almuerzo</option>
-                            <option>Cena</option>
-                            <option>Snack</option>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Nombre de la Receta</label>
+                        <input type="text" id="title" required class="input-field" placeholder="Ej: Salmon al Eneldo con Espárragos">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Categoría</label>
+                            <select id="category" class="input-field">
+                                <option>Desayuno</option>
+                                <option>Almuerzo</option>
+                                <option>Cena</option>
+                                <option>Postre Fitness</option>
+                                <option>Snack Proteico</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Tipo de Dieta</label>
+                            <select id="diet_type" class="input-field">
+                                <option>Equilibrada</option>
+                                <option>Keto</option>
+                                <option>Vegana</option>
+                                <option>Alta Proteína</option>
+                                <option>Sin Gluten</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-slate-50 p-3 rounded-2xl">
+                            <label class="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 text-center">Prote (g)</label>
+                            <input type="number" id="protein" class="w-full bg-transparent text-center font-black border-none focus:ring-0 p-0 text-sm">
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-2xl">
+                            <label class="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 text-center">Carbs (g)</label>
+                            <input type="number" id="carbs" class="w-full bg-transparent text-center font-black border-none focus:ring-0 p-0 text-sm">
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-2xl">
+                            <label class="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 text-center">Grasas (g)</label>
+                            <input type="number" id="fats" class="w-full bg-transparent text-center font-black border-none focus:ring-0 p-0 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Calorías Totales</label>
+                            <input type="number" id="calories" class="input-field" placeholder="500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Tiempo Prep</label>
+                            <input type="text" id="prep_time" class="input-field" placeholder="15 min">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Dificultad</label>
+                        <select id="difficulty" class="input-field">
+                            <option>Fácil</option>
+                            <option>Media</option>
+                            <option>Pro</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Calorías</label>
-                        <input type="number" id="calories" class="input-field" placeholder="450">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Ingredientes Clave</label>
+                        <textarea id="ingredients" rows="3" class="input-field text-sm" placeholder="1 x Salmon (200g)..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Instrucciones Paso a Paso</label>
+                        <textarea id="instructions" rows="5" class="input-field text-sm" placeholder="1. Calienta la sartén..."></textarea>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Proteína (g)</label>
-                        <input type="number" id="protein" class="input-field text-sm px-2">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Carbos (g)</label>
-                        <input type="number" id="carbs" class="input-field text-sm px-2">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Grasas (g)</label>
-                        <input type="number" id="fats" class="input-field text-sm px-2">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Imagen del Platillo</label>
-                    <input type="file" id="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-bold file:bg-emerald-50 file:text-emerald-700">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Ingredientes</label>
-                    <textarea id="ingredients" rows="3" class="input-field text-sm" placeholder="Listado de ingredientes..."></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Preparación</label>
-                    <textarea id="instructions" rows="4" class="input-field text-sm" placeholder="Pasos detallados..."></textarea>
-                </div>
-
-                <button type="submit" id="submit-btn" class="btn-primary w-full bg-emerald-600 hover:bg-emerald-700 mt-6 py-3">
-                    <span id="btn-text">Publicar Receta</span>
-                    <span id="btn-loading" class="hidden"><i class="fas fa-circle-notch animate-spin mr-2"></i> Guardando...</span>
+                <button type="submit" id="submit-btn" class="w-full py-5 bg-emerald-600 text-white rounded-[30px] font-black uppercase tracking-widest text-sm shadow-xl hover:bg-emerald-700 transition-all">
+                    <span id="btn-text">Publicar Receta Ultra</span>
+                    <span id="btn-loading" class="hidden"><i class="fas fa-spinner animate-spin mr-2"></i> Cocinando...</span>
                 </button>
             </form>
         </aside>
 
-        <!-- Main View / List -->
-        <main class="w-full lg:w-2/3 p-8">
-            <h2 class="text-3xl font-bold text-slate-800 mb-8">Recetario Actual</h2>
-            <div id="recipes-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <!-- Recipe Inventory -->
+        <main class="flex-grow p-8 lg:p-12">
+            <h2 class="text-4xl font-black text-slate-900 mb-10 tracking-tight italic">Menú <span class="not-italic text-emerald-500">PRO</span></h2>
+            <div id="recipes-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                <!-- Dinámico -->
+            </div>
         </main>
     </div>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, renderNavbar } from './js/utils.js';
+        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar } from './js/utils.js';
         renderNavbar();
 
         const form = document.getElementById('recipe-form');
         const list = document.getElementById('recipes-list');
+        const dropZone = document.getElementById('drop-zone');
+        const imageInput = document.getElementById('image-input');
+        const previewImage = document.getElementById('preview-image');
+        const dropPlaceholder = document.getElementById('drop-placeholder');
+
+        setupDragAndDrop(dropZone, imageInput, (file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewImage.classList.remove('hidden');
+                dropPlaceholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const submitBtn = document.getElementById('submit-btn');
+            const btn = document.getElementById('submit-btn');
             const btnText = document.getElementById('btn-text');
             const btnLoading = document.getElementById('btn-loading');
 
-            submitBtn.disabled = true;
+            btn.disabled = true;
             btnText.classList.add('hidden');
             btnLoading.classList.remove('hidden');
 
             try {
                 const title = document.getElementById('title').value;
                 const category = document.getElementById('category').value;
-                const calories = document.getElementById('calories').value;
+                const diet_type = document.getElementById('diet_type').value;
                 const protein = document.getElementById('protein').value;
                 const carbs = document.getElementById('carbs').value;
                 const fats = document.getElementById('fats').value;
+                const calories = document.getElementById('calories').value;
+                const prep_time = document.getElementById('prep_time').value;
+                const difficulty = document.getElementById('difficulty').value;
                 const ingredients = document.getElementById('ingredients').value;
                 const instructions = document.getElementById('instructions').value;
-                const imageFile = document.getElementById('image').files[0];
+                const imageFile = imageInput.files[0];
 
                 let imageUrl = '';
                 if (imageFile) imageUrl = await uploadToCloudinary(imageFile);
 
                 const { error } = await supabase.from('gym_recipes').insert([{
-                    title, category, calories, protein, carbs, fats, ingredients, instructions, image_url: imageUrl
+                    title, category, diet_type, protein, carbs, fats, calories, prep_time, difficulty, ingredients, instructions, image_url: imageUrl
                 }]);
 
                 if (error) throw error;
-                alert('¡Receta guardada!');
+                alert('¡Receta Ultra Publicada!');
                 location.reload();
             } catch (err) {
                 alert('Error: ' + err.message);
             } finally {
-                submitBtn.disabled = false;
+                btn.disabled = false;
                 btnText.classList.remove('hidden');
                 btnLoading.classList.add('hidden');
             }
@@ -137,22 +194,22 @@
             if (error) return;
 
             list.innerHTML = data.map(r => `
-                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-                    <div class="h-40 bg-slate-100 relative">
+                <div class="bg-white rounded-[40px] shadow-sm border overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                    <div class="h-48 relative overflow-hidden">
                         <img src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400'}"
-                             class="w-full h-full object-cover">
-                        <span class="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm">${r.category}</span>
+                             class="w-full h-full object-cover group-hover:scale-110 transition duration-1000">
+                        <span class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-emerald-600">${r.diet_type}</span>
                     </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-slate-800 mb-1">${r.title}</h4>
-                        <div class="flex space-x-3 text-[10px] font-bold text-slate-400 mb-4">
-                            <span>🔥 ${r.calories || 0} kcal</span>
-                            <span>🍖 P: ${r.protein || 0}g</span>
-                            <span>🥖 C: ${r.carbs || 0}g</span>
+                    <div class="p-6">
+                        <h4 class="font-black text-slate-800 text-lg mb-2 truncate">${r.title}</h4>
+                        <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 mb-6">
+                            <span>⏱ ${r.prep_time || '20m'}</span>
+                            <span>⚖️ ${r.calories || 0} kcal</span>
+                            <span>⚡ ${r.difficulty}</span>
                         </div>
-                        <button onclick="deleteRecipe(${r.id})" class="text-xs text-red-400 hover:text-red-600 font-bold transition">
-                            <i class="fas fa-trash-alt mr-1"></i> ELIMINAR
-                        </button>
+                        <div class="flex space-x-2">
+                            <button onclick="deleteRecipe(${r.id})" class="flex-grow py-3 bg-slate-50 text-[10px] font-black uppercase text-red-400 rounded-2xl hover:bg-red-50 transition-colors">Borrar</button>
+                        </div>
                     </div>
                 </div>
             `).join('');
