@@ -66,10 +66,10 @@
     </div>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, renderNavbar, Auth } from './js/utils.js';
+        import { supabase, uploadToCloudinary, renderNavbar, Auth, showPopup, showConfirm } from './js/utils.js';
         renderNavbar();
 
-        const currentUser = Auth.checkAccess(['gym-admin', 'gym-owner']);
+        const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
         if (!currentUser) return;
 
         const form = document.getElementById('trainer-form');
@@ -102,10 +102,10 @@
                 }]);
 
                 if (error) throw error;
-                alert('¡Entrenador agregado!');
+                await showPopup('¡Éxito!', '¡Entrenador agregado!');
                 location.reload();
             } catch (err) {
-                alert('Error: ' + err.message);
+                await showPopup('Error', err.message, 'error');
             } finally {
                 submitBtn.disabled = false;
                 btnText.classList.remove('hidden');
@@ -143,7 +143,7 @@
         }
 
         window.deleteTrainer = async (id) => {
-            if (confirm('¿Eliminar entrenador del equipo?')) {
+            if (await showConfirm('¿Eliminar entrenador?', 'Esta acción no se puede deshacer')) {
                 await supabase.from('gym_trainers').delete().eq('id', id);
                 fetchTrainers();
             }
