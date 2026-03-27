@@ -70,11 +70,57 @@ export function setupDragAndDrop(dropZone, fileInput, callback) {
 }
 
 /**
+ * SISTEMA DE AUTENTICACIÓN MOCK (Sustituto de Supabase Auth por ahora)
+ */
+export const Auth = {
+    async login(username, password) {
+        const { data, error } = await supabase
+            .from('gym_users')
+            .select('*')
+            .eq('username', username)
+            .eq('password', password)
+            .single();
+
+        if (error || !data) throw new Error('Usuario o contraseña incorrectos');
+
+        localStorage.setItem('gym_user', JSON.stringify(data));
+        return data;
+    },
+
+    logout() {
+        localStorage.removeItem('gym_user');
+        window.location.href = 'index.html';
+    },
+
+    getUser() {
+        const user = localStorage.getItem('gym_user');
+        return user ? JSON.parse(user) : null;
+    },
+
+    checkAccess(rolesPermitidos = []) {
+        const user = this.getUser();
+        if (!user) {
+            window.location.href = 'login.html';
+            return null;
+        }
+        if (rolesPermitidos.length > 0 && !rolesPermitidos.includes(user.role)) {
+            alert('Acceso no autorizado');
+            window.location.href = 'index.html';
+            return null;
+        }
+        return user;
+    }
+};
+
+/**
  * Helper para navegación (Navbar común)
  */
 export function renderNavbar() {
     const nav = document.getElementById('main-nav');
     if (!nav) return;
+
+    const user = Auth.getUser();
+    const isAdminOrOwner = user && ['gym-admin', 'gym-owner'].includes(user.role);
 
     nav.className = "bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-lg border-b border-white/5";
     nav.innerHTML = `
@@ -86,9 +132,32 @@ export function renderNavbar() {
                 <li><a href="rutinas.html" class="hover:text-orange-400 transition-all hover:-translate-y-0.5 inline-block">Rutinas</a></li>
                 <li><a href="entrenadores.html" class="hover:text-indigo-400 transition-all hover:-translate-y-0.5 inline-block">Equipo</a></li>
                 <li><a href="test.html" class="bg-blue-600 px-6 py-2.5 rounded-full text-white hover:bg-blue-700 transition shadow-lg shadow-blue-900/40">Hacer Test</a></li>
-                <li><a href="admin.html" class="text-slate-500 hover:text-white transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
+
+                ${isAdminOrOwner ? `
+                    <li><a href="admin.html" class="text-slate-500 hover:text-white transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
+                ` : ''}
+
+                ${user ? `
+                    <li class="flex items-center space-x-3 border-l border-white/10 pl-8 ml-4">
+                        <span class="text-[10px] text-slate-500 font-black">${user.username} (${user.role.replace('gym-', '')})</span>
+                        <button id="logout-btn" class="text-red-400 hover:text-red-300 transition-colors" title="Cerrar Sesión">
+                            <i class="fas fa-power-off text-lg"></i>
+                        </button>
+                    </li>
+                ` : `
+                    <li class="pl-8 ml-4">
+                        <a href="login.html" class="text-blue-500 hover:text-blue-400 transition-colors flex items-center">
+                            <i class="fas fa-user-circle mr-2 text-lg"></i> Login
+                        </a>
+                    </li>
+                `}
             </ul>
             <button class="md:hidden text-white text-2xl"><i class="fas fa-bars"></i></button>
         </div>
     `;
+
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.onclick = () => Auth.logout();
+    }
 }

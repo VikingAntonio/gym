@@ -66,8 +66,11 @@
     </div>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, renderNavbar } from './js/utils.js';
+        import { supabase, uploadToCloudinary, renderNavbar, Auth } from './js/utils.js';
         renderNavbar();
+
+        const currentUser = Auth.checkAccess(['gym-admin', 'gym-owner']);
+        if (!currentUser) return;
 
         const form = document.getElementById('trainer-form');
         const list = document.getElementById('trainers-list');
@@ -94,7 +97,8 @@
                 if (imageFile) imageUrl = await uploadToCloudinary(imageFile);
 
                 const { error } = await supabase.from('gym_trainers').insert([{
-                    name, specialty, rating, contact_info, bio, image_url: imageUrl
+                    name, specialty, rating, contact_info, bio, image_url: imageUrl,
+                    owner_id: currentUser.role === 'gym-owner' ? currentUser.id : null
                 }]);
 
                 if (error) throw error;
@@ -110,7 +114,13 @@
         });
 
         async function fetchTrainers() {
-            const { data, error } = await supabase.from('gym_trainers').select('*').order('created_at', { ascending: false });
+            let query = supabase.from('gym_trainers').select('*').order('created_at', { ascending: false });
+
+            if (currentUser.role === 'gym-owner') {
+                query = query.eq('owner_id', currentUser.id);
+            }
+
+            const { data, error } = await query;
             if (error) return;
 
             list.innerHTML = data.map(t => `

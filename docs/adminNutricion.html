@@ -126,8 +126,9 @@
     </div>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar } from './js/utils.js';
+        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth } from './js/utils.js';
         renderNavbar();
+        Auth.checkAccess(['gym-admin', 'gym-owner']);
 
         const form = document.getElementById('recipe-form');
         const list = document.getElementById('recipes-list');
