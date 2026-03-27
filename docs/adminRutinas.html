@@ -173,8 +173,9 @@
     </template>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar } from './js/utils.js';
+        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth } from './js/utils.js';
         renderNavbar();
+        Auth.checkAccess(['gym-admin', 'gym-owner']);
 
         const weeksContainer = document.getElementById('weeks-container');
         const addWeekBtn = document.getElementById('add-week');
