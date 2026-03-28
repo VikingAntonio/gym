@@ -173,9 +173,9 @@
     </template>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth } from './js/utils.js';
+        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth, showPopup } from './js/utils.js';
         renderNavbar();
-        Auth.checkAccess(['gym-admin', 'gym-owner']);
+        await Auth.checkAccess(['gym-admin', 'gym-owner']);
 
         const weeksContainer = document.getElementById('weeks-container');
         const addWeekBtn = document.getElementById('add-week');
@@ -283,11 +283,11 @@
                 }]);
 
                 if (error) throw error;
-                alert('¡Sistema Ultra Pro Actualizado!');
+                await showPopup('¡Éxito!', '¡Sistema Ultra Pro Actualizado!');
                 window.location.href = 'admin.html';
 
             } catch (err) {
-                alert('Error Crítico: ' + err.message);
+                await showPopup('Error Crítico', err.message, 'error');
             } finally {
                 btn.disabled = false;
                 btnText.classList.remove('hidden');

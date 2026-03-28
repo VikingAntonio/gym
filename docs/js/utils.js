@@ -31,6 +31,81 @@ export async function uploadToCloudinary(file) {
  * @param {HTMLInputElement} fileInput - El input file oculto
  * @param {Function} callback - Función que se ejecuta al recibir el archivo
  */
+/**
+ * Muestra un popup estilizado
+ */
+export function showPopup(title, message, type = 'success') {
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    const bgClass = type === 'success' ? 'bg-emerald-50' : 'bg-red-50';
+    const textClass = type === 'success' ? 'text-emerald-500' : 'text-red-500';
+    const btnClass = type === 'success' ? 'hover:bg-emerald-600' : 'hover:bg-red-600';
+
+    const popup = document.createElement('div');
+    popup.className = `fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in`;
+    popup.innerHTML = `
+        <div class="bg-white rounded-[40px] p-10 max-w-sm w-full text-center shadow-2xl border border-white/20">
+            <div class="w-20 h-20 ${bgClass} ${textClass} rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
+                <i class="fas ${icon}"></i>
+            </div>
+            <h3 class="text-2xl font-black text-slate-900 mb-2">${title}</h3>
+            <p class="text-slate-500 font-medium mb-8">${message}</p>
+            <button id="popup-close" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs ${btnClass} transition-colors">
+                Entendido
+            </button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    document.body.style.overflow = 'hidden';
+
+    return new Promise((resolve) => {
+        document.getElementById('popup-close').onclick = () => {
+            popup.remove();
+            document.body.style.overflow = 'auto';
+            resolve();
+        };
+    });
+}
+
+/**
+ * Muestra un popup de confirmación
+ */
+export function showConfirm(title, message) {
+    const popup = document.createElement('div');
+    popup.className = `fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in`;
+    popup.innerHTML = `
+        <div class="bg-white rounded-[40px] p-10 max-w-sm w-full text-center shadow-2xl border border-white/20">
+            <div class="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <h3 class="text-2xl font-black text-slate-900 mb-2">${title}</h3>
+            <p class="text-slate-500 font-medium mb-8">${message}</p>
+            <div class="flex space-x-3">
+                <button id="confirm-cancel" class="flex-grow py-4 bg-slate-100 text-slate-400 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-colors">
+                    Cancelar
+                </button>
+                <button id="confirm-ok" class="flex-grow py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition-colors">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    document.body.style.overflow = 'hidden';
+
+    return new Promise((resolve) => {
+        document.getElementById('confirm-cancel').onclick = () => {
+            popup.remove();
+            document.body.style.overflow = 'auto';
+            resolve(false);
+        };
+        document.getElementById('confirm-ok').onclick = () => {
+            popup.remove();
+            document.body.style.overflow = 'auto';
+            resolve(true);
+        };
+    });
+}
+
 export function setupDragAndDrop(dropZone, fileInput, callback) {
     if (!dropZone || !fileInput) return;
 
@@ -97,14 +172,14 @@ export const Auth = {
         return user ? JSON.parse(user) : null;
     },
 
-    checkAccess(rolesPermitidos = []) {
+    async checkAccess(rolesPermitidos = []) {
         const user = this.getUser();
         if (!user) {
             window.location.href = 'login.html';
             return null;
         }
         if (rolesPermitidos.length > 0 && !rolesPermitidos.includes(user.role)) {
-            alert('Acceso no autorizado');
+            await showPopup('Acceso no autorizado', 'No tienes permisos para ver esta sección', 'error');
             window.location.href = 'index.html';
             return null;
         }

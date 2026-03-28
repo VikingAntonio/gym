@@ -126,9 +126,9 @@
     </div>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth } from './js/utils.js';
+        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth, showPopup, showConfirm } from './js/utils.js';
         renderNavbar();
-        Auth.checkAccess(['gym-admin', 'gym-owner']);
+        await Auth.checkAccess(['gym-admin', 'gym-owner']);
 
         const form = document.getElementById('recipe-form');
         const list = document.getElementById('recipes-list');
@@ -179,10 +179,10 @@
                 }]);
 
                 if (error) throw error;
-                alert('¡Receta Ultra Publicada!');
+                await showPopup('¡Éxito!', '¡Receta Ultra Publicada!');
                 location.reload();
             } catch (err) {
-                alert('Error: ' + err.message);
+                await showPopup('Error', err.message, 'error');
             } finally {
                 btn.disabled = false;
                 btnText.classList.remove('hidden');
@@ -217,7 +217,7 @@
         }
 
         window.deleteRecipe = async (id) => {
-            if (confirm('¿Borrar receta?')) {
+            if (await showConfirm('¿Borrar receta?', 'Esta acción no se puede deshacer')) {
                 await supabase.from('gym_recipes').delete().eq('id', id);
                 fetchRecipes();
             }

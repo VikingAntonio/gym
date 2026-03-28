@@ -98,7 +98,7 @@
     <script type="module">
         import { renderNavbar, Auth } from './js/utils.js';
         renderNavbar();
-        Auth.checkAccess(['gym-admin', 'gym-owner']);
+        await Auth.checkAccess(['gym-admin', 'gym-owner']);
     </script>
 </body>
 </html>

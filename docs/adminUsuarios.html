@@ -81,10 +81,10 @@
     </div>
 
     <script type="module">
-        import { supabase, Auth, renderNavbar } from './js/utils.js';
+        import { supabase, Auth, renderNavbar, showPopup, showConfirm } from './js/utils.js';
         renderNavbar();
 
-        const currentUser = Auth.checkAccess(['gym-admin', 'gym-owner']);
+        const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
         if (!currentUser) return;
 
         const form = document.getElementById('user-form');
@@ -131,10 +131,10 @@
                 }]);
 
                 if (error) throw error;
-                alert('¡Usuario registrado con éxito!');
+                await showPopup('¡Éxito!', '¡Usuario registrado con éxito!');
                 location.reload();
             } catch (err) {
-                alert('Error: ' + err.message);
+                await showPopup('Error', err.message, 'error');
             } finally {
                 btn.disabled = false;
                 btnText.classList.remove('hidden');
@@ -186,9 +186,9 @@
         }
 
         window.deleteUser = async (id) => {
-            if (confirm('¿Estás seguro de eliminar este usuario?')) {
+            if (await showConfirm('¿Estás seguro?', '¿Deseas eliminar este usuario permanentemente?')) {
                 const { error } = await supabase.from('gym_users').delete().eq('id', id);
-                if (error) alert('Error al eliminar');
+                if (error) await showPopup('Error', 'No se pudo eliminar al usuario', 'error');
                 else fetchUsers();
             }
         }
