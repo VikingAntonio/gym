@@ -3,13 +3,12 @@
 -- ######################################################
 -- Copia y pega TODO este código en el SQL Editor de Supabase.
 
--- 0. LIMPIEZA DE CONSTRAINTS (Para evitar errores de tipos incompatibles en migraciones)
+-- 0. LIMPIEZA DE CONSTRAINTS Y PREPARACIÓN DE TIPOS
 DO $$
 DECLARE
     r RECORD;
 BEGIN
-    -- Buscamos y eliminamos CUALQUIER Foreign Key en nuestras tablas gym_*
-    -- Esto permite cambiar los tipos de ID de BIGINT a UUID sin bloqueos
+    -- 1. Eliminar Foreign Keys
     FOR r IN (
         SELECT table_name, constraint_name
         FROM information_schema.table_constraints
@@ -18,6 +17,11 @@ BEGIN
     ) LOOP
         EXECUTE 'ALTER TABLE ' || quote_ident(r.table_name) || ' DROP CONSTRAINT IF EXISTS ' || quote_ident(r.constraint_name);
     END LOOP;
+
+    -- 2. Eliminar Identity de gym_users.id si existe (necesario para cambiar a UUID)
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_users' AND column_name = 'id' AND is_identity = 'YES') THEN
+        ALTER TABLE gym_users ALTER COLUMN id DROP IDENTITY;
+    END IF;
 END $$;
 
 -- 1. TABLA DE USUARIOS (Vínculo con auth.users de Supabase)
@@ -32,7 +36,7 @@ CREATE TABLE IF NOT EXISTS gym_users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Migrar tipos de columna a UUID si existen como BIGINT
+-- Migración de tipos segura para gym_users
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_users' AND column_name = 'id' AND data_type != 'uuid') THEN
@@ -43,7 +47,7 @@ BEGIN
     END IF;
 END $$;
 
--- Asegurar que domain sea opcional y no tenga restricción única antigua
+-- Asegurar que domain no tenga restricciones antiguas
 ALTER TABLE gym_users ALTER COLUMN domain DROP NOT NULL;
 ALTER TABLE gym_users DROP CONSTRAINT IF EXISTS gym_users_domain_key;
 
@@ -119,22 +123,18 @@ BEGIN
     END IF;
 END $$;
 
--- 5. RE-ESTABLECER CONSTRAINTS (Ahora que todos son UUID)
+-- 5. RE-ESTABLECER CONSTRAINTS
 DO $$
 BEGIN
-    -- FKs para gym_users
     IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'gym_users_owner_id_fkey') THEN
         ALTER TABLE gym_users ADD CONSTRAINT gym_users_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES gym_users(id) ON DELETE SET NULL;
     END IF;
-    -- FKs para gym_recipes
     IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'gym_recipes_owner_id_fkey') THEN
         ALTER TABLE gym_recipes ADD CONSTRAINT gym_recipes_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES gym_users(id) ON DELETE CASCADE;
     END IF;
-    -- FKs para gym_routines
     IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'gym_routines_owner_id_fkey') THEN
         ALTER TABLE gym_routines ADD CONSTRAINT gym_routines_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES gym_users(id) ON DELETE CASCADE;
     END IF;
-    -- FKs para gym_trainers
     IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'gym_trainers_owner_id_fkey') THEN
         ALTER TABLE gym_trainers ADD CONSTRAINT gym_trainers_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES gym_users(id) ON DELETE CASCADE;
     END IF;
