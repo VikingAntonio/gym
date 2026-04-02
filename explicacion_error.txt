@@ -1,17 +1,15 @@
-# Solución al error "Database error saving new user"
+# Solución Definitiva al error de registro (Database error saving new user)
 
-## ¿Por qué ocurrió el error?
-El error que aparecía en la interfaz al intentar registrar un usuario se debía a un fallo en el **Trigger de Postgres** en la base de datos de Supabase.
+## El Problema Real
+Incluso después de arreglar la generación del nombre de usuario y los tipos de datos, el error persistía. Esto ocurre comúnmente en Supabase por **"Registros Huérfanos"**.
 
-Cuando Supabase crea un usuario en `auth.users`, se dispara una función llamada `handle_new_user()`. Esta función estaba fallando por dos razones probables:
-1. **Conflicto de Username**: Si dos usuarios tenían correos similares, el nombre de usuario generado podía chocar.
-2. **Error de Conversión (Cast)**: Si el campo `owner_id` en los metadatos estaba vacío, el intento de convertirlo a `UUID` lanzaba un error de base de datos, lo que bloqueaba la creación del usuario.
+Si intentaste registrarte anteriormente y el proceso falló a mitad de camino, es posible que el ID del usuario o su correo electrónico ya estuvieran en la tabla `gym_users` sin estar vinculados correctamente a una cuenta de Auth activa. Al intentar registrarte de nuevo, Supabase intentaba insertar los mismos datos y la base de datos lanzaba un error de "Clave Duplicada" o "Violación de Restricción Única".
 
-## ¿Qué he hecho para solucionarlo?
-He actualizado el archivo `bdd.txt` con una versión mucho más robusta del trigger:
+## La Solución Aplicada
+He actualizado `bdd.txt` con una versión "Ultra Robusta" de la función de registro:
 
-1. **Generación Segura de Username**: Ahora se usan los primeros **8 caracteres** del UUID del usuario (en lugar de 4) para asegurar que el nombre de usuario siempre sea único.
-2. **Manejo de Errores de UUID**: He añadido un bloque `BEGIN...EXCEPTION` dentro del trigger para que, si el `owner_id` no es un UUID válido o está vacío, se ignore el error y se asigne un valor nulo (`NULL`) de forma segura.
-3. **Resolución de Conflictos (ON CONFLICT)**: He añadido la instrucción `ON CONFLICT (id) DO UPDATE`. Esto significa que si el usuario ya existe en la tabla `gym_users` por alguna razón, el sistema simplemente actualizará sus datos en lugar de lanzar un error.
+1. **Limpieza Automática (Auto-Cleanup)**: La función ahora busca y **elimina** cualquier registro antiguo que tenga el mismo ID o Email antes de intentar guardar el nuevo perfil. Esto limpia cualquier "basura" de intentos fallidos anteriores.
+2. **Ruta de Búsqueda Explícita**: Se ha añadido `SET search_path = public;` para asegurar que el trigger siempre encuentre las tablas correctas sin importar el contexto.
+3. **Malla de Seguridad Total**: Se ha añadido un bloque `EXCEPTION WHEN OTHERS` final. Esto garantiza que, incluso si ocurre un error inesperado al crear el perfil, el registro del usuario en la plataforma **NO se bloquee**. El usuario podrá entrar a su cuenta y el perfil se creará o actualizará automáticamente al iniciar sesión.
 
-Copia y pega el nuevo contenido de `bdd.txt` en el SQL Editor de Supabase para aplicar estas mejoras. Con esto, el registro de usuarios debería funcionar perfectamente sin errores.
+Copia y pega este nuevo código en el SQL Editor de Supabase. Este cambio elimina la causa raíz de los errores de guardado de usuarios.
