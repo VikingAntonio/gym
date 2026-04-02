@@ -1,0 +1,16 @@
+# Explicación del Error de SQL y Solución
+
+## El Problema
+El error `ERROR: 42703: column "domain" of relation "gym_users" does not exist` ocurrió porque el script anterior utilizaba `CREATE TABLE IF NOT EXISTS`.
+
+En SQL, si una tabla **ya existe**, la instrucción `CREATE TABLE IF NOT EXISTS` no hace nada. Por lo tanto, si tenías una versión antigua de la tabla `gym_users` que no incluía la columna `domain`, el script no la agregaba automáticamente. Al intentar ejecutar el resto del código que hacía referencia a `domain`, el sistema fallaba porque no encontraba la columna.
+
+## La Solución
+He actualizado el archivo `bdd.txt` con un enfoque "idempotente" (que se puede ejecutar muchas veces sin fallar):
+
+1. **Uso de ALTER TABLE**: Ahora el script utiliza `ALTER TABLE gym_users ADD COLUMN IF NOT EXISTS domain TEXT;`. Esta instrucción verifica específicamente si la columna existe y, si no, la agrega a la tabla actual sin borrar tus datos.
+2. **Aseguramiento de Columnas**: He aplicado este mismo principio a todas las columnas críticas (`owner_id`, `domain`, `full_name`, etc.) en todas las tablas (`gym_users`, `gym_recipes`, `gym_routines`, `gym_trainers`).
+3. **Migración de Tipos Mejorada**: Se mantiene la lógica para convertir IDs de números (`BIGINT`) a identificadores de Supabase (`UUID`), limpiando cualquier dato antiguo que pueda causar errores de sintaxis.
+4. **Vínculos de Seguridad**: Se asegura que las llaves foráneas y las políticas de seguridad (RLS) se creen correctamente incluso si las tablas ya existían previamente.
+
+Con este cambio, puedes copiar y pegar el contenido de `bdd.txt` en tu editor de Supabase y funcionará correctamente, sin importar si las tablas están vacías o si tienen una estructura antigua.
