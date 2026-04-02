@@ -139,8 +139,11 @@
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
 
         if (currentUser) {
-            document.getElementById('user-domain').innerText = currentUser.domain;
-            document.getElementById('widget-code').innerText = `<div id="wisbe-rutinas" domain="${currentUser.domain}"></div>`;
+            const domainText = currentUser.domain || 'Sin dominio configurado';
+            document.getElementById('user-domain').innerText = domainText;
+            document.getElementById('widget-code').innerText = currentUser.domain
+                ? `<div id="wisbe-rutinas" domain="${currentUser.domain}"></div>`
+                : 'Configura un dominio en tu perfil para generar el código';
         }
 
         window.copyToClipboard = (id) => {

@@ -134,8 +134,8 @@
                     const full_name = document.getElementById('full_name').value;
                     const domain = document.getElementById('domain').value;
 
-                    if (!full_name || !domain) {
-                        throw new Error('Todos los campos son obligatorios');
+                    if (!full_name) {
+                        throw new Error('El nombre es obligatorio');
                     }
 
                     await Auth.register(email, pass, {
