@@ -3,18 +3,42 @@
 -- ######################################################
 -- Copia y pega TODO este código en el SQL Editor de Supabase.
 
+-- 0. MIGRACIONES PREVIAS (Asegurar tipos UUID para evitar error uuid = bigint)
+DO $$
+BEGIN
+    -- Recetas
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_recipes' AND column_name = 'owner_id' AND data_type != 'uuid') THEN
+        ALTER TABLE gym_recipes ALTER COLUMN owner_id TYPE UUID USING owner_id::text::uuid;
+    END IF;
+    -- Rutinas
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_routines' AND column_name = 'owner_id' AND data_type != 'uuid') THEN
+        ALTER TABLE gym_routines ALTER COLUMN owner_id TYPE UUID USING owner_id::text::uuid;
+    END IF;
+    -- Entrenadores
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_trainers' AND column_name = 'owner_id' AND data_type != 'uuid') THEN
+        ALTER TABLE gym_trainers ALTER COLUMN owner_id TYPE UUID USING owner_id::text::uuid;
+    END IF;
+    -- Usuarios
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_users' AND column_name = 'owner_id' AND data_type != 'uuid') THEN
+        ALTER TABLE gym_users ALTER COLUMN owner_id TYPE UUID USING owner_id::text::uuid;
+    END IF;
+END $$;
+
 -- 1. TABLA DE USUARIOS (PERFILES)
--- Esta tabla se vincula con auth.users de Supabase
 CREATE TABLE IF NOT EXISTS gym_users (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     username TEXT UNIQUE NOT NULL,
     full_name TEXT,
     email TEXT UNIQUE NOT NULL,
-    domain TEXT NOT NULL,
+    domain TEXT, -- OPCIONAL
     role TEXT CHECK (role IN ('gym-admin', 'gym-owner', 'gym-entrenador', 'gym-socios')) DEFAULT 'gym-owner',
     owner_id UUID REFERENCES gym_users(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Asegurar que el dominio no sea obligatorio y no tenga restricción única
+ALTER TABLE gym_users ALTER COLUMN domain DROP NOT NULL;
+ALTER TABLE gym_users DROP CONSTRAINT IF EXISTS gym_users_domain_key;
 
 -- 2. TABLA DE RECETAS (NUTRICIÓN)
 CREATE TABLE IF NOT EXISTS gym_recipes (
@@ -82,11 +106,11 @@ DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON gym_users;
 CREATE POLICY "Public profiles are viewable by everyone" ON gym_users FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Users can update own profile" ON gym_users;
-CREATE POLICY "Users can update own profile" ON gym_users FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON gym_users FOR UPDATE USING ((auth.uid())::uuid = id);
 
 DROP POLICY IF EXISTS "Owners can manage their staff and socios" ON gym_users;
 CREATE POLICY "Owners can manage their staff and socios" ON gym_users
-FOR ALL USING (auth.uid() = owner_id);
+FOR ALL USING ((auth.uid())::uuid = owner_id);
 
 -- POLÍTICAS PARA gym_recipes
 DROP POLICY IF EXISTS "Anyone can view recipes" ON gym_recipes;
@@ -94,8 +118,8 @@ CREATE POLICY "Anyone can view recipes" ON gym_recipes FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Owners and staff can manage recipes" ON gym_recipes;
 CREATE POLICY "Owners and staff can manage recipes" ON gym_recipes FOR ALL USING (
-    auth.uid() = owner_id OR
-    EXISTS (SELECT 1 FROM gym_users WHERE id = auth.uid() AND owner_id = gym_recipes.owner_id)
+    (auth.uid())::uuid = owner_id OR
+    EXISTS (SELECT 1 FROM gym_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = gym_recipes.owner_id)
 );
 
 -- POLÍTICAS PARA gym_routines
@@ -104,8 +128,8 @@ CREATE POLICY "Anyone can view routines" ON gym_routines FOR SELECT USING (true)
 
 DROP POLICY IF EXISTS "Owners and staff can manage routines" ON gym_routines;
 CREATE POLICY "Owners and staff can manage routines" ON gym_routines FOR ALL USING (
-    auth.uid() = owner_id OR
-    EXISTS (SELECT 1 FROM gym_users WHERE id = auth.uid() AND owner_id = gym_routines.owner_id)
+    (auth.uid())::uuid = owner_id OR
+    EXISTS (SELECT 1 FROM gym_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = gym_routines.owner_id)
 );
 
 -- POLÍTICAS PARA gym_trainers
@@ -114,12 +138,11 @@ CREATE POLICY "Anyone can view trainers" ON gym_trainers FOR SELECT USING (true)
 
 DROP POLICY IF EXISTS "Owners and staff can manage trainers" ON gym_trainers;
 CREATE POLICY "Owners and staff can manage trainers" ON gym_trainers FOR ALL USING (
-    auth.uid() = owner_id OR
-    EXISTS (SELECT 1 FROM gym_users WHERE id = auth.uid() AND owner_id = gym_trainers.owner_id)
+    (auth.uid())::uuid = owner_id OR
+    EXISTS (SELECT 1 FROM gym_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = gym_trainers.owner_id)
 );
 
 -- Función para manejar nuevos registros de Auth y crear el perfil automáticamente
--- Nota: Esto requiere que el usuario pase metadata durante el registro (full_name, domain, owner_id)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
@@ -129,9 +152,9 @@ BEGIN
     new.email,
     COALESCE(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1) || '_' || substr(new.id::text, 1, 4)),
     COALESCE(new.raw_user_meta_data->>'full_name', ''),
-    COALESCE(new.raw_user_meta_data->>'domain', 'default.com'),
+    NULLIF(new.raw_user_meta_data->>'domain', ''),
     COALESCE(new.raw_user_meta_data->>'role', 'gym-owner'),
-    (new.raw_user_meta_data->>'owner_id')::uuid
+    (NULLIF(new.raw_user_meta_data->>'owner_id', ''))::uuid
   );
   RETURN new;
 END;
