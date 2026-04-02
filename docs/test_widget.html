@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Widget Integration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 p-10">
+    <h1 class="text-3xl font-bold mb-8">Simulación de Sitio Externo (Gimnasio)</h1>
+
+    <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-200">
+        <h2 class="text-xl font-bold mb-4">Nuestras Rutinas (Vía Widget)</h2>
+
+        <!-- Integración con Custom Element -->
+        <wisbe-widget type="rutinas" domain="lasalsitapinchi.com" height="600px"></wisbe-widget>
+
+        <hr class="my-10">
+
+        <h2 class="text-xl font-bold mb-4">Nutrición (Vía Div ID)</h2>
+        <!-- Integración con Div ID -->
+        <div id="wisbe-nutricion" domain="lasalsitapinchi.com" height="600px"></div>
+    </div>
+
+    <!-- Cargar el script del widget -->
+    <script src="widget.js"></script>
+</body>
+</html>

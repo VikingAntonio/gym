@@ -102,6 +102,10 @@
                     <span id="btn-loading" class="hidden"><i class="fas fa-spinner animate-spin mr-2"></i> Procesando...</span>
                 </button>
             </form>
+
+            <div id="routines-list" class="mt-12 space-y-4">
+                <!-- Listado de rutinas para borrar -->
+            </div>
         </aside>
 
         <!-- Main Workspace: Weekly Builder -->
@@ -173,13 +177,15 @@
     </template>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth, showPopup } from './js/utils.js';
+        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth, showPopup, showConfirm } from './js/utils.js';
         renderNavbar();
-        await Auth.checkAccess(['gym-admin', 'gym-owner']);
+        const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+        if (!currentUser) return;
 
         const weeksContainer = document.getElementById('weeks-container');
         const addWeekBtn = document.getElementById('add-week');
         const routineForm = document.getElementById('routine-form');
+        const routinesList = document.getElementById('routines-list');
 
         // Setup Drag & Drop
         const dropZone = document.getElementById('drop-zone');
@@ -279,12 +285,13 @@
                     exercises: weeksData,
                     difficulty_level, plan_duration_weeks,
                     target_gender, target_age_group, health_conditions,
-                    level: difficulty_level // Backward compatibility
+                    level: difficulty_level,
+                    owner_id: currentUser.id
                 }]);
 
                 if (error) throw error;
                 await showPopup('¡Éxito!', '¡Sistema Ultra Pro Actualizado!');
-                window.location.href = 'admin.html';
+                location.reload();
 
             } catch (err) {
                 await showPopup('Error Crítico', err.message, 'error');
@@ -294,6 +301,35 @@
                 btnLoading.classList.add('hidden');
             }
         });
+
+        async function fetchRoutines() {
+            let query = supabase.from('gym_routines').select('id, title').order('created_at', { ascending: false });
+            if (currentUser.role === 'gym-owner') {
+                query = query.eq('owner_id', currentUser.id);
+            }
+
+            const { data, error } = await query;
+            if (error) return;
+
+            routinesList.innerHTML = '<h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Tus Planes Activos</h3>' +
+                data.map(r => `
+                <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center group hover:bg-white transition-all border border-transparent hover:border-slate-100">
+                    <span class="text-xs font-bold text-slate-700">${r.title}</span>
+                    <button onclick="deleteRoutine(${r.id})" class="text-slate-300 hover:text-red-500 transition-colors">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        window.deleteRoutine = async (id) => {
+            if (await showConfirm('¿Borrar plan?', 'Esta acción eliminará toda la programación de este plan.')) {
+                await supabase.from('gym_routines').delete().eq('id', id);
+                fetchRoutines();
+            }
+        }
+
+        fetchRoutines();
     </script>
 </body>
 </html>

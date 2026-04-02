@@ -26,12 +26,6 @@ export async function uploadToCloudinary(file) {
 }
 
 /**
- * Configura un área de Drag and Drop moderna
- * @param {HTMLElement} dropZone - El contenedor de la zona
- * @param {HTMLInputElement} fileInput - El input file oculto
- * @param {Function} callback - Función que se ejecuta al recibir el archivo
- */
-/**
  * Muestra un popup estilizado
  */
 export function showPopup(title, message, type = 'success') {
@@ -145,24 +139,44 @@ export function setupDragAndDrop(dropZone, fileInput, callback) {
 }
 
 /**
- * SISTEMA DE AUTENTICACIÓN MOCK (Sustituto de Supabase Auth por ahora)
+ * SISTEMA DE AUTENTICACIÓN REAL (Supabase Auth)
  */
 export const Auth = {
-    async login(username, password) {
-        const { data, error } = await supabase
-            .from('gym_users')
-            .select('*')
-            .eq('username', username)
-            .eq('password', password)
-            .single();
-
-        if (error || !data) throw new Error('Usuario o contraseña incorrectos');
-
-        localStorage.setItem('gym_user', JSON.stringify(data));
+    async register(email, password, metadata) {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: metadata
+            }
+        });
+        if (error) throw error;
         return data;
     },
 
-    logout() {
+    async login(email, password) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) throw error;
+
+        // Fetch user profile from gym_users
+        const { data: profile, error: profileError } = await supabase
+            .from('gym_users')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+        if (profileError) throw new Error('Error al cargar perfil de usuario');
+
+        localStorage.setItem('gym_user', JSON.stringify(profile));
+        return profile;
+    },
+
+    async logout() {
+        await supabase.auth.signOut();
         localStorage.removeItem('gym_user');
         window.location.href = 'index.html';
     },
@@ -173,11 +187,29 @@ export const Auth = {
     },
 
     async checkAccess(rolesPermitidos = []) {
-        const user = this.getUser();
-        if (!user) {
+        // First check session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
             window.location.href = 'login.html';
             return null;
         }
+
+        const user = this.getUser();
+        if (!user) {
+            // Re-fetch if missing in localStorage
+            const { data: profile } = await supabase
+                .from('gym_users')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+            if (profile) {
+                localStorage.setItem('gym_user', JSON.stringify(profile));
+                return this.checkAccess(rolesPermitidos);
+            }
+            window.location.href = 'login.html';
+            return null;
+        }
+
         if (rolesPermitidos.length > 0 && !rolesPermitidos.includes(user.role)) {
             await showPopup('Acceso no autorizado', 'No tienes permisos para ver esta sección', 'error');
             window.location.href = 'index.html';
@@ -191,6 +223,9 @@ export const Auth = {
  * Helper para navegación (Navbar común)
  */
 export function renderNavbar() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('embedded')) return; // Hide navbar if embedded
+
     const nav = document.getElementById('main-nav');
     if (!nav) return;
 

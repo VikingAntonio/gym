@@ -98,7 +98,7 @@
 
                 const { error } = await supabase.from('gym_trainers').insert([{
                     name, specialty, rating, contact_info, bio, image_url: imageUrl,
-                    owner_id: currentUser.role === 'gym-owner' ? currentUser.id : null
+                    owner_id: currentUser.id
                 }]);
 
                 if (error) throw error;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - GYM PRO</title>
+    <title>Acceso - GYM PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,18 +15,48 @@
         <div class="p-8 md:p-12">
             <div class="text-center mb-10">
                 <a href="index.html" class="text-3xl font-black tracking-tighter text-blue-600 italic">GYM <span class="text-slate-900 not-italic">PRO</span></a>
-                <h2 class="text-xl font-bold text-slate-800 mt-4">Bienvenido de nuevo</h2>
-                <p class="text-slate-400 text-sm">Ingresa tus credenciales para acceder</p>
+                <h2 id="form-title" class="text-xl font-bold text-slate-800 mt-4">Bienvenido de nuevo</h2>
+                <p id="form-subtitle" class="text-slate-400 text-sm">Ingresa tus credenciales para acceder</p>
             </div>
 
-            <form id="login-form" class="space-y-6">
+            <form id="login-form" class="space-y-4">
+                <div id="register-fields" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Nombre Completo</label>
+                        <div class="relative">
+                            <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="full_name"
+                                   class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700"
+                                   placeholder="Juan Pérez">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Usuario (Username)</label>
+                        <div class="relative">
+                            <i class="fas fa-at absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="username"
+                                   class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700"
+                                   placeholder="juanp">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Dominio (Tu Gym)</label>
+                        <div class="relative">
+                            <i class="fas fa-globe absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="domain"
+                                   class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700"
+                                   placeholder="mi-gym.com">
+                        </div>
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Usuario</label>
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Email</label>
                     <div class="relative">
-                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="username" required
+                        <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="email" id="email" required
                                class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700"
-                               placeholder="Antonio">
+                               placeholder="tu@email.com">
                     </div>
                 </div>
 
@@ -43,9 +73,15 @@
                 <button type="submit" id="login-btn"
                         class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all">
                     <span id="btn-text">Entrar al Sistema</span>
-                    <span id="btn-loading" class="hidden"><i class="fas fa-circle-notch animate-spin mr-2"></i> Verificando...</span>
+                    <span id="btn-loading" class="hidden"><i class="fas fa-circle-notch animate-spin mr-2"></i> Procesando...</span>
                 </button>
             </form>
+
+            <div class="mt-6 text-center">
+                <button id="toggle-mode" class="text-xs font-black text-blue-500 uppercase tracking-widest hover:text-blue-700 transition-colors">
+                    ¿No tienes cuenta? Regístrate
+                </button>
+            </div>
 
             <div id="error-msg" class="hidden mt-6 p-4 bg-red-50 text-red-500 text-xs font-bold rounded-xl text-center">
                 <i class="fas fa-exclamation-circle mr-2"></i> Credenciales inválidas
@@ -53,18 +89,41 @@
         </div>
 
         <div class="bg-slate-50 p-6 text-center border-t border-slate-100">
-            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Protegido por Sistema GYM PRO v2.0</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Protegido por Sistema GYM PRO v3.0</p>
         </div>
     </div>
 
     <script type="module">
-        import { Auth } from './js/utils.js';
+        import { Auth, showPopup } from './js/utils.js';
 
         const form = document.getElementById('login-form');
         const errorMsg = document.getElementById('error-msg');
         const btnText = document.getElementById('btn-text');
         const btnLoading = document.getElementById('btn-loading');
         const loginBtn = document.getElementById('login-btn');
+        const toggleBtn = document.getElementById('toggle-mode');
+        const registerFields = document.getElementById('register-fields');
+        const formTitle = document.getElementById('form-title');
+        const formSubtitle = document.getElementById('form-subtitle');
+
+        let isLogin = true;
+
+        toggleBtn.addEventListener('click', () => {
+            isLogin = !isLogin;
+            if (isLogin) {
+                formTitle.innerText = 'Bienvenido de nuevo';
+                formSubtitle.innerText = 'Ingresa tus credenciales para acceder';
+                btnText.innerText = 'Entrar al Sistema';
+                toggleBtn.innerText = '¿No tienes cuenta? Regístrate';
+                registerFields.classList.add('hidden');
+            } else {
+                formTitle.innerText = 'Únete a GYM PRO';
+                formSubtitle.innerText = 'Configura tu cuenta de Owner hoy mismo';
+                btnText.innerText = 'Crear Cuenta';
+                toggleBtn.innerText = '¿Ya tienes cuenta? Inicia Sesión';
+                registerFields.classList.remove('hidden');
+            }
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -73,12 +132,32 @@
             btnText.classList.add('hidden');
             btnLoading.classList.remove('hidden');
 
-            const user = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
 
             try {
-                await Auth.login(user, pass);
-                window.location.href = 'admin.html';
+                if (isLogin) {
+                    await Auth.login(email, pass);
+                    window.location.href = 'admin.html';
+                } else {
+                    const username = document.getElementById('username').value;
+                    const full_name = document.getElementById('full_name').value;
+                    const domain = document.getElementById('domain').value;
+
+                    if (!username || !full_name || !domain) {
+                        throw new Error('Todos los campos son obligatorios');
+                    }
+
+                    await Auth.register(email, pass, {
+                        username,
+                        full_name,
+                        domain,
+                        role: 'gym-owner'
+                    });
+
+                    await showPopup('¡Éxito!', 'Cuenta creada. Por favor revisa tu email para confirmar y luego inicia sesión.');
+                    location.reload();
+                }
             } catch (err) {
                 errorMsg.textContent = err.message;
                 errorMsg.classList.remove('hidden');
