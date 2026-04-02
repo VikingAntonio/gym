@@ -119,7 +119,7 @@ CREATE POLICY "Owners and staff can manage trainers" ON gym_trainers FOR ALL USI
 );
 
 -- Función para manejar nuevos registros de Auth y crear el perfil automáticamente
--- Nota: Esto requiere que el usuario pase metadata durante el registro (username, full_name, domain, owner_id)
+-- Nota: Esto requiere que el usuario pase metadata durante el registro (full_name, domain, owner_id)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
@@ -127,7 +127,7 @@ BEGIN
   VALUES (
     new.id,
     new.email,
-    COALESCE(new.raw_user_meta_data->>'username', 'user_' || substr(new.id::text, 1, 8)),
+    COALESCE(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1) || '_' || substr(new.id::text, 1, 4)),
     COALESCE(new.raw_user_meta_data->>'full_name', ''),
     COALESCE(new.raw_user_meta_data->>'domain', 'default.com'),
     COALESCE(new.raw_user_meta_data->>'role', 'gym-owner'),
