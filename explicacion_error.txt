@@ -1,16 +1,17 @@
-# Explicación del Error de SQL y Solución
+# Solución al error "Database error saving new user"
 
-## El Problema
-El error `ERROR: 42703: column "domain" of relation "gym_users" does not exist` ocurrió porque el script anterior utilizaba `CREATE TABLE IF NOT EXISTS`.
+## ¿Por qué ocurrió el error?
+El error que aparecía en la interfaz al intentar registrar un usuario se debía a un fallo en el **Trigger de Postgres** en la base de datos de Supabase.
 
-En SQL, si una tabla **ya existe**, la instrucción `CREATE TABLE IF NOT EXISTS` no hace nada. Por lo tanto, si tenías una versión antigua de la tabla `gym_users` que no incluía la columna `domain`, el script no la agregaba automáticamente. Al intentar ejecutar el resto del código que hacía referencia a `domain`, el sistema fallaba porque no encontraba la columna.
+Cuando Supabase crea un usuario en `auth.users`, se dispara una función llamada `handle_new_user()`. Esta función estaba fallando por dos razones probables:
+1. **Conflicto de Username**: Si dos usuarios tenían correos similares, el nombre de usuario generado podía chocar.
+2. **Error de Conversión (Cast)**: Si el campo `owner_id` en los metadatos estaba vacío, el intento de convertirlo a `UUID` lanzaba un error de base de datos, lo que bloqueaba la creación del usuario.
 
-## La Solución
-He actualizado el archivo `bdd.txt` con un enfoque "idempotente" (que se puede ejecutar muchas veces sin fallar):
+## ¿Qué he hecho para solucionarlo?
+He actualizado el archivo `bdd.txt` con una versión mucho más robusta del trigger:
 
-1. **Uso de ALTER TABLE**: Ahora el script utiliza `ALTER TABLE gym_users ADD COLUMN IF NOT EXISTS domain TEXT;`. Esta instrucción verifica específicamente si la columna existe y, si no, la agrega a la tabla actual sin borrar tus datos.
-2. **Aseguramiento de Columnas**: He aplicado este mismo principio a todas las columnas críticas (`owner_id`, `domain`, `full_name`, etc.) en todas las tablas (`gym_users`, `gym_recipes`, `gym_routines`, `gym_trainers`).
-3. **Migración de Tipos Mejorada**: Se mantiene la lógica para convertir IDs de números (`BIGINT`) a identificadores de Supabase (`UUID`), limpiando cualquier dato antiguo que pueda causar errores de sintaxis.
-4. **Vínculos de Seguridad**: Se asegura que las llaves foráneas y las políticas de seguridad (RLS) se creen correctamente incluso si las tablas ya existían previamente.
+1. **Generación Segura de Username**: Ahora se usan los primeros **8 caracteres** del UUID del usuario (en lugar de 4) para asegurar que el nombre de usuario siempre sea único.
+2. **Manejo de Errores de UUID**: He añadido un bloque `BEGIN...EXCEPTION` dentro del trigger para que, si el `owner_id` no es un UUID válido o está vacío, se ignore el error y se asigne un valor nulo (`NULL`) de forma segura.
+3. **Resolución de Conflictos (ON CONFLICT)**: He añadido la instrucción `ON CONFLICT (id) DO UPDATE`. Esto significa que si el usuario ya existe en la tabla `gym_users` por alguna razón, el sistema simplemente actualizará sus datos en lugar de lanzar un error.
 
-Con este cambio, puedes copiar y pegar el contenido de `bdd.txt` en tu editor de Supabase y funcionará correctamente, sin importar si las tablas están vacías o si tienen una estructura antigua.
+Copia y pega el nuevo contenido de `bdd.txt` en el SQL Editor de Supabase para aplicar estas mejoras. Con esto, el registro de usuarios debería funcionar perfectamente sin errores.
