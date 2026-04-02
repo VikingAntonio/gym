@@ -22,25 +22,16 @@
             <form id="login-form" class="space-y-4">
                 <div id="register-fields" class="hidden space-y-4">
                     <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Nombre Completo</label>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Nombre</label>
                         <div class="relative">
-                            <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                             <input type="text" id="full_name"
                                    class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700"
-                                   placeholder="Juan Pérez">
+                                   placeholder="Ej: Juan Pérez">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Usuario (Username)</label>
-                        <div class="relative">
-                            <i class="fas fa-at absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="username"
-                                   class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700"
-                                   placeholder="juanp">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Dominio (Tu Gym)</label>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Dominio</label>
                         <div class="relative">
                             <i class="fas fa-globe absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                             <input type="text" id="domain"
@@ -140,16 +131,14 @@
                     await Auth.login(email, pass);
                     window.location.href = 'admin.html';
                 } else {
-                    const username = document.getElementById('username').value;
                     const full_name = document.getElementById('full_name').value;
                     const domain = document.getElementById('domain').value;
 
-                    if (!username || !full_name || !domain) {
+                    if (!full_name || !domain) {
                         throw new Error('Todos los campos son obligatorios');
                     }
 
                     await Auth.register(email, pass, {
-                        username,
                         full_name,
                         domain,
                         role: 'gym-owner'
