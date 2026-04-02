@@ -130,7 +130,29 @@
         let allRecipes = [];
 
         async function loadRecipes() {
-            const { data, error } = await supabase.from('gym_recipes').select('*').order('created_at', { ascending: false });
+            const params = new URLSearchParams(window.location.search);
+            const domain = params.get('domain');
+
+            let query = supabase.from('gym_recipes').select('*').order('created_at', { ascending: false });
+
+            if (domain) {
+                // Fetch owner_id for this domain (filter by role='gym-owner' to ensure we get the main gym account)
+                const { data: userData } = await supabase.from('gym_users')
+                    .select('id')
+                    .eq('domain', domain)
+                    .eq('role', 'gym-owner')
+                    .maybeSingle();
+
+                if (userData) {
+                    query = query.eq('owner_id', userData.id);
+                } else {
+                    grid.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-20">Gimnasio no encontrado para el dominio especificado.</div>';
+                    document.getElementById('results-count').innerText = '0 Opciones Maestro';
+                    return;
+                }
+            }
+
+            const { data, error } = await query;
             if (error) return;
             allRecipes = data;
             filterRecipes();

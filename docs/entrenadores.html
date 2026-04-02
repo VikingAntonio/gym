@@ -52,10 +52,27 @@
 
         async function loadTrainers() {
             const container = document.getElementById('trainers-container');
-            const { data, error } = await supabase
-                .from('gym_trainers')
-                .select('*')
-                .order('created_at', { ascending: false });
+            const params = new URLSearchParams(window.location.search);
+            const domain = params.get('domain');
+
+            let query = supabase.from('gym_trainers').select('*').order('created_at', { ascending: false });
+
+            if (domain) {
+                const { data: userData } = await supabase.from('gym_users')
+                    .select('id')
+                    .eq('domain', domain)
+                    .eq('role', 'gym-owner')
+                    .maybeSingle();
+
+                if (userData) {
+                    query = query.eq('owner_id', userData.id);
+                } else {
+                    container.innerHTML = `<p class="text-slate-500 col-span-full text-center py-20">Gimnasio no encontrado para el dominio especificado.</p>`;
+                    return;
+                }
+            }
+
+            const { data, error } = await query;
 
             if (error) {
                 container.innerHTML = `<p class="text-red-500 col-span-full">Error al cargar entrenadores: ${error.message}</p>`;
