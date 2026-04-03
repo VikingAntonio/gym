@@ -210,6 +210,9 @@
                     msg = 'DEBES CONFIRMAR TU CORREO PARA ENTRAR. Revisa tu inbox.';
                 } else if (msg.includes('Invalid login credentials')) {
                     msg = 'Credenciales no válidas. Verifica tus datos.';
+                } else if (msg.includes('SINCRONIZACIÓN')) {
+                    // This error is now rare but good to keep clear
+                    msg = `ERROR DE SINCRONIZACIÓN: REVISA EL SQL EDITOR EN SUPABASE.<br><span class="text-[8px] opacity-60 mt-2 block">TIP: COPIA BDD.TXT EN TU SQL EDITOR Y EJECÚTALO PARA REPARAR EL VÍNCULO.</span>`;
                 }
 
                 statusMsg.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i> ${msg}`;
