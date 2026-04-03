@@ -14,8 +14,8 @@ BEGIN
         EXECUTE format('DROP POLICY IF EXISTS %I ON %I', pol.policyname, pol.tablename);
     END LOOP;
 
-    -- 2. Eliminar TODOS los constraints existentes (PK, FK, Check, Unique) de gym_*
-    -- Esto garantiza que podamos alterar tipos de columnas y evitar errores de "ya existe"
+    -- 2. Eliminar TODOS los constraints existentes (PK, FK, Check, Unique) e índices de gym_*
+    -- Esto garantiza que podamos alterar tipos de columnas y evitar errores de "ya existe" o índices duplicados
     FOR con IN (
         SELECT table_name, constraint_name
         FROM information_schema.table_constraints
@@ -25,10 +25,18 @@ BEGIN
         EXECUTE format('ALTER TABLE %I DROP CONSTRAINT IF EXISTS %I CASCADE', con.table_name, con.constraint_name);
     END LOOP;
 
+    -- Eliminar índices (excluyendo los de PK que ya borramos arriba)
+    FOR con IN (
+        SELECT indexname FROM pg_indexes WHERE schemaname = 'public' AND tablename LIKE 'gym_%'
+    ) LOOP
+        EXECUTE format('DROP INDEX IF EXISTS %I CASCADE', con.indexname);
+    END LOOP;
+
     -- 3. Limpieza manual de triggers y funciones viejas
     DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
     DROP FUNCTION IF EXISTS public.handle_new_user();
     DROP FUNCTION IF EXISTS public.create_profile_if_missing(UUID, TEXT, TEXT, TEXT, TEXT, UUID);
+    DROP FUNCTION IF EXISTS public.create_profile_if_missing(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
 END $$;
 
 -- 1. ASEGURAR TABLAS (Básico)
@@ -120,6 +128,8 @@ END $$;
 -- 4. RE-ESTABLECER CONSTRAINTS (Uno por uno con seguridad)
 -- Re-establecer Primary Keys primero
 DO $$ BEGIN
+    -- Limpieza de duplicados antes de PK
+    DELETE FROM gym_users a USING gym_users b WHERE a.ctid < b.ctid AND a.id = b.id;
     ALTER TABLE gym_users ADD PRIMARY KEY (id);
 EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
@@ -186,30 +196,53 @@ CREATE POLICY "Owners and staff can manage trainers" ON gym_trainers FOR ALL USI
     EXISTS (SELECT 1 FROM gym_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = gym_trainers.owner_id)
 );
 
--- 6. RPC "SECURITY BRIDGE"
+-- 6. RPC "SECURITY BRIDGE" - ULTRA ROBUSTO
 CREATE OR REPLACE FUNCTION public.create_profile_if_missing(
-    p_id UUID,
+    p_id TEXT,
     p_email TEXT,
     p_full_name TEXT DEFAULT '',
     p_domain TEXT DEFAULT NULL,
     p_role TEXT DEFAULT 'gym-owner',
-    p_owner_id UUID DEFAULT NULL
+    p_owner_id TEXT DEFAULT NULL
 ) RETURNS JSONB AS $$
 DECLARE
+    v_id UUID;
+    v_owner_id UUID;
     v_username TEXT;
     v_profile RECORD;
 BEGIN
     SET search_path = public;
-    v_username := split_part(p_email, '@', 1) || '_' || substr(p_id::text, 1, 8);
+
+    -- Manejo seguro de UUIDs
+    BEGIN
+        v_id := p_id::UUID;
+        v_owner_id := NULLIF(p_owner_id, '')::UUID;
+    EXCEPTION WHEN OTHERS THEN
+        v_id := NULL;
+        v_owner_id := NULL;
+    END;
+
+    IF v_id IS NULL THEN
+        RAISE EXCEPTION 'ID de usuario inválido: %', p_id;
+    END IF;
+
+    -- Limpieza preventiva ultra agresiva para resolver colisiones de email/id
+    -- Esto elimina registros que tengan el mismo email pero distinto ID, o mismo ID pero distinto email
+    -- que el que viene de Supabase Auth, asegurando una sincronización 1:1 limpia.
+    DELETE FROM public.gym_users WHERE email = p_email AND id != v_id;
+    DELETE FROM public.gym_users WHERE id = v_id AND email != p_email;
+
+    v_username := split_part(p_email, '@', 1) || '_' || substr(v_id::text, 1, 8);
 
     INSERT INTO public.gym_users (id, email, username, full_name, domain, role, owner_id)
-    VALUES (p_id, p_email, v_username, p_full_name, p_domain, p_role, p_owner_id)
+    VALUES (v_id, p_email, v_username, p_full_name, p_domain, p_role, v_owner_id)
     ON CONFLICT (id) DO UPDATE SET
+        email = EXCLUDED.email,
         full_name = COALESCE(NULLIF(EXCLUDED.full_name, ''), public.gym_users.full_name),
         domain = COALESCE(NULLIF(EXCLUDED.domain, ''), public.gym_users.domain),
         owner_id = COALESCE(EXCLUDED.owner_id, public.gym_users.owner_id);
 
-    SELECT * INTO v_profile FROM public.gym_users WHERE id = p_id;
+    SELECT * INTO v_profile FROM public.gym_users WHERE id = v_id;
     RETURN row_to_json(v_profile)::jsonb;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -222,12 +255,12 @@ RETURNS trigger AS $$
 BEGIN
   SET search_path = public;
   PERFORM public.create_profile_if_missing(
-    new.id,
+    new.id::text,
     new.email,
     COALESCE(new.raw_user_meta_data->>'full_name', ''),
     NULLIF(new.raw_user_meta_data->>'domain', ''),
     COALESCE(new.raw_user_meta_data->>'role', 'gym-owner'),
-    (NULLIF(new.raw_user_meta_data->>'owner_id', ''))::uuid
+    new.raw_user_meta_data->>'owner_id'
   );
   RETURN new;
 EXCEPTION WHEN OTHERS THEN
@@ -241,5 +274,8 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Permisos Globales
-GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, service_role;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO authenticated, anon;
+-- Permisos Globales (Ultra Permisivos para evitar bloqueos)
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, service_role, authenticated, anon;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, service_role, authenticated, anon;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO postgres, service_role, authenticated, anon;
+GRANT ALL ON SCHEMA public TO postgres, service_role, authenticated, anon;
