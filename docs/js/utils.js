@@ -174,39 +174,25 @@ export const Auth = {
             .eq('id', data.user.id)
             .maybeSingle();
 
-        // SELF-HEALING: If profile is missing (trigger failed), create it now
+        // SELF-HEALING: If profile is missing (trigger/RLS issue), use RPC Bridge
         if (!profile) {
-            console.warn('Profile missing for user, creating now...');
+            console.warn('Profile missing or blocked by RLS, using Security Bridge RPC...');
             const metadata = data.user.user_metadata || {};
 
-            const newRecord = {
-                id: data.user.id,
-                email: data.user.email,
-                username: (data.user.email.split('@')[0] + '_' + data.user.id.substring(0, 8)),
-                full_name: metadata.full_name || '',
-                domain: metadata.domain || null,
-                role: metadata.role || 'gym-owner',
-                owner_id: metadata.owner_id || null
-            };
+            const { data: rpcProfile, error: rpcError } = await supabase
+                .rpc('create_profile_if_missing', {
+                    p_id: data.user.id,
+                    p_email: data.user.email,
+                    p_full_name: metadata.full_name || '',
+                    p_domain: metadata.domain || null,
+                    p_role: metadata.role || 'gym-owner'
+                });
 
-            const { data: newProfile, error: insertError } = await supabase
-                .from('gym_users')
-                .upsert([newRecord])
-                .select()
-                .maybeSingle();
-
-            if (insertError) {
-                console.error('Error creating profile manually:', insertError);
-                // Try one more time with a simple select in case it was a race condition
-                const { data: retry } = await supabase.from('gym_users').select('*').eq('id', data.user.id).maybeSingle();
-                if (retry) {
-                    profile = retry;
-                } else {
-                    throw new Error('No se pudo cargar tu perfil. Contacta con soporte.');
-                }
-            } else {
-                profile = newProfile;
+            if (rpcError) {
+                console.error('RPC Security Bridge failed:', rpcError);
+                throw new Error('Error crítico al sincronizar perfil. Contacta con soporte.');
             }
+            profile = rpcProfile;
         }
 
         if (!profile) throw new Error('Error al sincronizar tu perfil de usuario.');

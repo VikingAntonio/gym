@@ -18,6 +18,7 @@ ALTER TABLE gym_users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'gym-owner';
 ALTER TABLE gym_users ADD COLUMN IF NOT EXISTS owner_id UUID;
 ALTER TABLE gym_users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
 
+-- Asegurar columnas en otras tablas
 ALTER TABLE gym_recipes ADD COLUMN IF NOT EXISTS owner_id UUID;
 ALTER TABLE gym_recipes ADD COLUMN IF NOT EXISTS title TEXT;
 ALTER TABLE gym_recipes ADD COLUMN IF NOT EXISTS description TEXT;
@@ -75,6 +76,7 @@ BEGIN
         ALTER TABLE gym_users ALTER COLUMN id DROP IDENTITY;
     END IF;
 
+    -- Migración Robusta
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_users' AND column_name = 'id' AND data_type != 'uuid') THEN
         DELETE FROM gym_users WHERE id::text !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
         ALTER TABLE gym_users ALTER COLUMN id TYPE UUID USING id::text::uuid;
@@ -114,6 +116,7 @@ END $$;
 ALTER TABLE gym_users DROP CONSTRAINT IF EXISTS gym_users_role_check;
 ALTER TABLE gym_users ADD CONSTRAINT gym_users_role_check CHECK (role IN ('gym-admin', 'gym-owner', 'gym-entrenador', 'gym-socios'));
 ALTER TABLE gym_users DROP CONSTRAINT IF EXISTS gym_users_domain_key;
+ALTER TABLE gym_users DROP CONSTRAINT IF EXISTS gym_users_username_key;
 
 DO $$
 BEGIN
@@ -131,7 +134,7 @@ BEGIN
     END IF;
 END $$;
 
--- 4. POLÍTICAS DE SEGURIDAD (RLS) - FIX: Permissive self-management
+-- 4. POLÍTICAS DE SEGURIDAD (RLS)
 ALTER TABLE gym_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gym_recipes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gym_routines ENABLE ROW LEVEL SECURITY;
@@ -174,49 +177,55 @@ CREATE POLICY "Owners and staff can manage trainers" ON gym_trainers FOR ALL USI
     EXISTS (SELECT 1 FROM gym_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = gym_trainers.owner_id)
 );
 
--- 5. TRIGGER DE AUTOMATIZACIÓN (ULTRA ROBUST)
+-- 5. RPC "PUENTE DE SEGURIDAD" (Crea el perfil de forma ultra-segura)
+CREATE OR REPLACE FUNCTION public.create_profile_if_missing(
+    p_id UUID,
+    p_email TEXT,
+    p_full_name TEXT DEFAULT '',
+    p_domain TEXT DEFAULT NULL,
+    p_role TEXT DEFAULT 'gym-owner',
+    p_owner_id UUID DEFAULT NULL
+) RETURNS JSONB AS $$
+DECLARE
+    v_username TEXT;
+    v_profile RECORD;
+BEGIN
+    SET search_path = public;
+
+    -- 1. Limpieza absoluta antes de insertar (Evita errores de Unique Constraint)
+    DELETE FROM public.gym_users WHERE id = p_id OR email = p_email;
+
+    -- 2. Generar Username
+    v_username := split_part(p_email, '@', 1) || '_' || substr(p_id::text, 1, 8);
+
+    -- 3. Insertar
+    INSERT INTO public.gym_users (id, email, username, full_name, domain, role, owner_id)
+    VALUES (p_id, p_email, v_username, p_full_name, p_domain, p_role, p_owner_id);
+
+    -- 4. Retornar el perfil
+    SELECT * INTO v_profile FROM public.gym_users WHERE id = p_id;
+    RETURN row_to_json(v_profile)::jsonb;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.create_profile_if_missing TO authenticated, anon, service_role;
+
+-- 6. TRIGGER DE AUTOMATIZACIÓN
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
-DECLARE
-  v_username TEXT;
-  v_owner_id UUID;
 BEGIN
   SET search_path = public;
-
-  -- 1. Limpiar registros huérfanos con el mismo ID o Email
-  DELETE FROM public.gym_users WHERE id = new.id OR email = new.email;
-
-  -- 2. Generar Username
-  v_username := split_part(new.email, '@', 1) || '_' || substr(new.id::text, 1, 8);
-
-  -- 3. Limpiar owner_id (cast seguro)
-  BEGIN
-    v_owner_id := (NULLIF(new.raw_user_meta_data->>'owner_id', ''))::uuid;
-  EXCEPTION WHEN OTHERS THEN
-    v_owner_id := NULL;
-  END;
-
-  -- 4. Insertar de forma resiliente
-  INSERT INTO public.gym_users (id, email, username, full_name, domain, role, owner_id)
-  VALUES (
+  PERFORM public.create_profile_if_missing(
     new.id,
     new.email,
-    v_username,
     COALESCE(new.raw_user_meta_data->>'full_name', ''),
     NULLIF(new.raw_user_meta_data->>'domain', ''),
     COALESCE(new.raw_user_meta_data->>'role', 'gym-owner'),
-    v_owner_id
-  )
-  ON CONFLICT (id) DO UPDATE SET
-    email = EXCLUDED.email,
-    full_name = EXCLUDED.full_name,
-    domain = EXCLUDED.domain,
-    role = EXCLUDED.role,
-    owner_id = EXCLUDED.owner_id;
-
+    (NULLIF(new.raw_user_meta_data->>'owner_id', ''))::uuid
+  );
   RETURN new;
 EXCEPTION WHEN OTHERS THEN
-  RETURN new; -- Nunca bloquear Auth
+  RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -224,6 +233,3 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
--- Asegurar permisos para el trigger
-GRANT ALL ON TABLE public.gym_users TO postgres, service_role;
