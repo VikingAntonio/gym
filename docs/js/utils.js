@@ -163,13 +163,36 @@ export const Auth = {
         if (error) throw error;
 
         // Fetch user profile from gym_users
-        const { data: profile, error: profileError } = await supabase
+        let { data: profile, error: profileError } = await supabase
             .from('gym_users')
             .select('*')
             .eq('id', data.user.id)
-            .single();
+            .maybeSingle();
 
-        if (profileError) throw new Error('Error al cargar perfil de usuario');
+        // SELF-HEALING: If profile is missing (trigger failed), create it now
+        if (!profile) {
+            console.warn('Profile missing for user, creating now...');
+            const metadata = data.user.user_metadata || {};
+            const { data: newProfile, error: insertError } = await supabase
+                .from('gym_users')
+                .insert([{
+                    id: data.user.id,
+                    email: data.user.email,
+                    username: (data.user.email.split('@')[0] + '_' + data.user.id.substring(0, 8)),
+                    full_name: metadata.full_name || '',
+                    domain: metadata.domain || null,
+                    role: metadata.role || 'gym-owner',
+                    owner_id: metadata.owner_id ? metadata.owner_id : null
+                }])
+                .select()
+                .single();
+
+            if (insertError) {
+                console.error('Error creating profile manually:', insertError);
+                throw new Error('Error al cargar perfil de usuario (No se pudo crear automáticamente)');
+            }
+            profile = newProfile;
+        }
 
         localStorage.setItem('gym_user', JSON.stringify(profile));
         return profile;
