@@ -144,8 +144,13 @@
                         role: 'gym-owner'
                     });
 
-                    await showPopup('¡Éxito!', 'Cuenta creada. Por favor revisa tu email para confirmar y luego inicia sesión.');
-                    location.reload();
+                    await showPopup('¡Éxito!', 'Cuenta creada. IMPORTANTE: Revisa tu email para confirmar tu cuenta y luego podrás iniciar sesión.');
+                    isLogin = true;
+                    formTitle.innerText = 'Bienvenido de nuevo';
+                    formSubtitle.innerText = 'Confirma tu email e inicia sesión';
+                    btnText.innerText = 'Entrar al Sistema';
+                    toggleBtn.innerText = '¿No tienes cuenta? Regístrate';
+                    registerFields.classList.add('hidden');
                 }
             } catch (err) {
                 errorMsg.textContent = err.message;
