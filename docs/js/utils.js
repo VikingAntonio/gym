@@ -162,6 +162,11 @@ export const Auth = {
 
         if (error) throw error;
 
+        // Check if session is confirmed
+        if (!data.session) {
+             throw new Error('Debes confirmar tu correo electrónico. Revisa tu bandeja de entrada.');
+        }
+
         // Fetch user profile from gym_users
         let { data: profile, error: profileError } = await supabase
             .from('gym_users')
@@ -173,26 +178,38 @@ export const Auth = {
         if (!profile) {
             console.warn('Profile missing for user, creating now...');
             const metadata = data.user.user_metadata || {};
+
+            const newRecord = {
+                id: data.user.id,
+                email: data.user.email,
+                username: (data.user.email.split('@')[0] + '_' + data.user.id.substring(0, 8)),
+                full_name: metadata.full_name || '',
+                domain: metadata.domain || null,
+                role: metadata.role || 'gym-owner',
+                owner_id: metadata.owner_id || null
+            };
+
             const { data: newProfile, error: insertError } = await supabase
                 .from('gym_users')
-                .insert([{
-                    id: data.user.id,
-                    email: data.user.email,
-                    username: (data.user.email.split('@')[0] + '_' + data.user.id.substring(0, 8)),
-                    full_name: metadata.full_name || '',
-                    domain: metadata.domain || null,
-                    role: metadata.role || 'gym-owner',
-                    owner_id: metadata.owner_id ? metadata.owner_id : null
-                }])
+                .upsert([newRecord])
                 .select()
-                .single();
+                .maybeSingle();
 
             if (insertError) {
                 console.error('Error creating profile manually:', insertError);
-                throw new Error('Error al cargar perfil de usuario (No se pudo crear automáticamente)');
+                // Try one more time with a simple select in case it was a race condition
+                const { data: retry } = await supabase.from('gym_users').select('*').eq('id', data.user.id).maybeSingle();
+                if (retry) {
+                    profile = retry;
+                } else {
+                    throw new Error('No se pudo cargar tu perfil. Contacta con soporte.');
+                }
+            } else {
+                profile = newProfile;
             }
-            profile = newProfile;
         }
+
+        if (!profile) throw new Error('Error al sincronizar tu perfil de usuario.');
 
         localStorage.setItem('gym_user', JSON.stringify(profile));
         return profile;

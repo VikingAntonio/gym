@@ -131,7 +131,7 @@ BEGIN
     END IF;
 END $$;
 
--- 4. POLÍTICAS DE SEGURIDAD (RLS) - FIX: Allow users to insert their own records
+-- 4. POLÍTICAS DE SEGURIDAD (RLS) - FIX: Permissive self-management
 ALTER TABLE gym_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gym_recipes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gym_routines ENABLE ROW LEVEL SECURITY;
@@ -140,11 +140,8 @@ ALTER TABLE gym_trainers ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON gym_users;
 CREATE POLICY "Public profiles are viewable by everyone" ON gym_users FOR SELECT USING (true);
 
-DROP POLICY IF EXISTS "Users can insert their own profile" ON gym_users;
-CREATE POLICY "Users can insert their own profile" ON gym_users FOR INSERT WITH CHECK ((auth.uid())::uuid = id);
-
-DROP POLICY IF EXISTS "Users can update own profile" ON gym_users;
-CREATE POLICY "Users can update own profile" ON gym_users FOR UPDATE USING ((auth.uid())::uuid = id);
+DROP POLICY IF EXISTS "Users can manage their own profile" ON gym_users;
+CREATE POLICY "Users can manage their own profile" ON gym_users FOR ALL USING ((auth.uid())::uuid = id);
 
 DROP POLICY IF EXISTS "Owners can manage their staff and socios" ON gym_users;
 CREATE POLICY "Owners can manage their staff and socios" ON gym_users
@@ -199,7 +196,7 @@ BEGIN
     v_owner_id := NULL;
   END;
 
-  -- 4. Insertar
+  -- 4. Insertar de forma resiliente
   INSERT INTO public.gym_users (id, email, username, full_name, domain, role, owner_id)
   VALUES (
     new.id,
@@ -209,7 +206,13 @@ BEGIN
     NULLIF(new.raw_user_meta_data->>'domain', ''),
     COALESCE(new.raw_user_meta_data->>'role', 'gym-owner'),
     v_owner_id
-  );
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = EXCLUDED.full_name,
+    domain = EXCLUDED.domain,
+    role = EXCLUDED.role,
+    owner_id = EXCLUDED.owner_id;
 
   RETURN new;
 EXCEPTION WHEN OTHERS THEN
@@ -221,3 +224,6 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Asegurar permisos para el trigger
+GRANT ALL ON TABLE public.gym_users TO postgres, service_role;
