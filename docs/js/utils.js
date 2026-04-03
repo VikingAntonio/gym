@@ -164,7 +164,7 @@ export const Auth = {
 
         // Check if session is confirmed
         if (!data.session) {
-             throw new Error('Debes confirmar tu correo electrónico. Revisa tu bandeja de entrada.');
+             throw new Error('DEBES CONFIRMAR TU EMAIL. Revisa tu bandeja de entrada.');
         }
 
         // Fetch user profile from gym_users
@@ -175,7 +175,7 @@ export const Auth = {
             .maybeSingle();
 
         // SELF-HEALING: If profile is missing (trigger/RLS issue), use RPC Bridge
-        if (!profile) {
+        if (!profile || profileError) {
             console.warn('Profile missing or blocked by RLS, using Security Bridge RPC...');
             const metadata = data.user.user_metadata || {};
 
@@ -185,12 +185,13 @@ export const Auth = {
                     p_email: data.user.email,
                     p_full_name: metadata.full_name || '',
                     p_domain: metadata.domain || null,
-                    p_role: metadata.role || 'gym-owner'
+                    p_role: metadata.role || 'gym-owner',
+                    p_owner_id: metadata.owner_id || null
                 });
 
             if (rpcError) {
                 console.error('RPC Security Bridge failed:', rpcError);
-                throw new Error('Error crítico al sincronizar perfil. Contacta con soporte.');
+                throw new Error('Error crítico al sincronizar perfil. Revisa tu conexión.');
             }
             profile = rpcProfile;
         }
