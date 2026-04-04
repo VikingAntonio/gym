@@ -125,12 +125,19 @@ export function setupDragAndDrop(dropZone, fileInput, callback) {
     dropZone.addEventListener('drop', (e) => {
         const file = e.dataTransfer.files[0];
         if (file) {
-            fileInput.files = e.dataTransfer.files;
+            // Fix: Create a new DataTransfer to ensure cross-browser compatibility when setting files
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
             callback(file);
         }
     }, false);
 
-    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('click', (e) => {
+        if (e.target !== fileInput) {
+            fileInput.click();
+        }
+    });
 
     fileInput.addEventListener('change', () => {
         const file = fileInput.files[0];
