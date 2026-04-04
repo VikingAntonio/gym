@@ -34,3 +34,23 @@ USING (auth.uid() = owner_id);
 -- 5. PERMISOS TOTALES PARA EVITAR BLOQUEOS DE ROL
 GRANT ALL ON gym_recipes TO anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
+
+-- 6. SINCRONIZACIÓN MANUAL DE SEGURIDAD (EJECUTAR SI EL ERROR PERSISTE)
+-- 6. SINCRONIZACIÓN MANUAL DE SEGURIDAD (EJECUTAR SI EL ERROR PERSISTE O SALE "OWNER_ID_FKEY")
+-- Este código fuerza la creación de perfiles para usuarios existentes que falten en gym_users.
+-- ES LA SOLUCIÓN DEFINITIVA AL ERROR "violates foreign key constraint".
+DO $$
+DECLARE
+    u RECORD;
+BEGIN
+    FOR u IN (SELECT id, email, raw_user_meta_data FROM auth.users) LOOP
+        PERFORM public.create_profile_if_missing(
+            u.id::text,
+            u.email,
+            COALESCE(u.raw_user_meta_data->>'full_name', ''),
+            NULLIF(u.raw_user_meta_data->>'domain', ''),
+            COALESCE(u.raw_user_meta_data->>'role', 'gym-owner'),
+            u.raw_user_meta_data->>'owner_id'
+        );
+    END LOOP;
+END $$;

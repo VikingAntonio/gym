@@ -97,8 +97,11 @@
         renderNavbar();
 
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
-        if (!currentUser) return;
+        if (currentUser) {
+            initPage();
+        }
 
+        function initPage() {
         const form = document.getElementById('user-form');
         const roleSelect = document.getElementById('role');
         const tableBody = document.getElementById('users-table-body');
@@ -210,6 +213,7 @@
         }
 
         fetchUsers();
+        }
     </script>
 </body>
 </html>
