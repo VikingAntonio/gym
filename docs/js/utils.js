@@ -125,7 +125,7 @@ export function setupDragAndDrop(dropZone, fileInput, callback) {
     dropZone.addEventListener('drop', (e) => {
         const file = e.dataTransfer.files[0];
         if (file) {
-            // Fix: Create a new DataTransfer to ensure cross-browser compatibility when setting files
+            // Restore DataTransfer for robust file setting
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             fileInput.files = dataTransfer.files;
@@ -134,9 +134,9 @@ export function setupDragAndDrop(dropZone, fileInput, callback) {
     }, false);
 
     dropZone.addEventListener('click', (e) => {
-        if (e.target !== fileInput) {
-            fileInput.click();
-        }
+        // Prevent event from bubbling if it's the input itself
+        if (e.target === fileInput) return;
+        fileInput.click();
     });
 
     fileInput.addEventListener('change', () => {
@@ -211,7 +211,8 @@ export const Auth = {
                 username: data.user.email.split('@')[0],
                 full_name: data.user.user_metadata?.full_name || '',
                 domain: data.user.user_metadata?.domain || '',
-                role: data.user.user_metadata?.role || 'gym-owner'
+                role: data.user.user_metadata?.role || 'gym-owner',
+                owner_id: data.user.user_metadata?.owner_id || null
             };
         }
 

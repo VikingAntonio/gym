@@ -180,8 +180,11 @@
         import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth, showPopup, showConfirm } from './js/utils.js';
         renderNavbar();
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
-        if (!currentUser) return;
+        if (currentUser) {
+            initPage();
+        }
 
+        function initPage() {
         const weeksContainer = document.getElementById('weeks-container');
         const addWeekBtn = document.getElementById('add-week');
         const routineForm = document.getElementById('routine-form');
@@ -280,6 +283,21 @@
                     imageUrl = await uploadToCloudinary(imageFile);
                 }
 
+                // FORCE SYNC: Ensure owner exists in gym_users before insert to avoid FK error
+                const { error: syncError } = await supabase.rpc('create_profile_if_missing', {
+                    p_id: currentUser.id,
+                    p_email: currentUser.email,
+                    p_full_name: currentUser.full_name || '',
+                    p_domain: currentUser.domain || null,
+                    p_role: currentUser.role || 'gym-owner',
+                    p_owner_id: currentUser.owner_id || null
+                });
+
+                if (syncError) {
+                    console.error('Profile sync failed:', syncError);
+                    throw new Error('Error de sincronización de perfil. Por favor, re-ejecuta el script SQL de Anutricion.txt en Supabase.');
+                }
+
                 const { error } = await supabase.from('gym_routines').insert([{
                     title, description, image_url: imageUrl,
                     exercises: weeksData,
@@ -330,6 +348,7 @@
         }
 
         fetchRoutines();
+        }
     </script>
 </body>
 </html>
