@@ -136,10 +136,10 @@
             let query = supabase.from('gym_recipes').select('*').order('created_at', { ascending: false });
 
             if (domain) {
-                // Fetch owner_id for this domain (filter by role='gym-owner' to ensure we get the main gym account)
-                const { data: userData } = await supabase.from('gym_users')
+                // Fetch owner_id for this domain
+                const { data: userData, error: userError } = await supabase.from('gym_users')
                     .select('id')
-                    .eq('domain', domain)
+                    .ilike('domain', domain.trim())
                     .eq('role', 'gym-owner')
                     .maybeSingle();
 
