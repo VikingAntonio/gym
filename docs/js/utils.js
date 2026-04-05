@@ -239,18 +239,21 @@ export const Auth = {
             return null;
         }
 
+        // Always fetch fresh profile to ensure role updates are reflected immediately
+        const { data: freshProfile, error: profileError } = await supabase
+            .from('gym_users')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+        if (profileError || !freshProfile) {
+            console.warn('Could not fetch fresh profile in checkAccess, falling back to local storage');
+        } else {
+            localStorage.setItem('gym_user', JSON.stringify(freshProfile));
+        }
+
         const user = this.getUser();
         if (!user) {
-            // Re-fetch if missing in localStorage
-            const { data: profile } = await supabase
-                .from('gym_users')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-            if (profile) {
-                localStorage.setItem('gym_user', JSON.stringify(profile));
-                return this.checkAccess(rolesPermitidos);
-            }
             window.location.href = 'login.html';
             return null;
         }

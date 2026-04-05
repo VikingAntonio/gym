@@ -7,13 +7,18 @@
 DROP POLICY IF EXISTS "Admins have full access" ON public.gym_users;
 
 -- 2. Crear la nueva política para permitir a los admins gestionar todo
+-- Esta política permite a cualquier usuario con rol 'gym-admin' hacer TODO en gym_users
 CREATE POLICY "Admins have full access" ON public.gym_users
 FOR ALL
 TO authenticated
 USING ( (SELECT role FROM public.gym_users WHERE id = auth.uid()) = 'gym-admin' );
 
 -- 3. Asignar el rol de Administrador Global al usuario solicitado
--- (Asegúrate de que el usuario ya esté registrado en el sistema)
+-- Usamos lower() y trim() para asegurar que encuentre el correo sin importar mayúsculas o espacios.
 UPDATE public.gym_users
 SET role = 'gym-admin'
-WHERE email = 'designerantoniomontiel@gmail.com';
+WHERE lower(trim(email)) = lower(trim('designerantoniomontiel@gmail.com'));
+
+-- 4. Verificación: Si el usuario NO existe aún en gym_users pero sí en auth.users,
+-- el trigger handle_new_user debería haberlo creado. Si no, esta sentencia lo marca.
+-- (Opcional) Puedes verificar si se actualizó con: SELECT email, role FROM gym_users WHERE email ILIKE '%designerantoniomontiel%';
