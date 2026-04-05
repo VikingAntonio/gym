@@ -49,6 +49,11 @@
                 </div>
 
                 <div>
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Dominio (Gimnasio)</label>
+                    <input type="text" id="domain" class="input-field" placeholder="Ej: mi-gym.com">
+                </div>
+
+                <div>
                     <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Rol del Usuario</label>
                     <select id="role" class="input-field">
                         <!-- Opciones dinámicas según rol actual -->
@@ -80,6 +85,7 @@
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-100">
                             <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre / Email</th>
+                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dominio</th>
                             <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rol</th>
                             <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
                         </tr>
@@ -98,7 +104,12 @@
 
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
         if (currentUser) {
-            initPage();
+            // Bloqueo temprano para socios
+            if (currentUser.role === 'gym-socios') {
+                window.location.href = 'index.html';
+            } else {
+                initPage();
+            }
         }
 
         function initPage() {
@@ -106,6 +117,27 @@
         const roleSelect = document.getElementById('role');
         const tableBody = document.getElementById('users-table-body');
         const userCount = document.getElementById('user-count');
+        let editingUserId = null;
+        let loadedUsers = [];
+
+        window.editUser = (id) => {
+            const u = loadedUsers.find(user => user.id === id);
+            if (!u) return;
+
+            editingUserId = u.id;
+            document.getElementById('full_name').value = u.full_name || '';
+            document.getElementById('email').value = u.email || '';
+            document.getElementById('role').value = u.role;
+            document.getElementById('domain').value = u.domain || '';
+
+            // En modo edición, email y password son menos relevantes para actualizar el perfil de gym_users
+            document.getElementById('email').disabled = true;
+            document.getElementById('password').required = false;
+            document.getElementById('password').placeholder = "(Sin cambios)";
+
+            document.getElementById('btn-text').textContent = "Actualizar Usuario";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
 
         // Configurar opciones de rol según quién esté logueado
         if (currentUser.role === 'gym-admin') {
@@ -137,19 +169,29 @@
                 const password = document.getElementById('password').value;
                 const full_name = document.getElementById('full_name').value;
                 const role = roleSelect.value;
-                const domain = currentUser.domain; // Mismo dominio que el owner
+                const domain = document.getElementById('domain').value || (currentUser.role === 'gym-owner' ? currentUser.domain : null);
 
-                // Registrar en Supabase Auth
-                const { data, error: authError } = await Auth.register(email, password, {
-                    full_name,
-                    domain,
-                    role,
-                    owner_id: currentUser.id
-                });
+                if (editingUserId) {
+                    // MODO EDICIÓN
+                    const { error } = await supabase
+                        .from('gym_users')
+                        .update({ full_name, role, domain })
+                        .eq('id', editingUserId);
 
-                if (authError) throw authError;
+                    if (error) throw error;
+                    await showPopup('¡Éxito!', 'Usuario actualizado correctamente');
+                } else {
+                    // MODO REGISTRO
+                    const { data, error: authError } = await Auth.register(email, password, {
+                        full_name,
+                        domain,
+                        role,
+                        owner_id: currentUser.id
+                    });
+                    if (authError) throw authError;
+                    await showPopup('¡Éxito!', '¡Usuario registrado con éxito!');
+                }
 
-                await showPopup('¡Éxito!', '¡Usuario registrado con éxito!');
                 location.reload();
             } catch (err) {
                 await showPopup('Error', err.message, 'error');
@@ -171,6 +213,7 @@
             const { data, error } = await query;
             if (error) return;
 
+            loadedUsers = data;
             userCount.textContent = data.length;
             tableBody.innerHTML = data.map(u => `
                 <tr class="hover:bg-slate-50 transition-colors">
@@ -179,12 +222,18 @@
                         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">${u.email}</div>
                     </td>
                     <td class="p-6">
+                        <div class="text-xs font-medium text-slate-600">${u.domain || '-'}</div>
+                    </td>
+                    <td class="p-6">
                         <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${getRoleClass(u.role)}">
                             ${u.role.replace('gym-', '')}
                         </span>
                     </td>
-                    <td class="p-6 text-right">
+                    <td class="p-6 text-right flex justify-end space-x-2">
                         ${u.id !== currentUser.id ? `
+                            <button onclick="editUser('${u.id}')" class="text-blue-400 hover:text-blue-600 transition p-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
                             <button onclick="deleteUser('${u.id}')" class="text-red-400 hover:text-red-600 transition p-2">
                                 <i class="fas fa-trash-alt"></i>
                             </button>

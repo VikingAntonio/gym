@@ -1,0 +1,82 @@
+CREATE OR REPLACE FUNCTION public.create_profile_if_missing(
+    p_id TEXT,
+    p_email TEXT,
+    p_full_name TEXT DEFAULT '',
+    p_domain TEXT DEFAULT NULL,
+    p_role TEXT DEFAULT 'gym-owner',
+    p_owner_id TEXT DEFAULT NULL
+) RETURNS JSONB AS $$
+DECLARE
+    v_id UUID;
+    v_owner_id UUID;
+    v_username TEXT;
+    v_profile RECORD;
+BEGIN
+    SET search_path = public;
+
+    -- Manejo seguro de UUIDs
+    BEGIN
+        v_id := p_id::UUID;
+        v_owner_id := NULLIF(p_owner_id, '')::UUID;
+    EXCEPTION WHEN OTHERS THEN
+        v_id := NULL;
+        v_owner_id := NULL;
+    END;
+
+    IF v_id IS NULL THEN
+        RAISE EXCEPTION 'ID de usuario inválido: %', p_id;
+    END IF;
+
+    -- Limpieza preventiva ultra agresiva para resolver colisiones de email/id
+    -- Esto elimina registros que tengan el mismo email pero distinto ID, o mismo ID pero distinto email
+    -- que el que viene de Supabase Auth, asegurando una sincronización 1:1 limpia.
+    DELETE FROM public.gym_users WHERE email = p_email AND id != v_id;
+    DELETE FROM public.gym_users WHERE id = v_id AND email != p_email;
+
+    v_username := split_part(p_email, '@', 1) || '_' || substr(v_id::text, 1, 8);
+
+    INSERT INTO public.gym_users (id, email, username, full_name, domain, role, owner_id)
+    VALUES (v_id, p_email, v_username, p_full_name, p_domain, p_role, v_owner_id)
+    ON CONFLICT (id) DO UPDATE SET
+        email = EXCLUDED.email,
+        full_name = COALESCE(NULLIF(EXCLUDED.full_name, ''), public.gym_users.full_name),
+        domain = COALESCE(NULLIF(EXCLUDED.domain, ''), public.gym_users.domain),
+        owner_id = COALESCE(EXCLUDED.owner_id, public.gym_users.owner_id);
+
+    SELECT * INTO v_profile FROM public.gym_users WHERE id = v_id;
+    RETURN row_to_json(v_profile)::jsonb;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.create_profile_if_missing TO authenticated, anon, service_role;
+
+-- 7. TRIGGER DE AUTOMATIZACIÓN
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  SET search_path = public;
+  PERFORM public.create_profile_if_missing(
+    new.id::text,
+    new.email,
+    COALESCE(new.raw_user_meta_data->>'full_name', ''),
+    NULLIF(new.raw_user_meta_data->>'domain', ''),
+    COALESCE(new.raw_user_meta_data->>'role', 'gym-owner'),
+    new.raw_user_meta_data->>'owner_id'
+  );
+  RETURN new;
+EXCEPTION WHEN OTHERS THEN
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Permisos Globales
+-- Permisos Globales (Ultra Permisivos para evitar bloqueos)
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, service_role, authenticated, anon;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, service_role, authenticated, anon;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO postgres, service_role, authenticated, anon;
+GRANT ALL ON SCHEMA public TO postgres, service_role, authenticated, anon;
