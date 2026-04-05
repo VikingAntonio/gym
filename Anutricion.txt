@@ -4,17 +4,21 @@
 -- Ejecuta esto en el SQL Editor de Supabase si tienes problemas
 -- para ver o crear tus recetas.
 
--- 1. ASEGURAR ESTRUCTURA DE TABLA
+-- 1. REPARAR TABLA DE USUARIOS (Solución al error del password null)
+-- Como ahora usamos Supabase Auth, la columna password de gym_users debe ser opcional o eliminada.
+ALTER TABLE gym_users ALTER COLUMN password DROP NOT NULL;
+
+-- 2. ASEGURAR ESTRUCTURA DE TABLA RECETAS
 ALTER TABLE gym_recipes ADD COLUMN IF NOT EXISTS calories INTEGER DEFAULT 0;
 ALTER TABLE gym_recipes ADD COLUMN IF NOT EXISTS protein INTEGER DEFAULT 0;
 ALTER TABLE gym_recipes ADD COLUMN IF NOT EXISTS carbs INTEGER DEFAULT 0;
 ALTER TABLE gym_recipes ADD COLUMN IF NOT EXISTS fats INTEGER DEFAULT 0;
 ALTER TABLE gym_recipes ADD COLUMN IF NOT EXISTS owner_id UUID;
 
--- 2. HABILITAR SEGURIDAD (RLS)
+-- 3. HABILITAR SEGURIDAD (RLS)
 ALTER TABLE gym_recipes ENABLE ROW LEVEL SECURITY;
 
--- 3. ELIMINAR POLÍTICAS ANTIGUAS PARA EVITAR CONFLICTOS (Limpieza Total)
+-- 4. ELIMINAR POLÍTICAS ANTIGUAS PARA EVITAR CONFLICTOS (Limpieza Total)
 DO $$
 DECLARE
     pol RECORD;
@@ -24,7 +28,7 @@ BEGIN
     END LOOP;
 END $$;
 
--- 4. CREAR NUEVAS POLÍTICAS LIMPIAS
+-- 5. CREAR NUEVAS POLÍTICAS LIMPIAS
 -- Permitir que CUALQUIERA vea las recetas (necesario para nutricion.html)
 CREATE POLICY "Public recipes access"
 ON gym_recipes FOR SELECT
@@ -35,11 +39,11 @@ CREATE POLICY "Owners manage own recipes"
 ON gym_recipes FOR ALL
 USING (auth.uid() = owner_id);
 
--- 5. PERMISOS TOTALES PARA EVITAR BLOQUEOS DE ROL
+-- 6. PERMISOS TOTALES PARA EVITAR BLOQUEOS DE ROL
 GRANT ALL ON gym_recipes TO anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
 
--- 6. SINCRONIZACIÓN MANUAL DE SEGURIDAD (EJECUTAR SI EL ERROR PERSISTE O SALE "OWNER_ID_FKEY")
+-- 7. SINCRONIZACIÓN MANUAL DE SEGURIDAD (EJECUTAR SI EL ERROR PERSISTE O SALE "OWNER_ID_FKEY")
 -- Este código fuerza la creación de perfiles para usuarios existentes que falten en gym_users.
 -- ES LA SOLUCIÓN DEFINITIVA AL ERROR "violates foreign key constraint".
 DO $$
