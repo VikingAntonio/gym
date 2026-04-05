@@ -3,22 +3,25 @@
 -- ######################################################
 -- Copia y pega este código en el SQL Editor de Supabase.
 
--- 1. Asegurar que no haya conflictos con la política si ya se ejecutó antes
+-- 1. Asegurar que la política de lectura sea pública para que todos vean la lista (necesario para fetchUsers)
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.gym_users;
+CREATE POLICY "Public profiles are viewable by everyone" ON public.gym_users FOR SELECT USING (true);
+
+-- 2. Asegurar que no haya conflictos con la política de Admin si ya se ejecutó antes
 DROP POLICY IF EXISTS "Admins have full access" ON public.gym_users;
 
--- 2. Crear la nueva política para permitir a los admins gestionar todo
--- Esta política permite a cualquier usuario con rol 'gym-admin' hacer TODO en gym_users
+-- 3. Crear la nueva política para permitir a los admins gestionar todo
+-- Nota: Usamos una subconsulta simple para evitar recursividad infinita en RLS
 CREATE POLICY "Admins have full access" ON public.gym_users
 FOR ALL
 TO authenticated
 USING ( (SELECT role FROM public.gym_users WHERE id = auth.uid()) = 'gym-admin' );
 
--- 3. Asignar el rol de Administrador Global al usuario solicitado
--- Usamos lower() y trim() para asegurar que encuentre el correo sin importar mayúsculas o espacios.
+-- 4. Asignar el rol de Administrador Global al usuario solicitado
+-- Usamos ILIKE y trim() para mayor flexibilidad en la búsqueda del correo.
 UPDATE public.gym_users
 SET role = 'gym-admin'
-WHERE lower(trim(email)) = lower(trim('designerantoniomontiel@gmail.com'));
+WHERE email ILIKE 'designerantoniomontiel@gmail.com';
 
--- 4. Verificación: Si el usuario NO existe aún en gym_users pero sí en auth.users,
--- el trigger handle_new_user debería haberlo creado. Si no, esta sentencia lo marca.
--- (Opcional) Puedes verificar si se actualizó con: SELECT email, role FROM gym_users WHERE email ILIKE '%designerantoniomontiel%';
+-- 5. Verificación rápida (Copia y pega esto para confirmar en el editor):
+-- SELECT email, role, full_name FROM gym_users WHERE email ILIKE '%designerantoniomontiel%';
