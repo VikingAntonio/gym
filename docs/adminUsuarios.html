@@ -205,9 +205,9 @@
         async function fetchUsers() {
             let query = supabase.from('gym_users').select('*').order('created_at', { ascending: false });
 
-            // Si es owner, solo ve los suyos
+            // Si es owner, solo ve su staff y su propio perfil
             if (currentUser.role === 'gym-owner') {
-                query = query.eq('owner_id', currentUser.id);
+                query = query.or(`owner_id.eq.${currentUser.id},id.eq.${currentUser.id}`);
             }
 
             const { data, error } = await query;
