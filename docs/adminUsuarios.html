@@ -100,9 +100,9 @@
 
     <script type="module">
         import { supabase, Auth, renderNavbar, showPopup, showConfirm } from './js/utils.js';
-        renderNavbar();
 
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+        renderNavbar();
         if (currentUser) {
             // Bloqueo temprano para socios
             if (currentUser.role === 'gym-socios') {
@@ -211,7 +211,10 @@
             }
 
             const { data, error } = await query;
-            if (error) return;
+            if (error) {
+                console.error("Error fetching users:", error);
+                return;
+            }
 
             loadedUsers = data;
             userCount.textContent = data.length;
