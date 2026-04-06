@@ -1,5 +1,7 @@
-127.0.0.1 - - [05/Apr/2026 07:17:42] "GET /adminUsuarios.html HTTP/1.1" 200 -
-127.0.0.1 - - [05/Apr/2026 07:17:42] "GET /css/styles.css HTTP/1.1" 200 -
-127.0.0.1 - - [05/Apr/2026 07:17:43] "GET /js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [05/Apr/2026 07:17:43] "GET /js/config.js HTTP/1.1" 200 -
-127.0.0.1 - - [05/Apr/2026 07:17:43] "GET /login.html HTTP/1.1" 200 -
+127.0.0.1 - - [06/Apr/2026 21:05:01] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [06/Apr/2026 21:05:02] "GET /css/styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [06/Apr/2026 21:05:03] "GET /js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Apr/2026 21:05:03] "GET /js/config.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Apr/2026 21:05:04] "GET /login.html HTTP/1.1" 200 -
+127.0.0.1 - - [06/Apr/2026 21:05:06] "GET /nutricion.html HTTP/1.1" 200 -
+127.0.0.1 - - [06/Apr/2026 21:05:08] "GET /rutinas.html HTTP/1.1" 200 -

@@ -3,55 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Entrenadores Pro - GYM PRO</title>
+    <title>Gestión de Equipo - Core Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
     <nav id="main-nav"></nav>
 
     <div class="flex flex-col lg:flex-row">
-        <!-- Sidebar / Form -->
-        <aside class="w-full lg:w-1/3 bg-white border-r min-h-screen p-6 lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] overflow-y-auto">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
-                <i class="fas fa-user-plus text-indigo-500 mr-2"></i> Alta de Entrenador
-            </h2>
+        <!-- Sidebar / Alta de Entrenador -->
+        <aside class="w-full lg:w-[400px] bg-white border-r border-slate-200 min-h-screen p-8 lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] overflow-y-auto">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Alta de Personal</h2>
+                <p class="text-slate-500 text-sm">Registra nuevos profesionales en tu equipo.</p>
+            </div>
 
-            <form id="trainer-form" class="space-y-4">
+            <form id="trainer-form" class="space-y-6">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre Completo</label>
-                    <input type="text" id="name" required class="input-field" placeholder="Ej: Carlos Méndez">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Nombre Completo</label>
+                    <input type="text" id="name" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="Ej: Carlos Méndez">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Especialidad</label>
-                    <input type="text" id="specialty" required class="input-field" placeholder="Ej: Hipertrofia y Nutrición">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Especialidad</label>
+                    <input type="text" id="specialty" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="Ej: Especialista en Rendimiento">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Rating inicial</label>
-                        <input type="number" step="0.1" id="rating" class="input-field" placeholder="5.0">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Rating (0-5)</label>
+                        <input type="number" step="0.1" id="rating" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="5.0">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">WhatsApp/Contacto</label>
-                        <input type="text" id="contact_info" class="input-field" placeholder="+52 ...">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Contacto</label>
+                        <input type="text" id="contact_info" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="+52 ...">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fotografía de Perfil</label>
-                    <input type="file" id="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-bold file:bg-indigo-50 file:text-indigo-700">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Fotografía</label>
+                    <input type="file" id="image" accept="image/*" class="w-full text-xs text-slate-400 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:uppercase file:bg-slate-900 file:text-white hover:file:bg-blue-600 transition-all cursor-pointer">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Biografía / Perfil</label>
-                    <textarea id="bio" rows="4" class="input-field text-sm" placeholder="Resumen de experiencia..."></textarea>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Biografía</label>
+                    <textarea id="bio" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium resize-none" placeholder="Resumen de experiencia..."></textarea>
                 </div>
 
-                <button type="submit" id="submit-btn" class="btn-primary w-full bg-indigo-600 hover:bg-indigo-700 mt-6 py-3">
+                <button type="submit" id="submit-btn" class="w-full py-5 bg-slate-900 text-white rounded-[24px] font-bold uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95">
                     <span id="btn-text">Agregar al Equipo</span>
                     <span id="btn-loading" class="hidden"><i class="fas fa-circle-notch animate-spin mr-2"></i> Guardando...</span>
                 </button>
@@ -59,9 +64,15 @@
         </aside>
 
         <!-- Main View / List -->
-        <main class="w-full lg:w-2/3 p-8">
-            <h2 class="text-3xl font-bold text-slate-800 mb-8">Nuestros Entrenadores</h2>
-            <div id="trainers-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+        <main class="flex-grow p-8 lg:p-12">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+                <h2 class="text-3xl font-bold text-slate-900">Equipo Profesional</h2>
+                <div class="flex items-center text-xs font-bold text-slate-400 uppercase tracking-widest bg-white px-4 py-2 rounded-xl border border-slate-200">
+                    <span id="trainer-count" class="text-blue-600 mr-2">0</span> Integrantes
+                </div>
+            </div>
+
+            <div id="trainers-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
         </main>
     </div>
 
@@ -99,8 +110,8 @@
                 let imageUrl = '';
                 if (imageFile) imageUrl = await uploadToCloudinary(imageFile);
 
-                // FORCE SYNC: Ensure owner exists in gym_users before insert to avoid FK error
-                const { error: syncError } = await supabase.rpc('create_profile_if_missing', {
+                // SYNC
+                await supabase.rpc('create_profile_if_missing', {
                     p_id: currentUser.id,
                     p_email: currentUser.email,
                     p_full_name: currentUser.full_name || '',
@@ -109,18 +120,13 @@
                     p_owner_id: currentUser.owner_id || null
                 });
 
-                if (syncError) {
-                    console.error('Profile sync failed:', syncError);
-                    throw new Error('Error de sincronización de perfil. Por favor, re-ejecuta el script SQL de Anutricion.txt en Supabase.');
-                }
-
                 const { error } = await supabase.from('gym_trainers').insert([{
                     name, specialty, rating, contact_info, bio, image_url: imageUrl,
                     owner_id: currentUser.id
                 }]);
 
                 if (error) throw error;
-                await showPopup('¡Éxito!', '¡Entrenador agregado!');
+                await showPopup('Éxito', 'Profesional agregado correctamente');
                 location.reload();
             } catch (err) {
                 await showPopup('Error', err.message, 'error');
@@ -141,27 +147,29 @@
             const { data, error } = await query;
             if (error) return;
 
+            document.getElementById('trainer-count').innerText = data.length;
+
             list.innerHTML = data.map(t => `
-                <div class="bg-white rounded-2xl shadow-sm border p-6 flex flex-col items-center text-center">
-                    <div class="w-24 h-24 rounded-full border-4 border-indigo-50 overflow-hidden mb-4">
+                <div class="bg-white rounded-[32px] shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center group hover:shadow-xl transition-all duration-300">
+                    <div class="w-24 h-24 rounded-3xl border-4 border-slate-50 overflow-hidden mb-6 shadow-md">
                         <img src="${t.image_url || 'https://images.unsplash.com/photo-1597347343908-2937e7dcc560?auto=format&fit=crop&q=80&w=200'}"
-                             class="w-full h-full object-cover">
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                     </div>
-                    <h4 class="font-bold text-lg text-slate-800">${t.name}</h4>
-                    <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-3">${t.specialty}</span>
-                    <div class="flex items-center text-yellow-400 text-xs mb-4">
+                    <h4 class="font-bold text-lg text-slate-900 mb-1">${t.name}</h4>
+                    <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4">${t.specialty}</span>
+                    <div class="flex items-center text-yellow-400 text-xs mb-6">
                         <i class="fas fa-star mr-1"></i> ${t.rating || 5.0}
                     </div>
-                    <p class="text-xs text-slate-500 mb-6 line-clamp-2">${t.bio || 'Sin biografía disponible.'}</p>
-                    <button onclick="deleteTrainer(${t.id})" class="text-xs text-red-400 hover:text-red-600 transition font-bold mt-auto">
-                        <i class="fas fa-user-minus mr-1"></i> ELIMINAR
+                    <p class="text-xs text-slate-500 mb-8 line-clamp-3 leading-relaxed">${t.bio || 'Sin biografía disponible.'}</p>
+                    <button onclick="deleteTrainer(${t.id})" class="text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors uppercase tracking-widest mt-auto border-t border-slate-50 pt-6 w-full">
+                        <i class="fas fa-user-minus mr-2"></i> Eliminar
                     </button>
                 </div>
             `).join('');
         }
 
         window.deleteTrainer = async (id) => {
-            if (await showConfirm('¿Eliminar entrenador?', 'Esta acción no se puede deshacer')) {
+            if (await showConfirm('¿Eliminar registro?', 'Esta acción no se puede deshacer.')) {
                 await supabase.from('gym_trainers').delete().eq('id', id);
                 fetchTrainers();
             }

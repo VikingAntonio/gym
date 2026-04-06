@@ -3,97 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Usuarios - GYM PRO</title>
+    <title>Gestión de Usuarios - Core Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
     <nav id="main-nav"></nav>
 
     <div class="flex flex-col lg:flex-row">
         <!-- Sidebar / Alta de Usuario -->
-        <aside class="w-full lg:w-1/3 bg-white border-r min-h-screen p-8 lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] overflow-y-auto">
-            <h2 class="text-3xl font-black text-slate-900 tracking-tight mb-8">
-                <i class="fas fa-user-shield text-blue-500 mr-2"></i> Alta de Staff/Socio
-            </h2>
+        <aside class="w-full lg:w-[450px] bg-white border-r border-slate-200 min-h-screen p-8 lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] overflow-y-auto">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Acceso y Roles</h2>
+                <p class="text-slate-500 text-sm">Gestiona los permisos y perfiles de tu plataforma.</p>
+            </div>
 
-            <div class="space-y-4 mb-6">
-                <p class="text-xs text-slate-500 bg-blue-50 p-4 rounded-xl border border-blue-100 font-medium">
-                    Nota: Para el staff/socios de tu gimnasio se usa registro manual. Los Owners se registran desde la pantalla principal.
+            <div class="bg-blue-50 border border-blue-100 p-6 rounded-3xl mb-8">
+                <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2"><i class="fas fa-info-circle mr-2"></i> Gestión de Cuentas</p>
+                <p class="text-[11px] text-blue-500 leading-relaxed font-medium">
+                    El registro de personal y clientes es manual. Los administradores de dominio deben registrarse desde la pantalla de acceso principal.
                 </p>
-                <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
-                    <p class="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-1"><i class="fas fa-exclamation-triangle mr-2"></i> Aviso de Sesión</p>
-                    <p class="text-[10px] text-amber-600 font-bold leading-relaxed">
-                        Al registrar un nuevo usuario, el sistema te cerrará la sesión actual para validar la nueva cuenta. Deberás volver a loguearte con tus credenciales de Dueño.
-                    </p>
-                </div>
             </div>
 
             <form id="user-form" class="space-y-6">
                 <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Nombre</label>
-                    <input type="text" id="full_name" required class="input-field" placeholder="Ej: Juan Pérez">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Nombre Completo</label>
+                    <input type="text" id="full_name" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="Ej: Juan Pérez">
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Email</label>
-                        <input type="email" id="email" required class="input-field" placeholder="juan@gmail.com">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Email</label>
+                        <input type="email" id="email" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="usuario@correo.com">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Contraseña</label>
-                        <input type="password" id="password" required class="input-field" placeholder="••••••">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Contraseña</label>
+                        <input type="password" id="password" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="••••••">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Dominio (Gimnasio)</label>
-                    <input type="text" id="domain" class="input-field" placeholder="Ej: mi-gym.com">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Dominio (Asociado)</label>
+                    <input type="text" id="domain" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="ejemplo.com">
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Rol del Usuario</label>
-                    <select id="role" class="input-field">
-                        <!-- Opciones dinámicas según rol actual -->
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Rol del Sistema</label>
+                    <select id="role" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none">
+                        <!-- Opciones dinámicas -->
                     </select>
                 </div>
 
-                <button type="submit" id="submit-btn" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:bg-blue-700 transition-all">
-                    <span id="btn-text">Registrar Usuario</span>
+                <button type="submit" id="submit-btn" class="w-full py-5 bg-slate-900 text-white rounded-[24px] font-bold uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95">
+                    <span id="btn-text">Guardar Usuario</span>
                     <span id="btn-loading" class="hidden"><i class="fas fa-spinner animate-spin mr-2"></i> Procesando...</span>
                 </button>
             </form>
         </aside>
 
         <!-- Main View / Listado -->
-        <main class="w-full lg:w-2/3 p-8 lg:p-12">
-            <div class="flex justify-between items-end mb-10">
+        <main class="flex-grow p-8 lg:p-12">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
                 <div>
-                    <h2 class="text-4xl font-black text-slate-900 tracking-tight italic">Panel <span class="not-italic text-blue-500">Usuarios</span></h2>
-                    <p class="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] mt-2">Control de accesos y roles</p>
+                    <h2 class="text-3xl font-bold text-slate-900">Directorio de Usuarios</h2>
+                    <p class="text-slate-500 text-sm mt-1">Lista global de cuentas y roles activos.</p>
                 </div>
-                <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100">
-                    <span id="user-count" class="text-2xl font-black text-blue-600">0</span>
-                    <span class="text-[10px] font-black text-blue-400 uppercase ml-2 tracking-widest">Registrados</span>
+                <div class="bg-white px-6 py-3 rounded-2xl border border-slate-200 shadow-sm">
+                    <span id="user-count" class="text-2xl font-bold text-blue-600">0</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase ml-2 tracking-widest">Registrados</span>
                 </div>
             </div>
 
-            <div class="bg-white rounded-[30px] shadow-sm border overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-100">
-                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre / Email</th>
-                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dominio</th>
-                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rol</th>
-                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table-body" class="divide-y divide-slate-50">
-                        <!-- Dinámico -->
-                    </tbody>
-                </table>
+            <div class="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/50 border-b border-slate-100">
+                                <th class="p-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Identidad</th>
+                                <th class="p-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dominio</th>
+                                <th class="p-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rol</th>
+                                <th class="p-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="divide-y divide-slate-50">
+                            <!-- Dinámico -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
@@ -104,7 +106,6 @@
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
         renderNavbar();
         if (currentUser) {
-            // Bloqueo temprano para socios
             if (currentUser.role === 'gym-socios') {
                 window.location.href = 'index.html';
             } else {
@@ -117,15 +118,14 @@
         const roleSelect = document.getElementById('role');
         const tableBody = document.getElementById('users-table-body');
         const userCount = document.getElementById('user-count');
-        let editingUserId = null;
         let loadedUsers = [];
+        let editingUserId = null;
 
-        // SI NO ES ADMIN: Deshabilitar el formulario (Owner y Socio no pueden editar solo ver)
         if (currentUser.role !== 'gym-admin') {
             form.querySelectorAll('input, select, button').forEach(el => el.disabled = true);
             const notice = document.createElement('p');
-            notice.className = "text-[10px] font-black text-red-500 uppercase tracking-widest mt-4 text-center border border-red-100 p-2 rounded-xl bg-red-50";
-            notice.innerHTML = '<i class="fas fa-lock mr-2"></i> Solo el Administrador puede editar usuarios';
+            notice.className = "text-[10px] font-bold text-red-500 uppercase tracking-widest mt-6 text-center bg-red-50 p-4 rounded-2xl border border-red-100";
+            notice.innerHTML = '<i class="fas fa-lock mr-2"></i> Solo administradores globales pueden editar';
             form.appendChild(notice);
         }
 
@@ -139,27 +139,24 @@
             document.getElementById('role').value = u.role;
             document.getElementById('domain').value = u.domain || '';
 
-            // En modo edición, email y password son menos relevantes para actualizar el perfil de gym_users
             document.getElementById('email').disabled = true;
             document.getElementById('password').required = false;
             document.getElementById('password').placeholder = "(Sin cambios)";
-
-            document.getElementById('btn-text').textContent = "Actualizar Usuario";
+            document.getElementById('btn-text').textContent = "Actualizar Cuenta";
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // Configurar opciones de rol según quién esté logueado
         if (currentUser.role === 'gym-admin') {
             roleSelect.innerHTML = `
-                <option value="gym-admin">Administrador (Global)</option>
-                <option value="gym-owner">Dueño de Gimnasio</option>
-                <option value="gym-entrenador">Entrenador</option>
-                <option value="gym-socios">Socio</option>
+                <option value="gym-admin">Administrador Global</option>
+                <option value="gym-owner">Dueño de Dominio</option>
+                <option value="gym-entrenador">Staff / Profesional</option>
+                <option value="gym-socios">Cliente / Socio</option>
             `;
         } else if (currentUser.role === 'gym-owner') {
             roleSelect.innerHTML = `
-                <option value="gym-entrenador">Entrenador (Mi Staff)</option>
-                <option value="gym-socios">Socio (Mi Cliente)</option>
+                <option value="gym-entrenador">Staff / Profesional</option>
+                <option value="gym-socios">Cliente / Socio</option>
             `;
         }
 
@@ -181,26 +178,23 @@
                 const domain = document.getElementById('domain').value || (currentUser.role === 'gym-owner' ? currentUser.domain : null);
 
                 if (editingUserId) {
-                    // MODO EDICIÓN
                     const { error } = await supabase
                         .from('gym_users')
                         .update({ full_name, role, domain })
                         .eq('id', editingUserId);
 
                     if (error) throw error;
-                    await showPopup('¡Éxito!', 'Usuario actualizado correctamente');
+                    await showPopup('Éxito', 'Cuenta actualizada correctamente');
                 } else {
-                    // MODO REGISTRO
-                    const { data, error: authError } = await Auth.register(email, password, {
+                    const { error: authError } = await Auth.register(email, password, {
                         full_name,
                         domain,
                         role,
                         owner_id: currentUser.id
                     });
                     if (authError) throw authError;
-                    await showPopup('¡Éxito!', '¡Usuario registrado con éxito!');
+                    await showPopup('Éxito', 'Usuario registrado correctamente');
                 }
-
                 location.reload();
             } catch (err) {
                 await showPopup('Error', err.message, 'error');
@@ -213,45 +207,42 @@
 
         async function fetchUsers() {
             let query = supabase.from('gym_users').select('*').order('created_at', { ascending: false });
-
-            // Si es owner, solo ve su staff y su propio perfil
             if (currentUser.role === 'gym-owner') {
                 query = query.or(`owner_id.eq.${currentUser.id},id.eq.${currentUser.id}`);
             }
 
             const { data, error } = await query;
-            if (error) {
-                console.error("Error fetching users:", error);
-                return;
-            }
+            if (error) return;
 
             loadedUsers = data;
             userCount.textContent = data.length;
             tableBody.innerHTML = data.map(u => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-6">
-                        <div class="font-bold text-slate-800">${u.full_name || 'Sin Nombre'}</div>
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="p-8">
+                        <div class="font-bold text-slate-900">${u.full_name || 'Sin nombre'}</div>
                         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">${u.email}</div>
                     </td>
-                    <td class="p-6">
-                        <div class="text-xs font-medium text-slate-600">${u.domain || '-'}</div>
+                    <td class="p-8">
+                        <div class="text-xs font-semibold text-slate-600">${u.domain || '-'}</div>
                     </td>
-                    <td class="p-6">
-                        <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${getRoleClass(u.role)}">
+                    <td class="p-8">
+                        <span class="px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${getRoleClass(u.role)}">
                             ${u.role.replace('gym-', '')}
                         </span>
                     </td>
-                    <td class="p-6 text-right flex justify-end space-x-2">
-                        ${currentUser.role === 'gym-admin' ? `
-                            <button onclick="editUser('${u.id}')" class="text-blue-400 hover:text-blue-600 transition p-2">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            ${u.id !== currentUser.id ? `
-                                <button onclick="deleteUser('${u.id}')" class="text-red-400 hover:text-red-600 transition p-2">
-                                    <i class="fas fa-trash-alt"></i>
+                    <td class="p-8 text-right">
+                        <div class="flex justify-end space-x-3">
+                            ${currentUser.role === 'gym-admin' ? `
+                                <button onclick="editUser('${u.id}')" class="text-slate-400 hover:text-blue-600 transition p-2">
+                                    <i class="fas fa-edit"></i>
                                 </button>
-                            ` : '<span class="text-[8px] font-black text-slate-300 uppercase self-center ml-2">Tú</span>'}
-                        ` : (u.id === currentUser.id ? '<span class="text-[8px] font-black text-slate-300 uppercase">Tú</span>' : '-')}
+                                ${u.id !== currentUser.id ? `
+                                    <button onclick="deleteUser('${u.id}')" class="text-slate-400 hover:text-red-500 transition p-2">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                ` : ''}
+                            ` : (u.id === currentUser.id ? '<span class="text-[10px] font-bold text-slate-300 uppercase">Tú</span>' : '-')}
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -267,8 +258,7 @@
         }
 
         window.deleteUser = async (id) => {
-            if (await showConfirm('¿Estás seguro?', '¿Deseas eliminar este usuario permanentemente? (Se eliminará de Auth también si tienes permisos)')) {
-                // El trigger de DB se encarga de gym_users si borramos de auth.users, pero aquí borramos de gym_users por simplicidad de permisos anon
+            if (await showConfirm('¿Eliminar cuenta?', 'Esta acción eliminará el perfil permanentemente.')) {
                 const { error } = await supabase.from('gym_users').delete().eq('id', id);
                 if (error) await showPopup('Error', 'No se pudo eliminar al usuario', 'error');
                 else fetchUsers();
