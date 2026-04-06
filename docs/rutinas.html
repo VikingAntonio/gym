@@ -3,90 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rutinas Ultra Pro - GYM PRO</title>
+    <title>Planes de Entrenamiento - Plataforma</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
     <nav id="main-nav"></nav>
 
-    <header class="bg-slate-950 py-32 text-white text-center relative overflow-hidden">
-        <div class="container mx-auto px-4 z-10 relative">
-            <h1 class="text-7xl font-black mb-6 tracking-tighter italic">Engineered <span class="text-blue-600 not-italic">Strength</span></h1>
-            <p class="text-slate-400 text-2xl max-w-4xl mx-auto font-light leading-relaxed">
-                Planes de entrenamiento estructurados para cada nivel, género y condición física.
+    <header class="bg-white border-b border-slate-200 py-16 text-center relative overflow-hidden">
+        <div class="container mx-auto px-4 relative z-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">Planes de Entrenamiento</h1>
+            <p class="text-slate-500 text-lg max-w-2xl mx-auto font-medium">
+                Programación estructurada diseñada para optimizar tu rendimiento y alcanzar tus objetivos.
             </p>
         </div>
-        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600 rounded-full blur-[150px] opacity-20"></div>
     </header>
 
-    <main class="container mx-auto px-4 py-20">
-        <!-- Ultra Filters -->
-        <div class="bg-white rounded-[40px] shadow-sm border border-slate-100 p-8 mb-20 flex flex-wrap gap-6 items-center justify-between">
-            <div class="flex flex-wrap gap-4">
-                <select id="filter-level" class="bg-slate-50 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 border-none focus:ring-2 focus:ring-blue-500 transition-all">
+    <main class="container mx-auto px-4 py-16">
+        <!-- Advanced Filters -->
+        <div class="bg-white rounded-[32px] shadow-sm border border-slate-200 p-6 mb-12 flex flex-wrap gap-4 items-center justify-between">
+            <div class="flex flex-wrap gap-3">
+                <select id="filter-level" class="bg-slate-50 px-5 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-500 border border-slate-100 focus:ring-2 focus:ring-blue-500 transition-all outline-none">
                     <option value="All">Dificultad: Todas</option>
                     <option value="Novato">Novato</option>
                     <option value="Guerrero">Guerrero</option>
                     <option value="Élite">Élite</option>
                 </select>
-                <select id="filter-gender" class="bg-slate-50 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 border-none focus:ring-2 focus:ring-blue-500 transition-all">
+                <select id="filter-gender" class="bg-slate-50 px-5 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-500 border border-slate-100 focus:ring-2 focus:ring-blue-500 transition-all outline-none">
                     <option value="All">Género: Todos</option>
                     <option value="Masculino">Masculino</option>
                     <option value="Femenino">Femenino</option>
                     <option value="Unisex">Unisex</option>
                 </select>
-                <select id="filter-age" class="bg-slate-50 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 border-none focus:ring-2 focus:ring-blue-500 transition-all">
-                    <option value="All">Edad: Todas</option>
-                    <option value="Niño">Niño</option>
-                    <option value="Joven">Joven</option>
-                    <option value="Adulto">Adulto</option>
-                    <option value="Senior">Senior</option>
-                </select>
             </div>
-            <div id="results-count" class="text-xs font-black uppercase tracking-widest text-slate-400">Cargando planes...</div>
+            <div id="results-count" class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Escaneando planes...</div>
         </div>
 
-        <div id="routines-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            <!-- Cargando... -->
+        <div id="routines-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Dynamic Content -->
         </div>
     </main>
 
-    <!-- Ultra Modal -->
-    <div id="routine-modal" class="fixed inset-0 bg-slate-950/90 z-[100] hidden items-center justify-center p-4 backdrop-blur-xl">
-        <div class="bg-white w-full max-w-6xl max-h-[92vh] rounded-[50px] overflow-hidden shadow-2xl flex flex-col xl:flex-row border border-white/20">
-            <div class="xl:w-4/12 h-64 xl:h-auto relative bg-slate-900">
-                <img id="modal-image" src="" class="w-full h-full object-cover opacity-60">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent flex flex-col justify-end p-10">
+    <!-- Detailed Modal -->
+    <div id="routine-modal" class="fixed inset-0 bg-slate-900/60 z-[100] hidden items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white w-full max-w-5xl max-h-[90vh] rounded-[40px] overflow-hidden shadow-2xl flex flex-col xl:flex-row border border-white animate-fade-in">
+            <div class="xl:w-5/12 h-64 xl:h-auto relative bg-slate-100">
+                <img id="modal-image" src="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent flex flex-col justify-end p-10">
                     <div class="flex flex-wrap gap-2 mb-4">
-                        <span id="modal-level" class="text-[10px] font-black uppercase bg-blue-600 text-white px-3 py-1.5 rounded-xl shadow-lg"></span>
-                        <span id="modal-gender" class="text-[10px] font-black uppercase bg-white/20 text-white px-3 py-1.5 rounded-xl backdrop-blur-md"></span>
+                        <span id="modal-level" class="text-[9px] font-bold uppercase bg-blue-600 text-white px-3 py-1.5 rounded-lg shadow-lg"></span>
+                        <span id="modal-gender" class="text-[9px] font-bold uppercase bg-white/20 text-white px-3 py-1.5 rounded-lg backdrop-blur-md border border-white/20"></span>
                     </div>
-                    <h2 id="modal-title" class="text-4xl font-black text-white leading-tight"></h2>
+                    <h2 id="modal-title" class="text-3xl font-bold text-white leading-tight"></h2>
                 </div>
             </div>
-            <div class="xl:w-8/12 p-8 xl:p-12 overflow-y-auto bg-white flex flex-col">
+            <div class="xl:w-7/12 p-8 xl:p-12 overflow-y-auto bg-white flex flex-col">
                 <div class="flex justify-between items-center mb-10">
                     <div id="weeks-nav" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        <!-- Botones de semana dinámicos -->
+                        <!-- Weeks Buttons -->
                     </div>
-                    <button onclick="closeModal()" class="text-slate-300 hover:text-blue-600 transition-all text-2xl ml-4"><i class="fas fa-times-circle"></i></button>
+                    <button onclick="closeModal()" class="text-slate-300 hover:text-red-500 transition-all text-2xl ml-4"><i class="fas fa-times-circle"></i></button>
                 </div>
 
-                <p id="modal-desc" class="text-slate-500 text-lg font-medium mb-10 leading-relaxed max-w-2xl"></p>
+                <p id="modal-desc" class="text-slate-500 text-base font-medium mb-10 leading-relaxed"></p>
 
                 <div id="modal-days" class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
-                    <!-- Días inyectados dinámicamente -->
+                    <!-- Daily routines -->
                 </div>
 
-                <div class="mt-auto pt-8 border-t border-slate-50 flex flex-wrap gap-6">
-                    <div class="flex items-center text-slate-400 font-bold text-xs uppercase tracking-widest">
-                        <i class="fas fa-heart-pulse mr-2 text-red-500"></i> Condición: <span id="modal-health" class="text-slate-900 ml-2"></span>
-                    </div>
-                    <div class="flex items-center text-slate-400 font-bold text-xs uppercase tracking-widest">
-                        <i class="fas fa-hourglass-half mr-2 text-blue-500"></i> Duración: <span id="modal-duration" class="text-slate-900 ml-2"></span>
+                <div class="mt-auto pt-8 border-t border-slate-100 flex flex-wrap gap-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <div class="flex items-center">
+                         Duración: <span id="modal-duration" class="text-slate-900 ml-2"></span>
                     </div>
                 </div>
             </div>
@@ -109,8 +102,7 @@
             let query = supabase.from('gym_routines').select('*').order('created_at', { ascending: false });
 
             if (domain) {
-                // Fetch owner_id for this domain with robust lookup
-                const { data: userData, error: userError } = await supabase.from('gym_users')
+                const { data: userData } = await supabase.from('gym_users')
                     .select('id')
                     .ilike('domain', domain.trim())
                     .eq('role', 'gym-owner')
@@ -119,8 +111,8 @@
                 if (userData) {
                     query = query.eq('owner_id', userData.id);
                 } else {
-                    grid.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-20">Gimnasio no encontrado para el dominio especificado.</div>';
-                    document.getElementById('results-count').innerText = '0 Planes Encontrados';
+                    grid.innerHTML = '<div class="col-span-full text-center text-slate-400 font-bold py-20 italic">No se encontraron resultados para el dominio especificado.</div>';
+                    document.getElementById('results-count').innerText = '0 resultados';
                     return;
                 }
             }
@@ -134,37 +126,35 @@
         function filterRoutines() {
             const level = document.getElementById('filter-level').value;
             const gender = document.getElementById('filter-gender').value;
-            const age = document.getElementById('filter-age').value;
 
             const filtered = allRoutines.filter(r => {
                 return (level === 'All' || r.difficulty_level === level) &&
-                       (gender === 'All' || r.target_gender === gender || r.target_gender === 'Unisex') &&
-                       (age === 'All' || r.target_age_group === age || r.target_age_group === 'Cualquiera');
+                       (gender === 'All' || r.target_gender === gender || r.target_gender === 'Unisex');
             });
 
-            document.getElementById('results-count').innerText = `${filtered.length} Planes Encontrados`;
+            document.getElementById('results-count').innerText = `${filtered.length} Planes disponibles`;
             renderGrid(filtered);
         }
 
         function renderGrid(data) {
             grid.innerHTML = data.map(r => `
-                <div class="bg-white rounded-[50px] shadow-sm border border-slate-50 overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-700">
-                    <div class="h-72 relative overflow-hidden bg-slate-200">
+                <div class="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden group hover:shadow-xl transition-all duration-500">
+                    <div class="h-64 relative overflow-hidden bg-slate-100">
                         <img src="${r.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=600'}"
-                             class="w-full h-full object-cover group-hover:scale-110 transition duration-1000 grayscale group-hover:grayscale-0">
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent flex flex-col justify-end p-10">
-                            <span class="text-[10px] font-black text-white uppercase bg-blue-600 w-fit px-4 py-1.5 rounded-xl mb-4 shadow-xl shadow-blue-900/40">${r.difficulty_level}</span>
-                            <h3 class="text-3xl font-black text-white tracking-tight">${r.title}</h3>
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute bottom-6 left-6">
+                            <span class="text-[9px] font-bold text-white uppercase bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">${r.difficulty_level}</span>
                         </div>
                     </div>
-                    <div class="p-10">
-                        <div class="flex justify-between items-center mb-10 border-b border-slate-50 pb-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            <span><i class="fas fa-venus-mars mr-2 text-blue-500"></i> ${r.target_gender}</span>
-                            <span><i class="fas fa-clock mr-2 text-blue-500"></i> ${r.plan_duration_weeks} Semanas</span>
+                    <div class="p-8">
+                        <h3 class="text-xl font-bold text-slate-900 mb-6 truncate">${r.title}</h3>
+                        <div class="flex justify-between items-center mb-8 border-t border-slate-50 pt-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                            <span><i class="fas fa-clock mr-2"></i> ${r.plan_duration_weeks} Semanas</span>
+                            <span><i class="fas fa-user-friends mr-2"></i> ${r.target_gender}</span>
                         </div>
                         <button onclick='openModal(${JSON.stringify(r).replace(/'/g, "&apos;")})'
-                                class="w-full py-5 bg-slate-950 hover:bg-blue-600 text-white font-black rounded-3xl transition-all shadow-xl hover:shadow-blue-200 uppercase tracking-widest text-xs">
-                            Analizar Plan
+                                class="w-full py-4 bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-600 font-bold rounded-2xl transition-all border border-slate-100 uppercase tracking-widest text-[10px]">
+                            Ver Detalle
                         </button>
                     </div>
                 </div>
@@ -174,57 +164,51 @@
         window.openModal = (r) => {
             currentRoutine = r;
             document.getElementById('modal-title').innerText = r.title;
-            document.getElementById('modal-desc').innerText = r.description || 'Este plan ha sido optimizado para maximizar la respuesta metabólica y fuerza.';
+            document.getElementById('modal-desc').innerText = r.description || 'Programación optimizada para resultados máximos.';
             document.getElementById('modal-level').innerText = r.difficulty_level;
             document.getElementById('modal-gender').innerText = r.target_gender;
-            document.getElementById('modal-health').innerText = r.health_conditions;
             document.getElementById('modal-duration').innerText = `${r.plan_duration_weeks} Semanas`;
             document.getElementById('modal-image').src = r.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=800';
 
-            // Build Weeks Nav
             const weeksNav = document.getElementById('weeks-nav');
             weeksNav.innerHTML = r.exercises.map((w, idx) => `
-                <button onclick="renderWeek(${idx})" class="week-btn px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${idx === 0 ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}">
+                <button onclick="renderWeek(${idx})" class="week-btn px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${idx === 0 ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-400 hover:bg-slate-100 border border-slate-100'}">
                     ${w.week}
                 </button>
             `).join('');
 
             renderWeek(0);
-
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             document.body.style.overflow = 'hidden';
         }
 
         window.renderWeek = (idx) => {
-            // Update UI buttons
             document.querySelectorAll('.week-btn').forEach((btn, i) => {
                 if (i === idx) {
-                    btn.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
-                    btn.classList.remove('bg-slate-50', 'text-slate-400');
+                    btn.className = 'week-btn px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all bg-slate-900 text-white shadow-lg';
                 } else {
-                    btn.classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
-                    btn.classList.add('bg-slate-50', 'text-slate-400');
+                    btn.className = 'week-btn px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all bg-slate-50 text-slate-400 hover:bg-slate-100 border border-slate-100';
                 }
             });
 
             const week = currentRoutine.exercises[idx];
             const daysContainer = document.getElementById('modal-days');
             daysContainer.innerHTML = week.days.map(d => `
-                <div class="bg-slate-50 rounded-[30px] p-8 border border-slate-100 shadow-sm animate-fade-in">
-                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest mb-6 border-b border-slate-200 pb-4 flex justify-between">
-                        ${d.day} <i class="fas fa-dumbbell text-blue-500 opacity-50"></i>
+                <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 animate-fade-in">
+                    <h4 class="text-[10px] font-bold text-slate-900 uppercase tracking-[0.2em] mb-6 border-b border-slate-200 pb-4">
+                        ${d.day}
                     </h4>
                     <ul class="space-y-4">
                         ${d.moves.map(m => `
-                            <li class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col space-y-2">
-                                <span class="font-black text-slate-800 text-sm tracking-tight">${m.name}</span>
-                                <div class="flex gap-4 text-[10px] font-black uppercase text-blue-600">
+                            <li class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col space-y-2">
+                                <span class="font-bold text-slate-800 text-sm">${m.name}</span>
+                                <div class="flex gap-4 text-[9px] font-bold uppercase text-slate-400">
                                     <span>${m.sets} Sets</span>
-                                    <span class="text-slate-300">/</span>
+                                    <span>/</span>
                                     <span>${m.reps} Reps</span>
-                                    <span class="text-slate-300">/</span>
-                                    <span class="text-slate-400">⏳ ${m.rest}</span>
+                                    <span>/</span>
+                                    <span>⏳ ${m.rest}</span>
                                 </div>
                             </li>
                         `).join('')}
@@ -239,7 +223,7 @@
             document.body.style.overflow = 'auto';
         }
 
-        ['filter-level', 'filter-gender', 'filter-age'].forEach(id => {
+        ['filter-level', 'filter-gender'].forEach(id => {
             document.getElementById(id).addEventListener('change', filterRoutines);
         });
 

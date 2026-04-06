@@ -283,7 +283,7 @@ export function renderNavbar() {
     nav.className = "bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-lg border-b border-white/5";
     nav.innerHTML = `
         <div class="container mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-black tracking-tighter text-blue-500 italic">GYM <span class="text-white not-italic">PRO</span></a>
+            <a href="index.html" class="text-2xl font-black tracking-tighter text-blue-500 italic">CORE <span class="text-white not-italic">PANEL</span></a>
             <ul class="hidden md:flex space-x-8 items-center font-bold text-xs uppercase tracking-widest text-slate-300">
                 <li><a href="index.html" class="hover:text-blue-400 transition-all hover:-translate-y-0.5 inline-block">Inicio</a></li>
                 <li><a href="nutricion.html" class="hover:text-emerald-400 transition-all hover:-translate-y-0.5 inline-block">Nutrición</a></li>
