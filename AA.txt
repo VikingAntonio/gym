@@ -21,7 +21,7 @@ UPDATE public.gym_users
 SET role = 'gym-admin'
 WHERE email ILIKE 'designerantoniomontiel@gmail.com';
 
--- 3. Actualizar políticas de gym_users
+-- 3. Actualizar políticas de gym_users (PROTECCIÓN DE ESCALACIÓN DE PRIVILEGIOS)
 DO $$
 DECLARE
     pol RECORD;
@@ -31,10 +31,14 @@ BEGIN
     END LOOP;
 END $$;
 
-CREATE POLICY "Public profiles are viewable by everyone" ON public.gym_users FOR SELECT USING (true);
-CREATE POLICY "Admins have full access" ON public.gym_users FOR ALL TO authenticated USING (public.is_admin());
-CREATE POLICY "Users can manage their own profile" ON public.gym_users FOR ALL USING ((auth.uid())::uuid = id);
-CREATE POLICY "Owners can manage their staff and socios" ON public.gym_users FOR ALL USING ((auth.uid())::uuid = owner_id);
+-- LECTURA: Solo autenticados. Admins ven todo, Owners ven staff/sí mismos, Socios ven sí mismos.
+CREATE POLICY "Users can view their own profile" ON public.gym_users FOR SELECT TO authenticated USING (auth.uid() = id);
+CREATE POLICY "Owners can view their staff" ON public.gym_users FOR SELECT TO authenticated USING (auth.uid() = owner_id);
+CREATE POLICY "Admins can view everyone" ON public.gym_users FOR SELECT TO authenticated USING (public.is_admin());
+
+-- ESCRITURA: Solo Admins pueden Insertar, Actualizar o Borrar (Satisface "Owner no puede editar solo ver")
+-- Esto también previene que Socios/Owners se cambien el rol a sí mismos (Escalación de privilegios).
+CREATE POLICY "Only admins can manage users" ON public.gym_users FOR ALL TO authenticated USING (public.is_admin());
 
 -- 4. Actualizar políticas de gym_recipes
 DO $$

@@ -120,6 +120,15 @@
         let editingUserId = null;
         let loadedUsers = [];
 
+        // SI NO ES ADMIN: Deshabilitar el formulario (Owner y Socio no pueden editar solo ver)
+        if (currentUser.role !== 'gym-admin') {
+            form.querySelectorAll('input, select, button').forEach(el => el.disabled = true);
+            const notice = document.createElement('p');
+            notice.className = "text-[10px] font-black text-red-500 uppercase tracking-widest mt-4 text-center border border-red-100 p-2 rounded-xl bg-red-50";
+            notice.innerHTML = '<i class="fas fa-lock mr-2"></i> Solo el Administrador puede editar usuarios';
+            form.appendChild(notice);
+        }
+
         window.editUser = (id) => {
             const u = loadedUsers.find(user => user.id === id);
             if (!u) return;
@@ -233,14 +242,16 @@
                         </span>
                     </td>
                     <td class="p-6 text-right flex justify-end space-x-2">
-                        ${u.id !== currentUser.id ? `
+                        ${currentUser.role === 'gym-admin' ? `
                             <button onclick="editUser('${u.id}')" class="text-blue-400 hover:text-blue-600 transition p-2">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="deleteUser('${u.id}')" class="text-red-400 hover:text-red-600 transition p-2">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        ` : '<span class="text-[8px] font-black text-slate-300 uppercase">Tú</span>'}
+                            ${u.id !== currentUser.id ? `
+                                <button onclick="deleteUser('${u.id}')" class="text-red-400 hover:text-red-600 transition p-2">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            ` : '<span class="text-[8px] font-black text-slate-300 uppercase self-center ml-2">Tú</span>'}
+                        ` : (u.id === currentUser.id ? '<span class="text-[8px] font-black text-slate-300 uppercase">Tú</span>' : '-')}
                     </td>
                 </tr>
             `).join('');
