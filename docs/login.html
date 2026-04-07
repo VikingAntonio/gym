@@ -25,10 +25,6 @@
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre Completo</label>
                     <input type="text" id="full_name" class="input" placeholder="Nombre y Apellidos">
                 </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">DOMINIO</label>
-                    <input type="text" id="domain" class="input" placeholder="ejemplo.com">
-                </div>
             </div>
 
             <div class="space-y-6">
@@ -93,14 +89,13 @@
                     window.location.href = 'gym.html';
                 } else {
                     const fullName = document.getElementById('full_name').value;
-                    const domain = document.getElementById('domain').value;
 
                     if (!fullName) throw new Error('El nombre es obligatorio');
 
                     await Auth.register(email, password, {
                         full_name: fullName,
-                        domain: domain || null,
-                        role: 'gym-owner'
+                        role: 'gym-owner',
+                        business_unit: 'gym'
                     });
 
                     showPopup('Registro Exitoso', 'Por favor, confirma tu correo electrónico para activar el acceso.', 'success');
