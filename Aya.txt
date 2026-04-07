@@ -124,9 +124,23 @@ BEGIN
     DROP POLICY IF EXISTS "Admins full" ON public.wisbe_users;
     CREATE POLICY "Admins full" ON public.wisbe_users FOR ALL TO authenticated USING (public.is_admin());
 
+    -- Permitir que usuarios autenticados inserten su propio perfil para evitar bloqueos en el registro
+    DROP POLICY IF EXISTS "Users can insert their own profile" ON public.wisbe_users;
+    CREATE POLICY "Users can insert their own profile" ON public.wisbe_users FOR INSERT WITH CHECK (auth.uid() = id);
+
     -- Políticas de negocio
     DROP POLICY IF EXISTS "Owner manage recipes" ON public.gym_recipes;
     CREATE POLICY "Owner manage recipes" ON public.gym_recipes FOR ALL USING (
-        (auth.uid())::uuid = owner_id OR EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_recipes.owner_id)
+        public.is_admin() OR (auth.uid())::uuid = owner_id OR EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_recipes.owner_id)
+    );
+
+    DROP POLICY IF EXISTS "Owner manage routines" ON public.gym_routines;
+    CREATE POLICY "Owner manage routines" ON public.gym_routines FOR ALL USING (
+        public.is_admin() OR (auth.uid())::uuid = owner_id OR EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_routines.owner_id)
+    );
+
+    DROP POLICY IF EXISTS "Owner manage trainers" ON public.gym_trainers;
+    CREATE POLICY "Owner manage trainers" ON public.gym_trainers FOR ALL USING (
+        public.is_admin() OR (auth.uid())::uuid = owner_id OR EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_trainers.owner_id)
     );
 END $$;

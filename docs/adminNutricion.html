@@ -122,6 +122,13 @@
                         </div>
                     </div>
 
+                    <div id="owner-group" class="hidden">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a Dueño (Admin)</label>
+                        <select id="owner_id_select" class="input bg-white cursor-pointer">
+                            <option value="">Mi Biblioteca</option>
+                        </select>
+                    </div>
+
                     <div class="pt-10 flex gap-6">
                         <button type="submit" id="submit-btn" class="flex-grow btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
                             Guardar Receta
@@ -136,9 +143,27 @@
         import { supabase, renderNavbar, Auth, showPopup, uploadToCloudinary, setupDragAndDrop, showConfirm } from './js/utils.js';
         renderNavbar();
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+        const isAdmin = currentUser && currentUser.role === 'gym-admin';
 
         let imageUrl = '';
         let loadedRecipes = [];
+
+        if (isAdmin) {
+            document.getElementById('owner-group').classList.remove('hidden');
+            loadOwners();
+        }
+
+        async function loadOwners() {
+            const { data, error } = await supabase
+                .from('wisbe_users')
+                .select('id, full_name, email')
+                .eq('role', 'gym-owner')
+                .order('full_name');
+            if (error) return console.error(error);
+            const select = document.getElementById('owner_id_select');
+            select.innerHTML = '<option value="">Mi Biblioteca (Global)</option>' +
+                data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
+        }
 
         async function loadRecipes() {
             const { data, error } = await supabase
@@ -241,6 +266,9 @@
             document.getElementById('fats').value = r.fats;
             document.getElementById('ingredients').value = Array.isArray(r.ingredients) ? r.ingredients.join('\n') : r.ingredients;
             document.getElementById('instructions').value = Array.isArray(r.instructions) ? r.instructions.join('\n') : r.instructions;
+            if (isAdmin) {
+                document.getElementById('owner_id_select').value = r.owner_id || '';
+            }
 
             if (r.image_url) {
                 imageUrl = r.image_url;
@@ -275,7 +303,7 @@
                 fats: parseInt(document.getElementById('fats').value) || 0,
                 ingredients: document.getElementById('ingredients').value.split('\n').filter(x => x.trim()),
                 instructions: document.getElementById('instructions').value.split('\n').filter(x => x.trim()),
-                owner_id: currentUser.id
+                owner_id: isAdmin ? (document.getElementById('owner_id_select').value || currentUser.id) : currentUser.id
             };
 
             const { error } = id
