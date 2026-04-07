@@ -29,7 +29,7 @@
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-200">
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Identidad</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rol / Permisos</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rol</th>
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dominio</th>
                             <th id="th-business" class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden">Unidad</th>
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Acciones</th>
@@ -75,9 +75,9 @@
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Rol Asignado</label>
                                 <select id="role" class="input bg-white cursor-pointer">
-                                    <option value="gym-socios">Socio / Cliente</option>
+                                    <option value="gym-socios">Socio</option>
                                     <option value="gym-entrenador">Entrenador</option>
-                                    <option value="gym-owner">Dueño / Staff</option>
+                                    <option value="gym-owner">Dueño</option>
                                     <option value="gym-admin">Administrador Global</option>
                                 </select>
                             </div>
@@ -89,17 +89,17 @@
                         <div id="business-group" class="hidden">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Unidad de Negocio</label>
                             <select id="business_unit" class="input bg-white cursor-pointer">
-                                <option value="gym">Gimnasio / Fitness</option>
+                                <option value="gym">Gimnasio</option>
                                 <option value="beauty">Salón de Belleza</option>
                                 <option value="construction">Construcción</option>
                                 <option value="freelance">Independiente</option>
-                                <option value="wisbe">Wisbe (Global)</option>
+                                <option value="wisbe">Wisbe</option>
                             </select>
                         </div>
                         <div id="owner-group" class="hidden">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Dueño Asociado (Owner)</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a</label>
                             <select id="owner_id_select" class="input bg-white cursor-pointer">
-                                <option value="">Sin Dueño (Global)</option>
+                                <option value="">Sin Asignar</option>
                             </select>
                         </div>
                     </div>
@@ -139,7 +139,7 @@
             if (error) return console.error(error);
             loadedOwners = data;
             const select = document.getElementById('owner_id_select');
-            select.innerHTML = '<option value="">Sin Dueño (Global/Admin)</option>' +
+            select.innerHTML = '<option value="">Sin Asignar</option>' +
                 data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
         }
 

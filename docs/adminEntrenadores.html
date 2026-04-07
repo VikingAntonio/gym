@@ -66,23 +66,23 @@
                             <input type="text" id="specialty" required class="input" placeholder="Ej: Powerlifting, Yoga">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Biografía Corta / Experiencia</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Biografía Corta</label>
                             <textarea id="bio" rows="4" class="input resize-none" placeholder="Breve descripción del perfil..."></textarea>
                         </div>
                         <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Enlace WhatsApp / Contacto</label>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Enlace WhatsApp</label>
                                 <input type="text" id="whatsapp_url" class="input" placeholder="https://wa.me/...">
                             </div>
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Enlace Instagram / Portfolio</label>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Enlace Instagram</label>
                                 <input type="text" id="instagram_url" class="input" placeholder="@usuario">
                             </div>
                         </div>
                     </div>
 
                     <div id="owner-group" class="hidden">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a Dueño (Admin)</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a</label>
                         <select id="owner_id_select" class="input bg-white cursor-pointer">
                             <option value="">Mis Entrenadores</option>
                         </select>
@@ -120,7 +120,7 @@
                 .order('full_name');
             if (error) return console.error(error);
             const select = document.getElementById('owner_id_select');
-            select.innerHTML = '<option value="">Mis Entrenadores (Global)</option>' +
+            select.innerHTML = '<option value="">Mis Entrenadores</option>' +
                 data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
         }
 

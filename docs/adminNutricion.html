@@ -65,7 +65,7 @@
                             </div>
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Tiempo Prep (min)</label>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Tiempo Prep</label>
                                     <input type="number" id="prep_time" class="input" placeholder="Ej: 20">
                                 </div>
                                 <div>
@@ -86,25 +86,25 @@
                                 <input type="text" id="title" required class="input" placeholder="Ej: Bowl de Avena con Frutos Rojos">
                             </div>
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Tipo de Dieta / Categoría</label>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Tipo de Dieta</label>
                                 <input type="text" id="diet_type" class="input" placeholder="Ej: Vegano, Proteico, Ayuno">
                             </div>
 
                             <div class="grid grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
                                 <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Calorías (kcal)</label>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Calorías</label>
                                     <input type="number" id="calories" class="input" placeholder="0">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Proteínas (g)</label>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Proteínas</label>
                                     <input type="number" id="protein" class="input" placeholder="0">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Carbos (g)</label>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Carbos</label>
                                     <input type="number" id="carbs" class="input" placeholder="0">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Grasas (g)</label>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Grasas</label>
                                     <input type="number" id="fats" class="input" placeholder="0">
                                 </div>
                             </div>
@@ -113,17 +113,17 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Ingredientes (Uno por línea)</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Ingredientes</label>
                             <textarea id="ingredients" rows="8" class="input resize-none" placeholder="1 taza de avena..."></textarea>
                         </div>
                         <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Instrucciones / Preparación</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Instrucciones</label>
                             <textarea id="instructions" rows="8" class="input resize-none" placeholder="1. Mezclar los ingredientes secos..."></textarea>
                         </div>
                     </div>
 
                     <div id="owner-group" class="hidden">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a Dueño (Admin)</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a</label>
                         <select id="owner_id_select" class="input bg-white cursor-pointer">
                             <option value="">Mi Biblioteca</option>
                         </select>
@@ -161,7 +161,7 @@
                 .order('full_name');
             if (error) return console.error(error);
             const select = document.getElementById('owner_id_select');
-            select.innerHTML = '<option value="">Mi Biblioteca (Global)</option>' +
+            select.innerHTML = '<option value="">Mi Biblioteca</option>' +
                 data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
         }
 
