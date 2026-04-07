@@ -298,7 +298,7 @@ export function renderNavbar() {
 
                 ${user ? `
                     <li class="flex items-center space-x-3 border-l border-white/10 pl-8 ml-4">
-                        <span class="text-[10px] text-slate-500 font-black">${user.full_name || user.username} (${user.role.replace('gym-', '')})</span>
+                        <span class="text-[10px] text-slate-500 font-black">${user.full_name || user.username} ${user.role.replace('gym-', '')}</span>
                         <button id="logout-btn" class="text-red-400 hover:text-red-300 transition-colors" title="Cerrar Sesión">
                             <i class="fas fa-power-off text-lg"></i>
                         </button>

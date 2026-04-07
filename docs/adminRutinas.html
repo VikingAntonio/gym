@@ -75,7 +75,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Condiciones de Salud / Notas</label>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Condiciones de Salud</label>
                                 <input type="text" id="health_conditions" class="input" placeholder="Ej: Sin problemas articulares">
                             </div>
                         </div>
@@ -97,7 +97,7 @@
                     </div>
 
                     <div id="owner-group" class="hidden">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a Dueño (Admin)</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a</label>
                         <select id="owner_id_select" class="input bg-white cursor-pointer">
                             <option value="">Mis Rutinas</option>
                         </select>
@@ -135,7 +135,7 @@
                 .order('full_name');
             if (error) return console.error(error);
             const select = document.getElementById('owner_id_select');
-            select.innerHTML = '<option value="">Mis Rutinas (Global)</option>' +
+            select.innerHTML = '<option value="">Mis Rutinas</option>' +
                 data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
         }
 
@@ -227,14 +227,14 @@
                     <input type="text" class="ex-name input text-xs font-bold" placeholder="Ej: Press de Banca" value="${ex.name}">
                 </div>
                 <div>
-                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Series x Reps</label>
+                                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Series y Reps</label>
                     <div class="flex gap-2">
                         <input type="text" class="ex-sets input text-xs font-bold text-center" placeholder="3" value="${ex.sets}">
                         <input type="text" class="ex-reps input text-xs font-bold text-center" placeholder="12" value="${ex.reps}">
                     </div>
                 </div>
                 <div>
-                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">URL Video / Guía</label>
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">URL Video</label>
                     <input type="text" class="ex-video input text-xs" placeholder="YouTube/Cloudinary" value="${ex.video}">
                 </div>
                 <div class="flex justify-end lg:pb-3">
