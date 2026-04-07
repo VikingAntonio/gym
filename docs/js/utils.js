@@ -232,6 +232,15 @@ export const Auth = {
         return user ? JSON.parse(user) : null;
     },
 
+    getSelectedOwnerId() {
+        return localStorage.getItem('admin_selected_owner_id') || null;
+    },
+
+    setSelectedOwnerId(id) {
+        if (!id) localStorage.removeItem('admin_selected_owner_id');
+        else localStorage.setItem('admin_selected_owner_id', id);
+    },
+
     async checkAccess(rolesPermitidos = []) {
         // First check session
         const { data: { session } } = await supabase.auth.getSession();
@@ -318,5 +327,83 @@ export function renderNavbar() {
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.onclick = () => Auth.logout();
+    }
+}
+
+/**
+ * Renderiza el panel lateral para administradores (Wisbe)
+ */
+export async function renderAdminSidebar(onOwnerChange) {
+    const user = Auth.getUser();
+    if (!user || user.role !== 'gym-admin') return;
+
+    // Crear el contenedor del panel
+    const sidebar = document.createElement('div');
+    sidebar.id = 'admin-sidebar';
+    sidebar.className = 'admin-sidebar-closed';
+    sidebar.innerHTML = `
+        <div class="admin-sidebar-tab">
+            <span>FIND PROJECT</span>
+        </div>
+        <div class="admin-sidebar-content">
+            <h3 class="text-orange-500 font-black text-[10px] uppercase tracking-widest mb-6">Find Project</h3>
+            <input type="text" id="owner-search" class="input mb-6 text-sm" placeholder="Domain or Name...">
+            <div id="owners-list-sidebar" class="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-2 custom-scrollbar">
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-orange-500 transition-all owner-item active-owner" data-id="">
+                    <span class="block font-bold text-slate-800 text-sm">Mi Biblioteca</span>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(sidebar);
+
+    const tab = sidebar.querySelector('.admin-sidebar-tab');
+    const searchInput = sidebar.querySelector('#owner-search');
+    const listContainer = sidebar.querySelector('#owners-list-sidebar');
+
+    tab.onclick = () => {
+        sidebar.classList.toggle('admin-sidebar-open');
+        sidebar.classList.toggle('admin-sidebar-closed');
+    };
+
+    // Cargar dueños
+    const { data: owners, error } = await supabase
+        .from('wisbe_users')
+        .select('id, full_name, email, domain')
+        .eq('role', 'gym-owner')
+        .order('full_name');
+
+    if (!error && owners) {
+        const renderList = (filter = '') => {
+            const currentId = Auth.getSelectedOwnerId() || '';
+            const filtered = owners.filter(o =>
+                (o.full_name || '').toLowerCase().includes(filter.toLowerCase()) ||
+                (o.email || '').toLowerCase().includes(filter.toLowerCase()) ||
+                (o.domain || '').toLowerCase().includes(filter.toLowerCase())
+            );
+
+            listContainer.innerHTML = `
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-orange-500 transition-all owner-item ${currentId === '' ? 'active-owner' : ''}" data-id="">
+                    <span class="block font-bold text-slate-800 text-sm">Mi Biblioteca</span>
+                </div>
+            ` + filtered.map(o => `
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-orange-500 transition-all owner-item ${o.id === currentId ? 'active-owner' : ''}" data-id="${o.id}">
+                    <span class="block font-bold text-slate-800 text-sm">${o.full_name || o.email}</span>
+                    ${o.domain ? `<span class="block text-[10px] text-slate-400 font-medium">${o.domain}</span>` : ''}
+                </div>
+            `).join('');
+
+            listContainer.querySelectorAll('.owner-item').forEach(item => {
+                item.onclick = () => {
+                    const id = item.dataset.id;
+                    Auth.setSelectedOwnerId(id);
+                    renderList(searchInput.value);
+                    if (onOwnerChange) onOwnerChange(id);
+                };
+            });
+        };
+
+        searchInput.oninput = (e) => renderList(e.target.value);
+        renderList();
     }
 }

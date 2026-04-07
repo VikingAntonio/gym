@@ -116,31 +116,46 @@
 
     <script type="module">
         import { supabase, renderNavbar, Auth, showPopup, showConfirm } from './js/utils.js';
-        renderNavbar();
-        const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
 
+        let currentUser = null;
+        let isAdmin = false;
         let loadedUsers = [];
         let loadedOwners = [];
-        const isAdmin = currentUser && currentUser.role === 'gym-admin';
 
-        if (isAdmin) {
-            document.getElementById('th-business').classList.remove('hidden');
-            document.getElementById('business-group').classList.remove('hidden');
-            document.getElementById('owner-group').classList.remove('hidden');
-            loadOwners();
+        async function initPage() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+            if (!currentUser) return;
+
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                document.getElementById('th-business').classList.remove('hidden');
+                document.getElementById('business-group').classList.remove('hidden');
+                document.getElementById('owner-group').classList.remove('hidden');
+                await loadOwners();
+            }
+
+            await loadUsers();
         }
 
         async function loadOwners() {
-            const { data, error } = await supabase
-                .from('wisbe_users')
-                .select('id, full_name, email')
-                .eq('role', 'gym-owner')
-                .order('full_name');
-            if (error) return console.error(error);
-            loadedOwners = data;
-            const select = document.getElementById('owner_id_select');
-            select.innerHTML = '<option value="">Sin Asignar</option>' +
-                data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
+            try {
+                const { data, error } = await supabase
+                    .from('wisbe_users')
+                    .select('id, full_name, email')
+                    .eq('role', 'gym-owner')
+                    .order('full_name');
+                if (error) throw error;
+                loadedOwners = data;
+                const select = document.getElementById('owner_id_select');
+                if (select) {
+                    select.innerHTML = '<option value="">Sin Asignar</option>' +
+                        data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
+                }
+            } catch (err) {
+                console.error('Error loading owners:', err);
+            }
         }
 
         async function loadUsers() {
@@ -285,7 +300,7 @@
             loadUsers();
         };
 
-        loadUsers();
+        initPage();
     </script>
 </body>
 </html>
