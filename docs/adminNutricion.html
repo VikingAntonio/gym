@@ -3,274 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Nutrición - Core Panel</title>
+    <title>Gestión de Nutrición</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-    </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
     <nav id="main-nav"></nav>
 
-    <div class="flex flex-col lg:flex-row">
-        <!-- Form Sidebar -->
-        <aside class="w-full lg:w-[450px] bg-white border-r border-slate-200 min-h-screen p-8 lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] overflow-y-auto">
-            <div class="mb-10">
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">Editor de Recetas</h2>
-                <p class="text-slate-500 text-sm">Crea y publica contenido nutricional para tu plataforma.</p>
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Nutrición</h1>
+                <p class="text-slate-500 font-medium mt-1">Biblioteca de recetas y planificación nutricional.</p>
             </div>
+            <button id="btn-nueva-receta" class="btn btn-primary px-6 py-3 uppercase tracking-widest text-xs font-black shadow-lg shadow-blue-600/20">
+                <i class="fas fa-plus mr-2"></i> Nueva Receta
+            </button>
+        </header>
 
-            <form id="recipe-form" class="space-y-8">
-                <!-- Image Upload -->
-                <div class="space-y-3">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Imagen de la receta</label>
-                    <div id="drop-zone" class="w-full h-44 border-2 border-dashed border-slate-200 rounded-[32px] flex flex-col items-center justify-center text-slate-400 hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer overflow-hidden group bg-slate-50 relative">
-                        <div id="drop-placeholder" class="text-center p-6">
-                            <i class="fas fa-image text-3xl mb-3 group-hover:scale-110 transition-transform"></i>
-                            <p class="text-[10px] font-bold uppercase tracking-widest">Sube una imagen</p>
-                            <p class="text-[9px] mt-1 opacity-60">PNG, JPG hasta 5MB</p>
-                        </div>
-                        <img id="preview-image" src="" class="hidden w-full h-full object-cover">
-                    </div>
-                    <input type="file" id="image-input" accept="image/*" class="hidden">
+        <div id="recetas-grid" class="admin-grid animate-fade">
+            <!-- Cargando -->
+            <div class="card flex flex-col items-center justify-center py-20 text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                <span class="text-sm font-black uppercase tracking-widest">Sincronizando recetas...</span>
+            </div>
+        </div>
+
+        <!-- Recipe Modal -->
+        <div id="modal-receta" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 overflow-y-auto">
+            <div class="card bg-white w-full max-w-4xl p-10 shadow-2xl animate-fade my-10">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 id="modal-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase">Editor de Receta</h2>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
                 </div>
 
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Título</label>
-                        <input type="text" id="title" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="Ej: Bowl de Quinoa y Pollo">
+                <form id="recipe-form" class="space-y-10">
+                    <input type="hidden" id="recipe-id">
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        <!-- Image & Media -->
+                        <div class="space-y-8">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Imagen de Presentación</label>
+                                <div id="drop-zone" class="border-2 border-dashed border-slate-200 rounded-[32px] p-8 text-center cursor-pointer hover:border-blue-400 transition-all bg-slate-50 relative overflow-hidden group min-h-[240px] flex flex-col items-center justify-center">
+                                    <div id="preview-container" class="absolute inset-0 hidden">
+                                        <img id="image-preview" src="" class="w-full h-full object-cover rounded-[32px]">
+                                        <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span class="text-white text-xs font-black uppercase tracking-widest">Cambiar Imagen</span>
+                                        </div>
+                                    </div>
+                                    <div id="upload-placeholder">
+                                        <i class="fas fa-cloud-upload-alt text-4xl text-slate-300 mb-4"></i>
+                                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Arrastra o selecciona archivo</p>
+                                    </div>
+                                    <input type="file" id="image-input" class="hidden" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Tiempo Prep (min)</label>
+                                    <input type="number" id="prep_time" class="input" placeholder="Ej: 20">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Dificultad</label>
+                                    <select id="difficulty" class="input bg-white cursor-pointer">
+                                        <option value="Fácil">Baja</option>
+                                        <option value="Media">Media</option>
+                                        <option value="Difícil">Alta</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data & Macros -->
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre de la Receta</label>
+                                <input type="text" id="title" required class="input" placeholder="Ej: Bowl de Avena con Frutos Rojos">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Tipo de Dieta / Categoría</label>
+                                <input type="text" id="diet_type" class="input" placeholder="Ej: Vegano, Proteico, Ayuno">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Calorías (kcal)</label>
+                                    <input type="number" id="calories" class="input" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Proteínas (g)</label>
+                                    <input type="number" id="protein" class="input" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Carbos (g)</label>
+                                    <input type="number" id="carbs" class="input" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Grasas (g)</label>
+                                    <input type="number" id="fats" class="input" placeholder="0">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Categoría</label>
-                            <select id="category" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none">
-                                <option>Desayuno</option>
-                                <option>Almuerzo</option>
-                                <option>Cena</option>
-                                <option>Postre Fitness</option>
-                                <option>Snack Proteico</option>
-                            </select>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Ingredientes (Uno por línea)</label>
+                            <textarea id="ingredients" rows="8" class="input resize-none" placeholder="1 taza de avena..."></textarea>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Dieta</label>
-                            <select id="diet_type" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none">
-                                <option>Equilibrada</option>
-                                <option>Keto</option>
-                                <option>Vegana</option>
-                                <option>Alta Proteína</option>
-                                <option>Sin Gluten</option>
-                            </select>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Instrucciones / Preparación</label>
+                            <textarea id="instructions" rows="8" class="input resize-none" placeholder="1. Mezclar los ingredientes secos..."></textarea>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <label class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2 text-center">Prote (g)</label>
-                            <input type="number" id="protein" class="w-full bg-transparent text-center font-bold border-none focus:ring-0 p-0 text-slate-700">
-                        </div>
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <label class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2 text-center">Carbs (g)</label>
-                            <input type="number" id="carbs" class="w-full bg-transparent text-center font-bold border-none focus:ring-0 p-0 text-slate-700">
-                        </div>
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <label class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2 text-center">Grasas (g)</label>
-                            <input type="number" id="fats" class="w-full bg-transparent text-center font-bold border-none focus:ring-0 p-0 text-slate-700">
-                        </div>
+                    <div class="pt-10 flex gap-6">
+                        <button type="submit" id="submit-btn" class="flex-grow btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                            Guardar Receta
+                        </button>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Calorías</label>
-                            <input type="number" id="calories" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="0">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Prep Time</label>
-                            <input type="text" id="prep_time" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="20 min">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Dificultad</label>
-                        <select id="difficulty" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none">
-                            <option>Fácil</option>
-                            <option>Media</option>
-                            <option>Avanzada</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Ingredientes</label>
-                        <textarea id="ingredients" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium resize-none" placeholder="Lista de ingredientes..."></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Preparación</label>
-                        <textarea id="instructions" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium resize-none" placeholder="Pasos a seguir..."></textarea>
-                    </div>
-                </div>
-
-                <button type="submit" id="submit-btn" class="w-full py-5 bg-slate-900 text-white rounded-[24px] font-bold uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95">
-                    <span id="btn-text">Publicar Contenido</span>
-                    <span id="btn-loading" class="hidden"><i class="fas fa-spinner animate-spin mr-2"></i> Procesando...</span>
-                </button>
-            </form>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="flex-grow p-8 lg:p-12">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
-                <h2 class="text-3xl font-bold text-slate-900">Inventario Nutricional</h2>
-                <div class="flex items-center text-xs font-bold text-slate-400 uppercase tracking-widest bg-white px-4 py-2 rounded-xl border border-slate-200">
-                    <span id="recipe-count" class="text-blue-600 mr-2">0</span> Recetas publicadas
-                </div>
+                </form>
             </div>
-
-            <div id="recipes-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                <!-- Dynamic Content -->
-            </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, setupDragAndDrop, renderNavbar, Auth, showPopup, showConfirm } from './js/utils.js';
+        import { supabase, renderNavbar, Auth, showPopup, uploadToCloudinary, setupDragAndDrop, showConfirm } from './js/utils.js';
         renderNavbar();
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
-        if (currentUser) {
-            initPage();
+
+        let imageUrl = '';
+        let loadedRecipes = [];
+
+        async function loadRecipes() {
+            const { data, error } = await supabase
+                .from('gym_recipes')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) return console.error(error);
+            loadedRecipes = data;
+            renderRecipes(data);
         }
 
-        function initPage() {
-        const form = document.getElementById('recipe-form');
-        const list = document.getElementById('recipes-list');
-        const dropZone = document.getElementById('drop-zone');
-        const imageInput = document.getElementById('image-input');
-        const previewImage = document.getElementById('preview-image');
-        const dropPlaceholder = document.getElementById('drop-placeholder');
-
-        setupDragAndDrop(dropZone, imageInput, (file) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImage.src = e.target.result;
-                previewImage.classList.remove('hidden');
-                dropPlaceholder.classList.add('hidden');
-            };
-            reader.readAsDataURL(file);
-        });
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submit-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnLoading = document.getElementById('btn-loading');
-
-            btn.disabled = true;
-            btnText.classList.add('hidden');
-            btnLoading.classList.remove('hidden');
-
-            try {
-                const title = document.getElementById('title').value;
-                const category = document.getElementById('category').value;
-                const diet_type = document.getElementById('diet_type').value;
-                const protein = document.getElementById('protein').value;
-                const carbs = document.getElementById('carbs').value;
-                const fats = document.getElementById('fats').value;
-                const calories = document.getElementById('calories').value;
-                const prep_time = document.getElementById('prep_time').value;
-                const difficulty = document.getElementById('difficulty').value;
-                const ingredients = document.getElementById('ingredients').value;
-                const instructions = document.getElementById('instructions').value;
-                const imageFile = imageInput.files[0];
-
-                let imageUrl = '';
-                if (imageFile) imageUrl = await uploadToCloudinary(imageFile);
-
-                // FORCE SYNC
-                await supabase.rpc('create_profile_if_missing', {
-                    p_id: currentUser.id,
-                    p_email: currentUser.email,
-                    p_full_name: currentUser.full_name || '',
-                    p_domain: currentUser.domain || null,
-                    p_role: currentUser.role || 'gym-owner',
-                    p_owner_id: currentUser.owner_id || null
-                });
-
-                const { error } = await supabase.from('gym_recipes').insert([{
-                    title, category, diet_type,
-                    protein: parseInt(protein) || 0,
-                    carbs: parseInt(carbs) || 0,
-                    fats: parseInt(fats) || 0,
-                    calories: parseInt(calories) || 0,
-                    prep_time, difficulty, ingredients, instructions, image_url: imageUrl,
-                    owner_id: currentUser.id
-                }]);
-
-                if (error) throw error;
-                await showPopup('Éxito', 'Receta publicada correctamente');
-                location.reload();
-            } catch (err) {
-                await showPopup('Error', err.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btnText.classList.remove('hidden');
-                btnLoading.classList.add('hidden');
-            }
-        });
-
-        async function fetchRecipes() {
-            let query = supabase.from('gym_recipes').select('*').order('created_at', { ascending: false });
-
-            if (currentUser.role === 'gym-owner') {
-                query = query.eq('owner_id', currentUser.id);
+        function renderRecipes(recipes) {
+            const grid = document.getElementById('recetas-grid');
+            if (recipes.length === 0) {
+                grid.innerHTML = '<div class="card col-span-full py-20 text-center text-slate-400">Aún no has creado ninguna receta profesional.</div>';
+                return;
             }
 
-            const { data, error } = await query;
-            if (error) return;
-
-            document.getElementById('recipe-count').innerText = data.length;
-
-            list.innerHTML = data.map(r => `
-                <div class="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden group hover:shadow-xl transition-all duration-300">
-                    <div class="h-56 relative overflow-hidden bg-slate-100">
-                        <img src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400'}"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                        <span class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-slate-700 border border-slate-200">${r.diet_type}</span>
-                    </div>
-                    <div class="p-8">
-                        <h4 class="font-bold text-slate-900 text-lg mb-4 truncate">${r.title}</h4>
-                        <div class="grid grid-cols-2 gap-4 mb-8">
-                            <div class="bg-slate-50 p-3 rounded-2xl text-center">
-                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Calorías</p>
-                                <p class="text-sm font-bold text-slate-700">${r.calories || 0}</p>
-                            </div>
-                            <div class="bg-slate-50 p-3 rounded-2xl text-center">
-                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Proteínas</p>
-                                <p class="text-sm font-bold text-slate-700">${r.protein || 0}g</p>
-                            </div>
+            grid.innerHTML = recipes.map(r => `
+                <div class="card group hover:border-blue-500 transition-all p-0 overflow-hidden flex flex-col">
+                    <div class="h-48 overflow-hidden bg-slate-100 relative">
+                        <img src="${r.image_url || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80'}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4">
+                            <span class="px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-slate-900 border border-white/50">
+                                ${r.diet_type || 'Nutrición'}
+                            </span>
                         </div>
-                        <div class="flex items-center justify-between pt-6 border-t border-slate-100">
-                             <button onclick="deleteRecipe(${r.id})" class="text-[10px] font-bold text-red-400 hover:text-red-600 uppercase tracking-widest transition-colors">
-                                <i class="fas fa-trash-alt mr-2"></i> Eliminar
-                             </button>
-                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${r.category}</span>
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="text-lg font-bold text-slate-900 mb-2 truncate">${r.title}</h3>
+                        <div class="flex items-center gap-4 text-slate-400 text-xs font-bold mb-6">
+                            <span class="flex items-center"><i class="far fa-clock mr-1.5"></i> ${r.prep_time || 0}'</span>
+                            <span class="flex items-center"><i class="fas fa-fire mr-1.5"></i> ${r.calories || 0} kcal</span>
+                        </div>
+                        <div class="mt-auto flex justify-between items-center pt-6 border-t border-slate-100">
+                            <button onclick="editRecipe('${r.id}')" class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors">
+                                Editar <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                            <button onclick="deleteRecipe('${r.id}')" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all border border-slate-100">
+                                <i class="fas fa-trash-alt text-[10px]"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        window.deleteRecipe = async (id) => {
-            if (await showConfirm('¿Borrar receta?', 'Esta acción no se puede deshacer.')) {
-                await supabase.from('gym_recipes').delete().eq('id', id);
-                fetchRecipes();
+        const modal = document.getElementById('modal-receta');
+        const form = document.getElementById('recipe-form');
+        const imagePreview = document.getElementById('image-preview');
+        const previewContainer = document.getElementById('preview-container');
+
+        document.getElementById('btn-nueva-receta').onclick = () => {
+            form.reset();
+            document.getElementById('recipe-id').value = '';
+            imageUrl = '';
+            previewContainer.classList.add('hidden');
+            document.getElementById('modal-title').innerText = 'Crear Receta';
+            modal.style.display = 'flex';
+        };
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+        setupDragAndDrop(
+            document.getElementById('drop-zone'),
+            document.getElementById('image-input'),
+            async (file) => {
+                try {
+                    const btn = document.getElementById('submit-btn');
+                    btn.disabled = true;
+                    btn.innerText = 'PROCESANDO IMAGEN...';
+
+                    imageUrl = await uploadToCloudinary(file);
+                    imagePreview.src = imageUrl;
+                    previewContainer.classList.remove('hidden');
+
+                    btn.disabled = false;
+                    btn.innerText = 'GUARDAR RECETA';
+                    showPopup('Subida Exitosa', 'La imagen se ha procesado correctamente');
+                } catch (err) {
+                    showPopup('Error', 'Fallo al subir a Cloudinary', 'error');
+                }
             }
-        }
-        fetchRecipes();
-        }
+        );
+
+        window.editRecipe = (id) => {
+            const r = loadedRecipes.find(x => x.id === id);
+            if (!r) return;
+
+            document.getElementById('recipe-id').value = r.id;
+            document.getElementById('title').value = r.title;
+            document.getElementById('prep_time').value = r.prep_time;
+            document.getElementById('difficulty').value = r.difficulty || 'Media';
+            document.getElementById('diet_type').value = r.diet_type;
+            document.getElementById('calories').value = r.calories;
+            document.getElementById('protein').value = r.protein;
+            document.getElementById('carbs').value = r.carbs;
+            document.getElementById('fats').value = r.fats;
+            document.getElementById('ingredients').value = Array.isArray(r.ingredients) ? r.ingredients.join('\n') : r.ingredients;
+            document.getElementById('instructions').value = Array.isArray(r.instructions) ? r.instructions.join('\n') : r.instructions;
+
+            if (r.image_url) {
+                imageUrl = r.image_url;
+                imagePreview.src = r.image_url;
+                previewContainer.classList.remove('hidden');
+            }
+
+            document.getElementById('modal-title').innerText = 'Modificar Receta';
+            modal.style.display = 'flex';
+        };
+
+        window.deleteRecipe = async (id) => {
+            if (await showConfirm('Eliminar Receta', '¿Seguro que deseas eliminar esta receta de la biblioteca?')) {
+                const { error } = await supabase.from('gym_recipes').delete().eq('id', id);
+                if (error) return showPopup('Error', error.message, 'error');
+                loadRecipes();
+            }
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('recipe-id').value;
+            const data = {
+                title: document.getElementById('title').value,
+                image_url: imageUrl,
+                prep_time: parseInt(document.getElementById('prep_time').value) || 0,
+                difficulty: document.getElementById('difficulty').value,
+                diet_type: document.getElementById('diet_type').value,
+                calories: parseInt(document.getElementById('calories').value) || 0,
+                protein: parseInt(document.getElementById('protein').value) || 0,
+                carbs: parseInt(document.getElementById('carbs').value) || 0,
+                fats: parseInt(document.getElementById('fats').value) || 0,
+                ingredients: document.getElementById('ingredients').value.split('\n').filter(x => x.trim()),
+                instructions: document.getElementById('instructions').value.split('\n').filter(x => x.trim()),
+                owner_id: currentUser.id
+            };
+
+            const { error } = id
+                ? await supabase.from('gym_recipes').update(data).eq('id', id)
+                : await supabase.from('gym_recipes').insert([data]);
+
+            if (error) return showPopup('Error de Conexión', error.message, 'error');
+
+            modal.style.display = 'none';
+            showPopup('Guardado', 'La receta se ha actualizado en la biblioteca global.');
+            loadRecipes();
+        };
+
+        loadRecipes();
     </script>
 </body>
 </html>

@@ -3,179 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Equipo - Core Panel</title>
+    <title>Gestión de Equipo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-    </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
     <nav id="main-nav"></nav>
 
-    <div class="flex flex-col lg:flex-row">
-        <!-- Sidebar / Alta de Entrenador -->
-        <aside class="w-full lg:w-[400px] bg-white border-r border-slate-200 min-h-screen p-8 lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] overflow-y-auto">
-            <div class="mb-8">
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">Alta de Personal</h2>
-                <p class="text-slate-500 text-sm">Registra nuevos profesionales en tu equipo.</p>
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Equipo</h1>
+                <p class="text-slate-500 font-medium mt-1">Directorio de entrenadores y personal profesional.</p>
             </div>
+            <button id="btn-nuevo-entrenador" class="btn btn-primary px-6 py-3 uppercase tracking-widest text-xs font-black shadow-lg shadow-blue-600/20">
+                <i class="fas fa-plus mr-2"></i> Nuevo Perfil
+            </button>
+        </header>
 
-            <form id="trainer-form" class="space-y-6">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Nombre Completo</label>
-                    <input type="text" id="name" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="Ej: Carlos Méndez">
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Especialidad</label>
-                    <input type="text" id="specialty" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="Ej: Especialista en Rendimiento">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Rating (0-5)</label>
-                        <input type="number" step="0.1" id="rating" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="5.0">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Contacto</label>
-                        <input type="text" id="contact_info" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="+52 ...">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Fotografía</label>
-                    <input type="file" id="image" accept="image/*" class="w-full text-xs text-slate-400 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:uppercase file:bg-slate-900 file:text-white hover:file:bg-blue-600 transition-all cursor-pointer">
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Biografía</label>
-                    <textarea id="bio" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm font-medium resize-none" placeholder="Resumen de experiencia..."></textarea>
-                </div>
-
-                <button type="submit" id="submit-btn" class="w-full py-5 bg-slate-900 text-white rounded-[24px] font-bold uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95">
-                    <span id="btn-text">Agregar al Equipo</span>
-                    <span id="btn-loading" class="hidden"><i class="fas fa-circle-notch animate-spin mr-2"></i> Guardando...</span>
-                </button>
-            </form>
-        </aside>
-
-        <!-- Main View / List -->
-        <main class="flex-grow p-8 lg:p-12">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
-                <h2 class="text-3xl font-bold text-slate-900">Equipo Profesional</h2>
-                <div class="flex items-center text-xs font-bold text-slate-400 uppercase tracking-widest bg-white px-4 py-2 rounded-xl border border-slate-200">
-                    <span id="trainer-count" class="text-blue-600 mr-2">0</span> Integrantes
-                </div>
+        <div id="trainers-grid" class="admin-grid animate-fade">
+            <!-- Cargando -->
+            <div class="card flex flex-col items-center justify-center py-20 text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                <span class="text-sm font-black uppercase tracking-widest">Sincronizando equipo...</span>
             </div>
+        </div>
 
-            <div id="trainers-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
-        </main>
-    </div>
+        <!-- Trainer Modal -->
+        <div id="modal-entrenador" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 overflow-y-auto">
+            <div class="card bg-white w-full max-w-2xl p-10 shadow-2xl animate-fade my-10">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 id="modal-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase">Perfil Profesional</h2>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="trainer-form" class="space-y-8">
+                    <input type="hidden" id="trainer-id">
+
+                    <div class="flex flex-col items-center mb-10">
+                        <div id="drop-zone" class="w-32 h-32 rounded-full border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center cursor-pointer hover:border-blue-400 transition-all relative group overflow-hidden">
+                            <img id="image-preview" src="" class="w-full h-full object-cover rounded-full hidden">
+                            <div id="upload-placeholder" class="text-center">
+                                <i class="fas fa-camera text-2xl text-slate-300"></i>
+                                <span class="block text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Foto</span>
+                            </div>
+                            <input type="file" id="image-input" class="hidden" accept="image/*">
+                        </div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">Imagen de Perfil</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre del Profesional</label>
+                            <input type="text" id="full_name" required class="input" placeholder="Ej: Coach Manuel">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Especialidad Principal</label>
+                            <input type="text" id="specialty" required class="input" placeholder="Ej: Powerlifting, Yoga">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Biografía Corta / Experiencia</label>
+                            <textarea id="bio" rows="4" class="input resize-none" placeholder="Breve descripción del perfil..."></textarea>
+                        </div>
+                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Enlace WhatsApp / Contacto</label>
+                                <input type="text" id="whatsapp_url" class="input" placeholder="https://wa.me/...">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Enlace Instagram / Portfolio</label>
+                                <input type="text" id="instagram_url" class="input" placeholder="@usuario">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="submit" id="submit-btn" class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                            Guardar Perfil de Entrenador
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
 
     <script type="module">
-        import { supabase, uploadToCloudinary, renderNavbar, Auth, showPopup, showConfirm } from './js/utils.js';
+        import { supabase, renderNavbar, Auth, showPopup, uploadToCloudinary, setupDragAndDrop, showConfirm } from './js/utils.js';
         renderNavbar();
-
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
-        if (currentUser) {
-            initPage();
+
+        let imageUrl = '';
+        let loadedTrainers = [];
+
+        async function loadTrainers() {
+            const { data, error } = await supabase.from('gym_trainers').select('*').order('created_at', { ascending: false });
+            if (error) return console.error(error);
+            loadedTrainers = data;
+            renderTrainers(data);
         }
 
-        function initPage() {
-        const form = document.getElementById('trainer-form');
-        const list = document.getElementById('trainers-list');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submit-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnLoading = document.getElementById('btn-loading');
-
-            submitBtn.disabled = true;
-            btnText.classList.add('hidden');
-            btnLoading.classList.remove('hidden');
-
-            try {
-                const name = document.getElementById('name').value;
-                const specialty = document.getElementById('specialty').value;
-                const rating = document.getElementById('rating').value;
-                const contact_info = document.getElementById('contact_info').value;
-                const bio = document.getElementById('bio').value;
-                const imageFile = document.getElementById('image').files[0];
-
-                let imageUrl = '';
-                if (imageFile) imageUrl = await uploadToCloudinary(imageFile);
-
-                // SYNC
-                await supabase.rpc('create_profile_if_missing', {
-                    p_id: currentUser.id,
-                    p_email: currentUser.email,
-                    p_full_name: currentUser.full_name || '',
-                    p_domain: currentUser.domain || null,
-                    p_role: currentUser.role || 'gym-owner',
-                    p_owner_id: currentUser.owner_id || null
-                });
-
-                const { error } = await supabase.from('gym_trainers').insert([{
-                    name, specialty, rating, contact_info, bio, image_url: imageUrl,
-                    owner_id: currentUser.id
-                }]);
-
-                if (error) throw error;
-                await showPopup('Éxito', 'Profesional agregado correctamente');
-                location.reload();
-            } catch (err) {
-                await showPopup('Error', err.message, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                btnText.classList.remove('hidden');
-                btnLoading.classList.add('hidden');
-            }
-        });
-
-        async function fetchTrainers() {
-            let query = supabase.from('gym_trainers').select('*').order('created_at', { ascending: false });
-
-            if (currentUser.role === 'gym-owner') {
-                query = query.eq('owner_id', currentUser.id);
+        function renderTrainers(trainers) {
+            const grid = document.getElementById('trainers-grid');
+            if (trainers.length === 0) {
+                grid.innerHTML = '<div class="card col-span-full py-20 text-center text-slate-400 font-medium">No has registrado entrenadores en tu equipo.</div>';
+                return;
             }
 
-            const { data, error } = await query;
-            if (error) return;
-
-            document.getElementById('trainer-count').innerText = data.length;
-
-            list.innerHTML = data.map(t => `
-                <div class="bg-white rounded-[32px] shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center group hover:shadow-xl transition-all duration-300">
-                    <div class="w-24 h-24 rounded-3xl border-4 border-slate-50 overflow-hidden mb-6 shadow-md">
-                        <img src="${t.image_url || 'https://images.unsplash.com/photo-1597347343908-2937e7dcc560?auto=format&fit=crop&q=80&w=200'}"
-                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+            grid.innerHTML = trainers.map(t => `
+                <div class="card group hover:border-blue-500 transition-all text-center flex flex-col items-center py-10 animate-fade">
+                    <div class="w-24 h-24 rounded-full border-4 border-slate-50 overflow-hidden mb-6 bg-slate-100 shadow-sm relative">
+                        <img src="${t.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80'}"
+                             class="w-full h-full object-cover">
                     </div>
-                    <h4 class="font-bold text-lg text-slate-900 mb-1">${t.name}</h4>
-                    <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4">${t.specialty}</span>
-                    <div class="flex items-center text-yellow-400 text-xs mb-6">
-                        <i class="fas fa-star mr-1"></i> ${t.rating || 5.0}
+                    <h3 class="text-xl font-bold text-slate-900 mb-1">${t.full_name}</h3>
+                    <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">${t.specialty}</p>
+                    <p class="text-xs text-slate-500 mb-8 line-clamp-2 px-4">${t.bio || 'Sin descripción'}</p>
+
+                    <div class="mt-auto flex gap-3 pt-6 border-t border-slate-100 w-full px-6">
+                        <button onclick="editTrainer('${t.id}')" class="flex-grow btn bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest py-2">
+                            Editar
+                        </button>
+                        <button onclick="deleteTrainer('${t.id}')" class="btn bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all w-10 h-10">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
-                    <p class="text-xs text-slate-500 mb-8 line-clamp-3 leading-relaxed">${t.bio || 'Sin biografía disponible.'}</p>
-                    <button onclick="deleteTrainer(${t.id})" class="text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors uppercase tracking-widest mt-auto border-t border-slate-50 pt-6 w-full">
-                        <i class="fas fa-user-minus mr-2"></i> Eliminar
-                    </button>
                 </div>
             `).join('');
         }
 
-        window.deleteTrainer = async (id) => {
-            if (await showConfirm('¿Eliminar registro?', 'Esta acción no se puede deshacer.')) {
-                await supabase.from('gym_trainers').delete().eq('id', id);
-                fetchTrainers();
+        const modal = document.getElementById('modal-entrenador');
+        const form = document.getElementById('trainer-form');
+        const imagePreview = document.getElementById('image-preview');
+        const placeholder = document.getElementById('upload-placeholder');
+
+        document.getElementById('btn-nuevo-entrenador').onclick = () => {
+            form.reset();
+            document.getElementById('trainer-id').value = '';
+            imageUrl = '';
+            imagePreview.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            document.getElementById('modal-title').innerText = 'Nuevo Entrenador';
+            modal.style.display = 'flex';
+        };
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+        setupDragAndDrop(
+            document.getElementById('drop-zone'),
+            document.getElementById('image-input'),
+            async (file) => {
+                const btn = document.getElementById('submit-btn');
+                btn.disabled = true;
+                btn.innerText = 'PROCESANDO...';
+
+                imageUrl = await uploadToCloudinary(file);
+                imagePreview.src = imageUrl;
+                imagePreview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+
+                btn.disabled = false;
+                btn.innerText = 'GUARDAR PERFIL';
             }
-        }
-        fetchTrainers();
-        }
+        );
+
+        window.editTrainer = (id) => {
+            const t = loadedTrainers.find(x => x.id === id);
+            if (!t) return;
+
+            document.getElementById('trainer-id').value = t.id;
+            document.getElementById('full_name').value = t.full_name;
+            document.getElementById('specialty').value = t.specialty;
+            document.getElementById('bio').value = t.bio || '';
+            document.getElementById('whatsapp_url').value = t.whatsapp_url || '';
+            document.getElementById('instagram_url').value = t.instagram_url || '';
+
+            if (t.image_url) {
+                imageUrl = t.image_url;
+                imagePreview.src = t.image_url;
+                imagePreview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+
+            document.getElementById('modal-title').innerText = 'Modificar Perfil';
+            modal.style.display = 'flex';
+        };
+
+        window.deleteTrainer = async (id) => {
+            if (await showConfirm('Eliminar Perfil', '¿Seguro que deseas eliminar este profesional de tu equipo?')) {
+                const { error } = await supabase.from('gym_trainers').delete().eq('id', id);
+                if (error) return showPopup('Error', error.message, 'error');
+                loadTrainers();
+            }
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('trainer-id').value;
+            const data = {
+                full_name: document.getElementById('full_name').value,
+                specialty: document.getElementById('specialty').value,
+                bio: document.getElementById('bio').value,
+                image_url: imageUrl,
+                whatsapp_url: document.getElementById('whatsapp_url').value,
+                instagram_url: document.getElementById('instagram_url').value,
+                owner_id: currentUser.id
+            };
+
+            const { error } = id
+                ? await supabase.from('gym_trainers').update(data).eq('id', id)
+                : await supabase.from('gym_trainers').insert([data]);
+
+            if (error) return showPopup('Error', error.message, 'error');
+
+            modal.style.display = 'none';
+            showPopup('Guardado', 'El perfil profesional se ha actualizado correctamente.');
+            loadTrainers();
+        };
+
+        loadTrainers();
     </script>
 </body>
 </html>
