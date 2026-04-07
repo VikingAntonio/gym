@@ -1,12 +1,19 @@
 POR QUÉ FALLÓ:
-El error "Database error updating user" ocurrió por un fallo en el trigger de sincronización al intentar crear el perfil en la tabla de usuarios. He implementado una versión "Ultra Robusta" que no bloquea el registro y se auto-repara.
+El error "Database error updating user" ocurrió por un fallo en el trigger de sincronización. Además, el error "function name is not unique" al intentar arreglarlo sucedió porque había múltiples versiones de la misma función con distintos parámetros en tu base de datos, lo que causaba un conflicto.
 
-NUEVA ACTUALIZACIÓN: CAMBIO DE NOMBRE DE TABLA Y MULTI-NEGOCIO
-Siguiendo tus instrucciones, la tabla `gym_users` ha sido renombrada a `wisbe_users` para permitir que el sistema sea escalable a otros negocios (salones, construcción, etc.). Se ha añadido el campo `business_unit` para diferenciar estos registros, el cual solo es visible para Administradores Globales.
+SOLUCIÓN DEFINITIVA:
+1. He limpiado todas las versiones antiguas de la función para eliminar el conflicto de "nombre no único".
+2. He renombrado la tabla `gym_users` a `wisbe_users` y añadido el campo `business_unit` (visible solo para admins) para soportar múltiples tipos de negocio.
+3. El sistema de registro ahora es "Ultra Robusto": si falla la creación del perfil, el registro de Supabase Auth sigue adelante y el sistema repara el perfil automáticamente al primer login.
 
-SQL DE MIGRACIÓN Y REPARACIÓN (Copia y pega todo esto en Supabase):
+SQL DE MIGRACIÓN Y REPARACIÓN (Copia y pega TODO esto en Supabase):
 
--- 1. Renombrar la tabla principal y añadir columna de unidad de negocio
+-- 1. Limpieza de funciones duplicadas para evitar "function name is not unique"
+DROP FUNCTION IF EXISTS public.create_profile_if_missing(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS public.create_profile_if_missing(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS public.create_profile_if_missing(UUID, TEXT, TEXT, TEXT, TEXT, UUID);
+
+-- 2. Renombrar la tabla principal y añadir columna de unidad de negocio
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'gym_users') THEN
@@ -15,7 +22,7 @@ BEGIN
 END $$;
 ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS business_unit TEXT DEFAULT 'gym';
 
--- 2. Actualizar Función de Seguridad is_admin()
+-- 3. Actualizar Función de Seguridad is_admin()
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -27,7 +34,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 3. Función de Sincronización Reforzada (wisbe_users)
+-- 4. Función de Sincronización Reforzada (wisbe_users)
 CREATE OR REPLACE FUNCTION public.create_profile_if_missing(
     p_id TEXT,
     p_email TEXT,
@@ -44,7 +51,6 @@ DECLARE
     v_profile RECORD;
 BEGIN
     SET search_path = public;
-
     BEGIN
         v_id := p_id::UUID;
         v_owner_id := NULLIF(p_owner_id, '')::UUID;
@@ -52,11 +58,9 @@ BEGIN
         v_id := NULL;
         v_owner_id := NULL;
     END;
-
     IF v_id IS NULL THEN RETURN NULL; END IF;
 
     DELETE FROM public.wisbe_users WHERE (email = p_email AND id != v_id) OR (id = v_id AND email != p_email);
-
     v_username := split_part(p_email, '@', 1) || '_' || substr(v_id::text, 1, 8);
 
     INSERT INTO public.wisbe_users (id, email, username, full_name, domain, role, owner_id, business_unit)
@@ -73,7 +77,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 4. Trigger Ultra-Seguro actualizado
+-- 5. Trigger Ultra-Seguro
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
@@ -94,34 +98,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 5. Re-vincular Trigger y Políticas (Supabase suele mantenerlas al renombrar, pero aseguramos)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Actualizar políticas de otras tablas que referenciaban wisbe_users
+-- 6. Actualizar políticas de otras tablas
 DO $$
-DECLARE
-    pol RECORD;
+DECLARE pol RECORD;
 BEGIN
-    -- Borrar y recrear políticas que usan subconsultas a la tabla de usuarios
     DROP POLICY IF EXISTS "Owners and staff can manage recipes" ON public.gym_recipes;
     CREATE POLICY "Owners and staff can manage recipes" ON public.gym_recipes FOR ALL USING (
-        (auth.uid())::uuid = owner_id OR
-        EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_recipes.owner_id)
+        (auth.uid())::uuid = owner_id OR EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_recipes.owner_id)
     );
-
     DROP POLICY IF EXISTS "Owners and staff can manage routines" ON public.gym_routines;
     CREATE POLICY "Owners and staff can manage routines" ON public.gym_routines FOR ALL USING (
-        (auth.uid())::uuid = owner_id OR
-        EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_routines.owner_id)
+        (auth.uid())::uuid = owner_id OR EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_routines.owner_id)
     );
-
     DROP POLICY IF EXISTS "Owners and staff can manage trainers" ON public.gym_trainers;
     CREATE POLICY "Owners and staff can manage trainers" ON public.gym_trainers FOR ALL USING (
-        (auth.uid())::uuid = owner_id OR
-        EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_trainers.owner_id)
+        (auth.uid())::uuid = owner_id OR EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_trainers.owner_id)
     );
 END $$;
 

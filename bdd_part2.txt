@@ -4,8 +4,7 @@ CREATE OR REPLACE FUNCTION public.create_profile_if_missing(
     p_full_name TEXT DEFAULT '',
     p_domain TEXT DEFAULT NULL,
     p_role TEXT DEFAULT 'gym-owner',
-    p_owner_id TEXT DEFAULT NULL,
-    p_business_unit TEXT DEFAULT 'gym'
+    p_owner_id TEXT DEFAULT NULL
 ) RETURNS JSONB AS $$
 DECLARE
     v_id UUID;
@@ -31,21 +30,20 @@ BEGIN
     -- Limpieza preventiva ultra agresiva para resolver colisiones de email/id
     -- Esto elimina registros que tengan el mismo email pero distinto ID, o mismo ID pero distinto email
     -- que el que viene de Supabase Auth, asegurando una sincronización 1:1 limpia.
-    DELETE FROM public.wisbe_users WHERE email = p_email AND id != v_id;
-    DELETE FROM public.wisbe_users WHERE id = v_id AND email != p_email;
+    DELETE FROM public.gym_users WHERE email = p_email AND id != v_id;
+    DELETE FROM public.gym_users WHERE id = v_id AND email != p_email;
 
     v_username := split_part(p_email, '@', 1) || '_' || substr(v_id::text, 1, 8);
 
-    INSERT INTO public.wisbe_users (id, email, username, full_name, domain, role, owner_id, business_unit)
-    VALUES (v_id, p_email, v_username, p_full_name, p_domain, p_role, v_owner_id, p_business_unit)
+    INSERT INTO public.gym_users (id, email, username, full_name, domain, role, owner_id)
+    VALUES (v_id, p_email, v_username, p_full_name, p_domain, p_role, v_owner_id)
     ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
-        full_name = COALESCE(NULLIF(EXCLUDED.full_name, ''), public.wisbe_users.full_name),
-        domain = COALESCE(NULLIF(EXCLUDED.domain, ''), public.wisbe_users.domain),
-        owner_id = COALESCE(EXCLUDED.owner_id, public.wisbe_users.owner_id),
-        business_unit = COALESCE(EXCLUDED.business_unit, public.wisbe_users.business_unit);
+        full_name = COALESCE(NULLIF(EXCLUDED.full_name, ''), public.gym_users.full_name),
+        domain = COALESCE(NULLIF(EXCLUDED.domain, ''), public.gym_users.domain),
+        owner_id = COALESCE(EXCLUDED.owner_id, public.gym_users.owner_id);
 
-    SELECT * INTO v_profile FROM public.wisbe_users WHERE id = v_id;
+    SELECT * INTO v_profile FROM public.gym_users WHERE id = v_id;
     RETURN row_to_json(v_profile)::jsonb;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -63,8 +61,7 @@ BEGIN
     COALESCE(new.raw_user_meta_data->>'full_name', ''),
     NULLIF(new.raw_user_meta_data->>'domain', ''),
     COALESCE(new.raw_user_meta_data->>'role', 'gym-owner'),
-    new.raw_user_meta_data->>'owner_id',
-    COALESCE(new.raw_user_meta_data->>'business_unit', 'gym')
+    new.raw_user_meta_data->>'owner_id'
   );
   RETURN new;
 EXCEPTION WHEN OTHERS THEN
