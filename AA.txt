@@ -9,7 +9,7 @@ RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
     SELECT 1
-    FROM public.wisbe_users
+    FROM public.gym_users
     WHERE id = auth.uid() AND role = 'gym-admin'
   );
 END;
@@ -17,28 +17,28 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 2. Asignar el rol de Administrador Global al usuario solicitado
 -- Esto convierte a Frank (designerantoniomontiel@gmail.com) en Admin Global.
-UPDATE public.wisbe_users
+UPDATE public.gym_users
 SET role = 'gym-admin'
 WHERE email ILIKE 'designerantoniomontiel@gmail.com';
 
--- 3. Actualizar políticas de wisbe_users (PROTECCIÓN DE ESCALACIÓN DE PRIVILEGIOS)
+-- 3. Actualizar políticas de gym_users (PROTECCIÓN DE ESCALACIÓN DE PRIVILEGIOS)
 DO $$
 DECLARE
     pol RECORD;
 BEGIN
-    FOR pol IN (SELECT policyname FROM pg_policies WHERE schemaname = 'public' AND tablename = 'wisbe_users') LOOP
-        EXECUTE format('DROP POLICY IF EXISTS %I ON public.wisbe_users', pol.policyname);
+    FOR pol IN (SELECT policyname FROM pg_policies WHERE schemaname = 'public' AND tablename = 'gym_users') LOOP
+        EXECUTE format('DROP POLICY IF EXISTS %I ON public.gym_users', pol.policyname);
     END LOOP;
 END $$;
 
 -- LECTURA: Solo autenticados. Admins ven todo, Owners ven staff/sí mismos, Socios ven sí mismos.
-CREATE POLICY "Users can view their own profile" ON public.wisbe_users FOR SELECT TO authenticated USING (auth.uid() = id);
-CREATE POLICY "Owners can view their staff" ON public.wisbe_users FOR SELECT TO authenticated USING (auth.uid() = owner_id);
-CREATE POLICY "Admins can view everyone" ON public.wisbe_users FOR SELECT TO authenticated USING (public.is_admin());
+CREATE POLICY "Users can view their own profile" ON public.gym_users FOR SELECT TO authenticated USING (auth.uid() = id);
+CREATE POLICY "Owners can view their staff" ON public.gym_users FOR SELECT TO authenticated USING (auth.uid() = owner_id);
+CREATE POLICY "Admins can view everyone" ON public.gym_users FOR SELECT TO authenticated USING (public.is_admin());
 
 -- ESCRITURA: Solo Admins pueden Insertar, Actualizar o Borrar (Satisface "Owner no puede editar solo ver")
 -- Esto también previene que Socios/Owners se cambien el rol a sí mismos (Escalación de privilegios).
-CREATE POLICY "Only admins can manage users" ON public.wisbe_users FOR ALL TO authenticated USING (public.is_admin());
+CREATE POLICY "Only admins can manage users" ON public.gym_users FOR ALL TO authenticated USING (public.is_admin());
 
 -- 4. Actualizar políticas de gym_recipes
 DO $$
@@ -54,7 +54,7 @@ CREATE POLICY "Anyone can view recipes" ON public.gym_recipes FOR SELECT USING (
 CREATE POLICY "Admins can manage all recipes" ON public.gym_recipes FOR ALL TO authenticated USING (public.is_admin());
 CREATE POLICY "Owners and staff can manage recipes" ON public.gym_recipes FOR ALL USING (
     (auth.uid())::uuid = owner_id OR
-    EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_recipes.owner_id)
+    EXISTS (SELECT 1 FROM public.gym_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_recipes.owner_id)
 );
 
 -- 5. Actualizar políticas de gym_routines
@@ -71,7 +71,7 @@ CREATE POLICY "Anyone can view routines" ON public.gym_routines FOR SELECT USING
 CREATE POLICY "Admins can manage all routines" ON public.gym_routines FOR ALL TO authenticated USING (public.is_admin());
 CREATE POLICY "Owners and staff can manage routines" ON public.gym_routines FOR ALL USING (
     (auth.uid())::uuid = owner_id OR
-    EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_routines.owner_id)
+    EXISTS (SELECT 1 FROM public.gym_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_routines.owner_id)
 );
 
 -- 6. Actualizar políticas de gym_trainers
@@ -88,8 +88,8 @@ CREATE POLICY "Anyone can view trainers" ON public.gym_trainers FOR SELECT USING
 CREATE POLICY "Admins can manage all trainers" ON public.gym_trainers FOR ALL TO authenticated USING (public.is_admin());
 CREATE POLICY "Owners and staff can manage trainers" ON public.gym_trainers FOR ALL USING (
     (auth.uid())::uuid = owner_id OR
-    EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_trainers.owner_id)
+    EXISTS (SELECT 1 FROM public.gym_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_trainers.owner_id)
 );
 
 -- Verificación:
--- SELECT email, role FROM wisbe_users WHERE email ILIKE 'designerantoniomontiel%';
+-- SELECT email, role FROM gym_users WHERE email ILIKE 'designerantoniomontiel%';

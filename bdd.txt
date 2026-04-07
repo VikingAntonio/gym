@@ -4,24 +4,24 @@
 -- Copia y pega este código en el SQL Editor de Supabase.
 
 -- 1. Asegurar que la política de lectura sea pública para que todos vean la lista (necesario para fetchUsers)
-DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.wisbe_users;
-CREATE POLICY "Public profiles are viewable by everyone" ON public.wisbe_users FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.gym_users;
+CREATE POLICY "Public profiles are viewable by everyone" ON public.gym_users FOR SELECT USING (true);
 
 -- 2. Asegurar que no haya conflictos con la política de Admin si ya se ejecutó antes
-DROP POLICY IF EXISTS "Admins have full access" ON public.wisbe_users;
+DROP POLICY IF EXISTS "Admins have full access" ON public.gym_users;
 
 -- 3. Crear la nueva política para permitir a los admins gestionar todo
--- Nota: Usamos public.is_admin() para evitar recursividad infinita en RLS
-CREATE POLICY "Admins have full access" ON public.wisbe_users
+-- Nota: Usamos una subconsulta simple para evitar recursividad infinita en RLS
+CREATE POLICY "Admins have full access" ON public.gym_users
 FOR ALL
 TO authenticated
-USING ( public.is_admin() );
+USING ( (SELECT role FROM public.gym_users WHERE id = auth.uid()) = 'gym-admin' );
 
 -- 4. Asignar el rol de Administrador Global al usuario solicitado
 -- Usamos ILIKE y trim() para mayor flexibilidad en la búsqueda del correo.
-UPDATE public.wisbe_users
+UPDATE public.gym_users
 SET role = 'gym-admin'
 WHERE email ILIKE 'designerantoniomontiel@gmail.com';
 
 -- 5. Verificación rápida (Copia y pega esto para confirmar en el editor):
--- SELECT email, role, full_name FROM wisbe_users WHERE email ILIKE '%designerantoniomontiel%';
+-- SELECT email, role, full_name FROM gym_users WHERE email ILIKE '%designerantoniomontiel%';
