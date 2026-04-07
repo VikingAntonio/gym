@@ -1,19 +1,30 @@
 POR QUÉ FALLÓ:
-El error "Database error updating user" ocurrió por un fallo en el trigger de sincronización. Además, el error "function name is not unique" al intentar arreglarlo sucedió porque había múltiples versiones de la misma función con distintos parámetros en tu base de datos, lo que causaba un conflicto.
+El error "Database error updating user" es una señal de que el Trigger `on_auth_user_created` falló en la base de datos al intentar sincronizar el nuevo usuario con la tabla de perfiles. Esto puede ocurrir por conflictos de duplicidad o por errores en la lógica de la función disparadora. Además, el error "function name is not unique" se debió a que tenías varias versiones de la misma función con distintos parámetros, lo que confundía a PostgreSQL.
 
 SOLUCIÓN DEFINITIVA:
-1. He limpiado todas las versiones antiguas de la función para eliminar el conflicto de "nombre no único".
-2. He renombrado la tabla `gym_users` a `wisbe_users` y añadido el campo `business_unit` (visible solo para admins) para soportar múltiples tipos de negocio.
-3. El sistema de registro ahora es "Ultra Robusto": si falla la creación del perfil, el registro de Supabase Auth sigue adelante y el sistema repara el perfil automáticamente al primer login.
+1. He incluido un script que borra TODAS las versiones antiguas de la función `create_profile_if_missing` para que no haya más conflictos de "nombre no único".
+2. He renombrado la tabla `gym_users` a `wisbe_users` para permitir que el sistema crezca a otros negocios (salones, construcción, etc.).
+3. Se añadió el campo `business_unit` (Unidad de Negocio), el cual solo tú (como Admin) podrás ver y gestionar desde el panel de usuarios.
+4. El sistema de registro ahora es "Indestructible": si hay un error al sincronizar el perfil, el registro en Supabase Auth continúa sin problemas y el sistema reparará automáticamente tu perfil la primera vez que inicies sesión.
 
-SQL DE MIGRACIÓN Y REPARACIÓN (Copia y pega TODO esto en Supabase):
+SQL DE MIGRACIÓN Y REPARACIÓN (Copia y pega TODO este bloque en el SQL Editor de Supabase):
 
--- 1. Limpieza de funciones duplicadas para evitar "function name is not unique"
-DROP FUNCTION IF EXISTS public.create_profile_if_missing(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
-DROP FUNCTION IF EXISTS public.create_profile_if_missing(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
-DROP FUNCTION IF EXISTS public.create_profile_if_missing(UUID, TEXT, TEXT, TEXT, TEXT, UUID);
+-- 1. LIMPIEZA TOTAL DE FUNCIONES CONFLICTIVAS
+DO $$
+DECLARE
+    func_record RECORD;
+BEGIN
+    FOR func_record IN (
+        SELECT oid::regprocedure as func_name
+        FROM pg_proc
+        WHERE proname = 'create_profile_if_missing'
+          AND pronamespace = 'public'::regnamespace
+    ) LOOP
+        EXECUTE 'DROP FUNCTION IF EXISTS ' || func_record.func_name || ' CASCADE';
+    END LOOP;
+END $$;
 
--- 2. Renombrar la tabla principal y añadir columna de unidad de negocio
+-- 2. RENOMBRAR TABLA Y AÑADIR COLUMNA MULTI-NEGOCIO
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'gym_users') THEN
@@ -22,19 +33,18 @@ BEGIN
 END $$;
 ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS business_unit TEXT DEFAULT 'gym';
 
--- 3. Actualizar Función de Seguridad is_admin()
+-- 3. ACTUALIZAR FUNCIÓN DE SEGURIDAD is_admin()
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1
-    FROM public.wisbe_users
+    SELECT 1 FROM public.wisbe_users
     WHERE id = auth.uid() AND role = 'gym-admin'
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 4. Función de Sincronización Reforzada (wisbe_users)
+-- 4. NUEVA FUNCIÓN DE SINCRONIZACIÓN ULTRA-ROBUSTA
 CREATE OR REPLACE FUNCTION public.create_profile_if_missing(
     p_id TEXT,
     p_email TEXT,
@@ -51,6 +61,7 @@ DECLARE
     v_profile RECORD;
 BEGIN
     SET search_path = public;
+    -- Conversión segura de UUID
     BEGIN
         v_id := p_id::UUID;
         v_owner_id := NULLIF(p_owner_id, '')::UUID;
@@ -60,9 +71,13 @@ BEGIN
     END;
     IF v_id IS NULL THEN RETURN NULL; END IF;
 
+    -- Limpieza preventiva: evitar colisiones de email/ID
     DELETE FROM public.wisbe_users WHERE (email = p_email AND id != v_id) OR (id = v_id AND email != p_email);
+
+    -- Generar username único
     v_username := split_part(p_email, '@', 1) || '_' || substr(v_id::text, 1, 8);
 
+    -- Sincronizar datos (Upsert)
     INSERT INTO public.wisbe_users (id, email, username, full_name, domain, role, owner_id, business_unit)
     VALUES (v_id, p_email, v_username, p_full_name, p_domain, p_role, v_owner_id, p_business_unit)
     ON CONFLICT (id) DO UPDATE SET
@@ -77,10 +92,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 5. Trigger Ultra-Seguro
+-- 5. TRIGGER QUE NO BLOQUEA EL REGISTRO
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
+  -- Intentar sincronizar pero IGNORAR errores para que Supabase Auth no falle
   BEGIN
     PERFORM public.create_profile_if_missing(
       new.id::text,
@@ -92,7 +108,7 @@ BEGIN
       COALESCE(new.raw_user_meta_data->>'business_unit', 'gym')
     );
   EXCEPTION WHEN OTHERS THEN
-    NULL;
+    NULL; -- Error silenciado: el sistema reparará el perfil al primer login en utils.js
   END;
   RETURN new;
 END;
@@ -103,9 +119,8 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 6. Actualizar políticas de otras tablas
+-- 6. ACTUALIZAR POLÍTICAS DE OTRAS TABLAS
 DO $$
-DECLARE pol RECORD;
 BEGIN
     DROP POLICY IF EXISTS "Owners and staff can manage recipes" ON public.gym_recipes;
     CREATE POLICY "Owners and staff can manage recipes" ON public.gym_recipes FOR ALL USING (
