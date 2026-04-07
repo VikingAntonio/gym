@@ -1,0 +1,27 @@
+-- ######################################################
+-- # CONFIGURACIÓN DE ACCESO GLOBAL PARA WISBE (Azul.txt) #
+-- ######################################################
+-- Este script otorga permisos CRUD completos a los usuarios 'gym-admin'
+-- sobre todos los perfiles, recetas, rutinas y equipo.
+
+DO $$
+BEGIN
+    -- 1. Permisos para wisbe_users
+    DROP POLICY IF EXISTS "Admins full" ON public.wisbe_users;
+    CREATE POLICY "Admins full" ON public.wisbe_users FOR ALL TO authenticated USING (public.is_admin());
+
+    DROP POLICY IF EXISTS "Users can insert their own profile" ON public.wisbe_users;
+    CREATE POLICY "Users can insert their own profile" ON public.wisbe_users FOR INSERT WITH CHECK (auth.uid() = id);
+
+    -- 2. Permisos para gym_recipes
+    DROP POLICY IF EXISTS "Admins manage all recipes" ON public.gym_recipes;
+    CREATE POLICY "Admins manage all recipes" ON public.gym_recipes FOR ALL TO authenticated USING (public.is_admin());
+
+    -- 3. Permisos para gym_routines
+    DROP POLICY IF EXISTS "Admins manage all routines" ON public.gym_routines;
+    CREATE POLICY "Admins manage all routines" ON public.gym_routines FOR ALL TO authenticated USING (public.is_admin());
+
+    -- 4. Permisos para gym_trainers
+    DROP POLICY IF EXISTS "Admins manage all trainers" ON public.gym_trainers;
+    CREATE POLICY "Admins manage all trainers" ON public.gym_trainers FOR ALL TO authenticated USING (public.is_admin());
+END $$;
