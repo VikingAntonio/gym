@@ -5,8 +5,8 @@
 -- para ver o crear tus recetas.
 
 -- 1. REPARAR TABLA DE USUARIOS (Solución al error del password null)
--- Como ahora usamos Supabase Auth, la columna password de gym_users debe ser opcional o eliminada.
-ALTER TABLE gym_users ALTER COLUMN password DROP NOT NULL;
+-- Como ahora usamos Supabase Auth, la columna password de wisbe_users debe ser opcional o eliminada.
+ALTER TABLE wisbe_users ALTER COLUMN password DROP NOT NULL;
 
 -- 2. ASEGURAR ESTRUCTURA DE TABLA RECETAS
 ALTER TABLE gym_recipes ADD COLUMN IF NOT EXISTS calories INTEGER DEFAULT 0;
@@ -44,7 +44,7 @@ GRANT ALL ON gym_recipes TO anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
 
 -- 7. SINCRONIZACIÓN MANUAL DE SEGURIDAD (EJECUTAR SI EL ERROR PERSISTE O SALE "OWNER_ID_FKEY")
--- Este código fuerza la creación de perfiles para usuarios existentes que falten en gym_users.
+-- Este código fuerza la creación de perfiles para usuarios existentes que falten en wisbe_users.
 -- ES LA SOLUCIÓN DEFINITIVA AL ERROR "violates foreign key constraint".
 DO $$
 DECLARE

@@ -137,7 +137,7 @@
 
             if (domain) {
                 // Fetch owner_id for this domain
-                const { data: userData, error: userError } = await supabase.from('gym_users')
+                const { data: userData, error: userError } = await supabase.from('wisbe_users')
                     .select('id')
                     .ilike('domain', domain.trim())
                     .eq('role', 'gym-owner')

@@ -54,7 +54,7 @@
 
             if (domain) {
                 const { data: userData } = await supabase
-                    .from('gym_users')
+                    .from('wisbe_users')
                     .select('id')
                     .ilike('domain', domain.trim())
                     .maybeSingle();

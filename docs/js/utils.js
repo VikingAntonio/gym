@@ -174,9 +174,9 @@ export const Auth = {
              throw new Error('DEBES CONFIRMAR TU EMAIL. Revisa tu bandeja de entrada.');
         }
 
-        // Fetch user profile from gym_users
+        // Fetch user profile from wisbe_users
         let { data: profile, error: profileError } = await supabase
-            .from('gym_users')
+            .from('wisbe_users')
             .select('*')
             .eq('id', data.user.id)
             .maybeSingle();
@@ -193,7 +193,8 @@ export const Auth = {
                     p_full_name: metadata.full_name || '',
                     p_domain: metadata.domain || null,
                     p_role: metadata.role || 'gym-owner',
-                    p_owner_id: metadata.owner_id || null
+                    p_owner_id: metadata.owner_id || null,
+                    p_business_unit: metadata.business_unit || 'gym'
                 });
 
             if (rpcError) {
@@ -241,7 +242,7 @@ export const Auth = {
 
         // Always fetch fresh profile to ensure role updates are reflected immediately
         const { data: freshProfile, error: profileError } = await supabase
-            .from('gym_users')
+            .from('wisbe_users')
             .select('*')
             .eq('id', session.user.id)
             .maybeSingle();
