@@ -96,12 +96,6 @@
                         </div>
                     </div>
 
-                    <div id="owner-group" class="hidden">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a</label>
-                        <select id="owner_id_select" class="input bg-white cursor-pointer">
-                            <option value="">Mis Rutinas</option>
-                        </select>
-                    </div>
 
                     <div class="pt-10 border-t border-slate-100 flex gap-6">
                         <button type="submit" id="submit-btn" class="flex-grow btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
@@ -114,33 +108,40 @@
     </main>
 
     <script type="module">
-        import { supabase, renderNavbar, Auth, showPopup, showConfirm } from './js/utils.js';
-        renderNavbar();
-        const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
-        const isAdmin = currentUser && currentUser.role === 'gym-admin';
+        import { supabase, renderNavbar, Auth, showPopup, showConfirm, renderAdminSidebar } from './js/utils.js';
 
+        let currentUser = null;
+        let isAdmin = false;
         let loadedRoutines = [];
         let exerciseData = [];
 
-        if (isAdmin) {
-            document.getElementById('owner-group').classList.remove('hidden');
-            loadOwners();
-        }
+        async function initPage() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+            if (!currentUser) return;
 
-        async function loadOwners() {
-            const { data, error } = await supabase
-                .from('wisbe_users')
-                .select('id, full_name, email')
-                .eq('role', 'gym-owner')
-                .order('full_name');
-            if (error) return console.error(error);
-            const select = document.getElementById('owner_id_select');
-            select.innerHTML = '<option value="">Mis Rutinas</option>' +
-                data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                renderAdminSidebar(() => loadRoutines());
+            }
+
+            await loadRoutines();
         }
 
         async function loadRoutines() {
-            const { data, error } = await supabase.from('gym_routines').select('*').order('created_at', { ascending: false });
+            let query = supabase.from('gym_routines').select('*');
+
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (selectedOwnerId) {
+                query = query.eq('owner_id', selectedOwnerId);
+            } else if (!isAdmin) {
+                query = query.eq('owner_id', currentUser.id);
+            } else {
+                query = query.eq('owner_id', currentUser.id);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
             if (error) return console.error(error);
             loadedRoutines = data;
             renderRoutines(data);
@@ -247,7 +248,7 @@
         }
 
         window.editRoutine = (id) => {
-            const r = loadedRoutines.find(x => x.id === id);
+            const r = loadedRoutines.find(x => x.id == id);
             if (!r) return;
 
             document.getElementById('routine-id').value = r.id;
@@ -261,10 +262,6 @@
             daysContainer.innerHTML = '';
             if (r.exercises && Array.isArray(r.exercises)) {
                 r.exercises.forEach(day => addDayUI(day));
-            }
-
-            if (isAdmin) {
-                document.getElementById('owner_id_select').value = r.owner_id || '';
             }
 
             document.getElementById('modal-title').innerText = 'Modificar Plan';
@@ -306,7 +303,7 @@
                 target_age_group: document.getElementById('target_age_group').value,
                 health_conditions: document.getElementById('health_conditions').value,
                 exercises: weeksData,
-                owner_id: isAdmin ? (document.getElementById('owner_id_select').value || currentUser.id) : currentUser.id
+                owner_id: isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id
             };
 
             const { error } = id
@@ -320,7 +317,7 @@
             loadRoutines();
         };
 
-        loadRoutines();
+        initPage();
     </script>
 </body>
 </html>
