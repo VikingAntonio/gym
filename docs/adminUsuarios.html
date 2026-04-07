@@ -87,12 +87,19 @@
                             </div>
                         </div>
                         <div id="business-group" class="hidden">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Unidad de Negocio (Admin)</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Unidad de Negocio</label>
                             <select id="business_unit" class="input bg-white cursor-pointer">
                                 <option value="gym">Gimnasio / Fitness</option>
                                 <option value="beauty">Salón de Belleza</option>
                                 <option value="construction">Construcción</option>
                                 <option value="freelance">Independiente</option>
+                                <option value="wisbe">Wisbe (Global)</option>
+                            </select>
+                        </div>
+                        <div id="owner-group" class="hidden">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Dueño Asociado (Owner)</label>
+                            <select id="owner_id_select" class="input bg-white cursor-pointer">
+                                <option value="">Sin Dueño (Global)</option>
                             </select>
                         </div>
                     </div>
@@ -113,11 +120,27 @@
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
 
         let loadedUsers = [];
+        let loadedOwners = [];
         const isAdmin = currentUser && currentUser.role === 'gym-admin';
 
         if (isAdmin) {
             document.getElementById('th-business').classList.remove('hidden');
             document.getElementById('business-group').classList.remove('hidden');
+            document.getElementById('owner-group').classList.remove('hidden');
+            loadOwners();
+        }
+
+        async function loadOwners() {
+            const { data, error } = await supabase
+                .from('wisbe_users')
+                .select('id, full_name, email')
+                .eq('role', 'gym-owner')
+                .order('full_name');
+            if (error) return console.error(error);
+            loadedOwners = data;
+            const select = document.getElementById('owner_id_select');
+            select.innerHTML = '<option value="">Sin Dueño (Global/Admin)</option>' +
+                data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
         }
 
         async function loadUsers() {
@@ -205,6 +228,7 @@
             document.getElementById('domain').value = user.domain || '';
             if (isAdmin) {
                 document.getElementById('business_unit').value = user.business_unit || 'gym';
+                document.getElementById('owner_id_select').value = user.owner_id || '';
             }
             document.getElementById('password-group').classList.add('hidden');
 
@@ -233,7 +257,7 @@
                 full_name: document.getElementById('full_name').value,
                 role: document.getElementById('role').value,
                 domain: document.getElementById('domain').value || null,
-                owner_id: currentUser.id,
+                owner_id: isAdmin ? (document.getElementById('owner_id_select').value || null) : currentUser.id,
                 business_unit: isAdmin ? document.getElementById('business_unit').value : 'gym'
             };
 
