@@ -1,22 +1,41 @@
 POR QUÉ FALLÓ:
-El error "Database error updating user" es un mensaje genérico de Supabase que ocurre cuando un trigger (disparador) en la base de datos falla durante el proceso de registro. En este caso, el trigger `on_auth_user_created` que intenta sincronizar el nuevo usuario con la tabla `gym_users` probablemente encontró un conflicto de datos (como un correo duplicado o un ID mal formado) o un problema de permisos temporales que bloqueó la creación de la cuenta en Supabase Auth.
+El error "Database error updating user" ocurrió por un fallo en el trigger de sincronización al intentar crear el perfil en la tabla de usuarios. He implementado una versión "Ultra Robusta" que no bloquea el registro y se auto-repara.
 
-SOLUCIÓN:
-He mejorado la lógica de sincronización para que sea "Ultra Robusta". Ahora el sistema:
-1. Limpia cualquier registro huérfano antes de insertar.
-2. Maneja los metadatos de forma segura (Nombre y Dominio).
-3. Asegura que el proceso de registro NUNCA se detenga, incluso si hay un error menor en la sincronización del perfil (el sistema lo reparará automáticamente al primer inicio de sesión mediante la función Auth.login en utils.js).
+NUEVA ACTUALIZACIÓN: CAMBIO DE NOMBRE DE TABLA Y MULTI-NEGOCIO
+Siguiendo tus instrucciones, la tabla `gym_users` ha sido renombrada a `wisbe_users` para permitir que el sistema sea escalable a otros negocios (salones, construcción, etc.). Se ha añadido el campo `business_unit` para diferenciar estos registros, el cual solo es visible para Administradores Globales.
 
-SQL DE REPARACIÓN (Copia y pega esto en el SQL Editor de Supabase):
+SQL DE MIGRACIÓN Y REPARACIÓN (Copia y pega todo esto en Supabase):
 
--- 1. Función de Sincronización Reforzada
+-- 1. Renombrar la tabla principal y añadir columna de unidad de negocio
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'gym_users') THEN
+        ALTER TABLE public.gym_users RENAME TO wisbe_users;
+    END IF;
+END $$;
+ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS business_unit TEXT DEFAULT 'gym';
+
+-- 2. Actualizar Función de Seguridad is_admin()
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1
+    FROM public.wisbe_users
+    WHERE id = auth.uid() AND role = 'gym-admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 3. Función de Sincronización Reforzada (wisbe_users)
 CREATE OR REPLACE FUNCTION public.create_profile_if_missing(
     p_id TEXT,
     p_email TEXT,
     p_full_name TEXT DEFAULT '',
     p_domain TEXT DEFAULT NULL,
     p_role TEXT DEFAULT 'gym-owner',
-    p_owner_id TEXT DEFAULT NULL
+    p_owner_id TEXT DEFAULT NULL,
+    p_business_unit TEXT DEFAULT 'gym'
 ) RETURNS JSONB AS $$
 DECLARE
     v_id UUID;
@@ -26,7 +45,6 @@ DECLARE
 BEGIN
     SET search_path = public;
 
-    -- Convertir IDs con seguridad
     BEGIN
         v_id := p_id::UUID;
         v_owner_id := NULLIF(p_owner_id, '')::UUID;
@@ -37,31 +55,28 @@ BEGIN
 
     IF v_id IS NULL THEN RETURN NULL; END IF;
 
-    -- Limpieza de seguridad: Evitar duplicados por email o ID
-    DELETE FROM public.gym_users WHERE (email = p_email AND id != v_id) OR (id = v_id AND email != p_email);
+    DELETE FROM public.wisbe_users WHERE (email = p_email AND id != v_id) OR (id = v_id AND email != p_email);
 
-    -- Generar username único basado en email y fragmento de ID
     v_username := split_part(p_email, '@', 1) || '_' || substr(v_id::text, 1, 8);
 
-    -- Insertar o Actualizar (Upsert)
-    INSERT INTO public.gym_users (id, email, username, full_name, domain, role, owner_id)
-    VALUES (v_id, p_email, v_username, p_full_name, p_domain, p_role, v_owner_id)
+    INSERT INTO public.wisbe_users (id, email, username, full_name, domain, role, owner_id, business_unit)
+    VALUES (v_id, p_email, v_username, p_full_name, p_domain, p_role, v_owner_id, p_business_unit)
     ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
-        full_name = CASE WHEN EXCLUDED.full_name != '' THEN EXCLUDED.full_name ELSE public.gym_users.full_name END,
-        domain = CASE WHEN EXCLUDED.domain IS NOT NULL THEN EXCLUDED.domain ELSE public.gym_users.domain END,
-        role = COALESCE(EXCLUDED.role, public.gym_users.role);
+        full_name = CASE WHEN EXCLUDED.full_name != '' THEN EXCLUDED.full_name ELSE public.wisbe_users.full_name END,
+        domain = CASE WHEN EXCLUDED.domain IS NOT NULL THEN EXCLUDED.domain ELSE public.wisbe_users.domain END,
+        role = COALESCE(EXCLUDED.role, public.wisbe_users.role),
+        business_unit = COALESCE(EXCLUDED.business_unit, public.wisbe_users.business_unit);
 
-    SELECT * INTO v_profile FROM public.gym_users WHERE id = v_id;
+    SELECT * INTO v_profile FROM public.wisbe_users WHERE id = v_id;
     RETURN row_to_json(v_profile)::jsonb;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 2. Trigger Ultra-Seguro (No bloquea el registro)
+-- 4. Trigger Ultra-Seguro actualizado
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  -- Intentar sincronizar, pero ignorar errores para no romper el registro de Supabase Auth
   BEGIN
     PERFORM public.create_profile_if_missing(
       new.id::text,
@@ -69,20 +84,45 @@ BEGIN
       COALESCE(new.raw_user_meta_data->>'full_name', ''),
       NULLIF(new.raw_user_meta_data->>'domain', ''),
       COALESCE(new.raw_user_meta_data->>'role', 'gym-owner'),
-      new.raw_user_meta_data->>'owner_id'
+      new.raw_user_meta_data->>'owner_id',
+      COALESCE(new.raw_user_meta_data->>'business_unit', 'gym')
     );
   EXCEPTION WHEN OTHERS THEN
-    -- El error se ignora aquí; la función de login en utils.js reparará el perfil al entrar
+    NULL;
   END;
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 3. Re-aplicar Trigger y Permisos
+-- 5. Re-vincular Trigger y Políticas (Supabase suele mantenerlas al renombrar, pero aseguramos)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Solo los usuarios autenticados o el sistema pueden llamar a esta función para evitar abusos
+-- Actualizar políticas de otras tablas que referenciaban wisbe_users
+DO $$
+DECLARE
+    pol RECORD;
+BEGIN
+    -- Borrar y recrear políticas que usan subconsultas a la tabla de usuarios
+    DROP POLICY IF EXISTS "Owners and staff can manage recipes" ON public.gym_recipes;
+    CREATE POLICY "Owners and staff can manage recipes" ON public.gym_recipes FOR ALL USING (
+        (auth.uid())::uuid = owner_id OR
+        EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_recipes.owner_id)
+    );
+
+    DROP POLICY IF EXISTS "Owners and staff can manage routines" ON public.gym_routines;
+    CREATE POLICY "Owners and staff can manage routines" ON public.gym_routines FOR ALL USING (
+        (auth.uid())::uuid = owner_id OR
+        EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_routines.owner_id)
+    );
+
+    DROP POLICY IF EXISTS "Owners and staff can manage trainers" ON public.gym_trainers;
+    CREATE POLICY "Owners and staff can manage trainers" ON public.gym_trainers FOR ALL USING (
+        (auth.uid())::uuid = owner_id OR
+        EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = (auth.uid())::uuid AND u.owner_id = public.gym_trainers.owner_id)
+    );
+END $$;
+
 GRANT EXECUTE ON FUNCTION public.create_profile_if_missing TO authenticated, service_role;

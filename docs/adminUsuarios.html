@@ -31,6 +31,7 @@
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Identidad</th>
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rol / Permisos</th>
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dominio</th>
+                            <th id="th-business" class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden">Unidad</th>
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Acciones</th>
                         </tr>
                     </thead>
@@ -85,6 +86,15 @@
                                 <input type="text" id="domain" class="input" placeholder="ejemplo.com">
                             </div>
                         </div>
+                        <div id="business-group" class="hidden">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Unidad de Negocio (Admin)</label>
+                            <select id="business_unit" class="input bg-white cursor-pointer">
+                                <option value="gym">Gimnasio / Fitness</option>
+                                <option value="beauty">Salón de Belleza</option>
+                                <option value="construction">Construcción</option>
+                                <option value="freelance">Independiente</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="pt-6">
@@ -105,8 +115,13 @@
         let loadedUsers = [];
         const isAdmin = currentUser && currentUser.role === 'gym-admin';
 
+        if (isAdmin) {
+            document.getElementById('th-business').classList.remove('hidden');
+            document.getElementById('business-group').classList.remove('hidden');
+        }
+
         async function loadUsers() {
-            let query = supabase.from('gym_users').select('*');
+            let query = supabase.from('wisbe_users').select('*');
             if (!isAdmin) {
                 query = query.eq('owner_id', currentUser.id);
             }
@@ -145,6 +160,9 @@
                     </td>
                     <td class="px-6 py-5">
                         <span class="text-sm font-mono text-slate-500">${user.domain || '—'}</span>
+                    </td>
+                    <td class="px-6 py-5 ${isAdmin ? '' : 'hidden'}">
+                        <span class="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase rounded">${user.business_unit || 'gym'}</span>
                     </td>
                     <td class="px-6 py-5 text-right">
                         ${isAdmin ? `
@@ -185,6 +203,9 @@
             document.getElementById('email').disabled = true;
             document.getElementById('role').value = user.role;
             document.getElementById('domain').value = user.domain || '';
+            if (isAdmin) {
+                document.getElementById('business_unit').value = user.business_unit || 'gym';
+            }
             document.getElementById('password-group').classList.add('hidden');
 
             document.getElementById('modal-title').innerText = 'Editar Registro';
@@ -196,7 +217,7 @@
 
             const confirm = await showConfirm('Eliminar Usuario', 'Esta acción es irreversible y podría afectar datos vinculados.');
             if (confirm) {
-                const { error } = await supabase.from('gym_users').delete().eq('id', id);
+                const { error } = await supabase.from('wisbe_users').delete().eq('id', id);
                 if (error) return showPopup('Error', error.message, 'error');
                 showPopup('Éxito', 'Usuario eliminado correctamente');
                 loadUsers();
@@ -213,8 +234,12 @@
                 owner_id: currentUser.id
             };
 
+            if (isAdmin) {
+                userData.business_unit = document.getElementById('business_unit').value;
+            }
+
             if (id) {
-                const { error } = await supabase.from('gym_users').update(userData).eq('id', id);
+                const { error } = await supabase.from('wisbe_users').update(userData).eq('id', id);
                 if (error) return showPopup('Error', error.message, 'error');
                 showPopup('Éxito', 'Perfil actualizado');
             } else {
