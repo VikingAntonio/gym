@@ -82,7 +82,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Dominio Personal</label>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">DOMINIO</label>
                                 <input type="text" id="domain" class="input" placeholder="ejemplo.com">
                             </div>
                         </div>
@@ -227,16 +227,15 @@
         form.onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('user-id').value;
+            const email = document.getElementById('email').value;
             const userData = {
+                email: email,
                 full_name: document.getElementById('full_name').value,
                 role: document.getElementById('role').value,
                 domain: document.getElementById('domain').value || null,
-                owner_id: currentUser.id
+                owner_id: currentUser.id,
+                business_unit: isAdmin ? document.getElementById('business_unit').value : 'gym'
             };
-
-            if (isAdmin) {
-                userData.business_unit = document.getElementById('business_unit').value;
-            }
 
             if (id) {
                 const { error } = await supabase.from('wisbe_users').update(userData).eq('id', id);
