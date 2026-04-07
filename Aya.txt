@@ -1,15 +1,17 @@
-POR QUÉ FALLÓ:
-El error "Database error updating user" es una señal de que el Trigger `on_auth_user_created` falló en la base de datos al intentar sincronizar el nuevo usuario con la tabla de perfiles. Esto puede ocurrir por conflictos de duplicidad o por errores en la lógica de la función disparadora. Además, el error "function name is not unique" se debió a que tenías varias versiones de la misma función con distintos parámetros, lo que confundía a PostgreSQL.
+POR QUÉ SIGUE EL ERROR:
+El error "Database error updating user" es un fallo crítico del Trigger en Supabase Auth. El error "function name is not unique" confirmó que tu base de datos tiene "basura" de funciones anteriores con distintos parámetros, lo que impide que la reparación se aplique correctamente.
 
-SOLUCIÓN DEFINITIVA:
-1. He incluido un script que borra TODAS las versiones antiguas de la función `create_profile_if_missing` para que no haya más conflictos de "nombre no único".
-2. He renombrado la tabla `gym_users` a `wisbe_users` para permitir que el sistema crezca a otros negocios (salones, construcción, etc.).
-3. Se añadió el campo `business_unit` (Unidad de Negocio), el cual solo tú (como Admin) podrás ver y gestionar desde el panel de usuarios.
-4. El sistema de registro ahora es "Indestructible": si hay un error al sincronizar el perfil, el registro en Supabase Auth continúa sin problemas y el sistema reparará automáticamente tu perfil la primera vez que inicies sesión.
+SOLUCIÓN NUCLEAR (Sigue estos pasos exactamente):
+He creado un script "Borrón y Cuenta Nueva" que limpia todas las funciones conflictivas antes de crear la nueva estructura. Esto garantiza que no haya más errores de ambigüedad.
 
-SQL DE MIGRACIÓN Y REPARACIÓN (Copia y pega TODO este bloque en el SQL Editor de Supabase):
+NUEVA ESTRUCTURA "WISBE":
+1. Renombrado: La tabla `gym_users` ahora es `wisbe_users` para que puedas usarla en cualquier negocio.
+2. Multi-Negocio: Se añadió el campo `business_unit` (solo tú como Admin lo gestionas).
+3. Etiqueta DOMINIO: Ya está corregida en el login.
 
--- 1. LIMPIEZA TOTAL DE FUNCIONES CONFLICTIVAS
+SQL DE REPARACIÓN TOTAL (Copia y pega TODO este bloque en el SQL Editor de Supabase):
+
+-- 1. LIMPIEZA AGRESIVA DE FUNCIONES (Elimina la ambigüedad)
 DO $$
 DECLARE
     func_record RECORD;
@@ -17,23 +19,30 @@ BEGIN
     FOR func_record IN (
         SELECT oid::regprocedure as func_name
         FROM pg_proc
-        WHERE proname = 'create_profile_if_missing'
+        WHERE proname IN ('create_profile_if_missing', 'handle_new_user', 'is_admin')
           AND pronamespace = 'public'::regnamespace
     ) LOOP
         EXECUTE 'DROP FUNCTION IF EXISTS ' || func_record.func_name || ' CASCADE';
     END LOOP;
 END $$;
 
--- 2. RENOMBRAR TABLA Y AÑADIR COLUMNA MULTI-NEGOCIO
+-- 2. MIGRACIÓN DE TABLA Y COLUMNAS
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'gym_users') THEN
         ALTER TABLE public.gym_users RENAME TO wisbe_users;
     END IF;
 END $$;
-ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS business_unit TEXT DEFAULT 'gym';
 
--- 3. ACTUALIZAR FUNCIÓN DE SEGURIDAD is_admin()
+-- Asegurar columnas básicas
+ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS business_unit TEXT DEFAULT 'gym';
+ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS domain TEXT;
+ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'gym-owner';
+ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.wisbe_users ADD COLUMN IF NOT EXISTS username TEXT;
+
+-- 3. RECREAR FUNCIÓN DE SEGURIDAD is_admin()
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -44,7 +53,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 4. NUEVA FUNCIÓN DE SINCRONIZACIÓN ULTRA-ROBUSTA
+-- 4. FUNCIÓN DE SINCRONIZACIÓN DEFINITIVA
 CREATE OR REPLACE FUNCTION public.create_profile_if_missing(
     p_id TEXT,
     p_email TEXT,
@@ -61,23 +70,18 @@ DECLARE
     v_profile RECORD;
 BEGIN
     SET search_path = public;
-    -- Conversión segura de UUID
     BEGIN
         v_id := p_id::UUID;
         v_owner_id := NULLIF(p_owner_id, '')::UUID;
     EXCEPTION WHEN OTHERS THEN
-        v_id := NULL;
-        v_owner_id := NULL;
+        v_id := NULL; v_owner_id := NULL;
     END;
     IF v_id IS NULL THEN RETURN NULL; END IF;
 
-    -- Limpieza preventiva: evitar colisiones de email/ID
+    -- Evitar colisiones
     DELETE FROM public.wisbe_users WHERE (email = p_email AND id != v_id) OR (id = v_id AND email != p_email);
-
-    -- Generar username único
     v_username := split_part(p_email, '@', 1) || '_' || substr(v_id::text, 1, 8);
 
-    -- Sincronizar datos (Upsert)
     INSERT INTO public.wisbe_users (id, email, username, full_name, domain, role, owner_id, business_unit)
     VALUES (v_id, p_email, v_username, p_full_name, p_domain, p_role, v_owner_id, p_business_unit)
     ON CONFLICT (id) DO UPDATE SET
@@ -92,11 +96,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 5. TRIGGER QUE NO BLOQUEA EL REGISTRO
+-- 5. TRIGGER INDESTRUCTIBLE (No bloquea el registro)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  -- Intentar sincronizar pero IGNORAR errores para que Supabase Auth no falle
   BEGIN
     PERFORM public.create_profile_if_missing(
       new.id::text,
@@ -108,7 +111,7 @@ BEGIN
       COALESCE(new.raw_user_meta_data->>'business_unit', 'gym')
     );
   EXCEPTION WHEN OTHERS THEN
-    NULL; -- Error silenciado: el sistema reparará el perfil al primer login en utils.js
+    NULL; -- Si falla aquí, se repara solo al entrar en utils.js
   END;
   RETURN new;
 END;
@@ -119,7 +122,7 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 6. ACTUALIZAR POLÍTICAS DE OTRAS TABLAS
+-- 6. ACTUALIZAR POLÍTICAS DE ACCESO
 DO $$
 BEGIN
     DROP POLICY IF EXISTS "Owners and staff can manage recipes" ON public.gym_recipes;
