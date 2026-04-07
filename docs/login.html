@@ -3,174 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - Core Panel</title>
+    <title>Acceso al Panel Administrativo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-        }
-    </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-
-    <!-- Subtle Background Shapes -->
-    <div class="absolute top-0 left-0 w-full h-full -z-10 opacity-30">
-        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-200 rounded-full blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-200 rounded-full blur-[120px]"></div>
-    </div>
-
-    <div class="max-w-md w-full bg-white rounded-[40px] p-10 md:p-14 shadow-2xl shadow-slate-200 border border-slate-100 relative z-10 animate-fade-in">
-        <!-- Logo -->
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center justify-center w-14 h-14 bg-slate-900 rounded-2xl mb-6 shadow-lg shadow-slate-200">
-                <i class="fas fa-shield-halved text-xl text-white"></i>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-6">
+    <div class="card w-full max-w-lg p-12 bg-white shadow-2xl animate-fade">
+        <header class="text-center mb-12">
+            <div class="w-16 h-16 bg-blue-600 text-white rounded-3xl flex items-center justify-center text-3xl font-black mx-auto mb-8 shadow-xl shadow-blue-600/30">
+                P
             </div>
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900 mb-1 uppercase tracking-widest">Core <span class="text-blue-600">Panel</span></h1>
-            <p id="form-subtitle" class="text-slate-400 font-bold uppercase tracking-[0.2em] text-[9px]">Sistemas de Gestión</p>
-        </div>
+            <h1 id="page-title" class="text-3xl font-black text-slate-900 tracking-tight uppercase mb-3">Acceder al Panel</h1>
+            <p id="page-desc" class="text-slate-500 font-medium">Gestión profesional de contenidos fitness.</p>
+        </header>
 
-        <form id="auth-form" class="space-y-6">
-            <!-- Register Specific -->
+        <form id="auth-form" class="space-y-8">
             <div id="register-fields" class="hidden space-y-6">
-                <div class="space-y-2">
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nombre Completo</label>
-                    <input type="text" id="full_name" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-medium text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="Ej: Frank Montiel">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre Completo</label>
+                    <input type="text" id="full_name" class="input" placeholder="Nombre y Apellidos">
                 </div>
-                <div class="space-y-2">
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Dominio / Marca</label>
-                    <input type="text" id="domain" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-medium text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="empresa.com">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Dominio Personal (Opcional)</label>
+                    <input type="text" id="domain" class="input" placeholder="ejemplo.com">
                 </div>
             </div>
 
-            <!-- Common -->
-            <div class="space-y-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email</label>
-                <input type="email" id="email" required class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-medium text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="admin@ejemplo.com">
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Correo Electrónico</label>
+                    <input type="email" id="email" required class="input" placeholder="correo@ejemplo.com">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Contraseña</label>
+                    <input type="password" id="password" required class="input" placeholder="••••••••">
+                </div>
             </div>
 
-            <div class="space-y-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Contraseña</label>
-                <input type="password" id="password" required class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-medium text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="••••••••">
+            <div class="pt-6">
+                <button type="submit" id="submit-btn" class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                    Ingresar al Panel
+                </button>
             </div>
-
-            <button type="submit" id="submit-btn" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95 mt-4">
-                <span id="btn-text">Entrar al Sistema</span>
-                <span id="btn-loading" class="hidden"><i class="fas fa-sync-alt animate-spin mr-3"></i> Procesando...</span>
-            </button>
         </form>
 
-        <!-- Toggle -->
-        <div class="mt-12 text-center">
-            <button id="toggle-mode" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-blue-600 transition-all">
-                ¿No tienes cuenta? Crear una
-            </button>
+        <div class="mt-12 pt-8 border-t border-slate-100 text-center">
+            <p class="text-sm font-medium text-slate-500">
+                <span id="toggle-text">¿Aún no tienes cuenta?</span>
+                <button id="toggle-auth" class="text-blue-600 font-black uppercase tracking-widest text-[10px] ml-2 hover:text-blue-700 transition-colors">Regístrate Aquí</button>
+            </p>
         </div>
-
-        <!-- Feedback -->
-        <div id="status-msg" class="hidden mt-8 p-5 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-center animate-fade-in border border-slate-100">
-            <!-- Dynamically injected -->
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="fixed bottom-8 left-0 right-0 text-center">
-        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.3em]">Core Panel Platform &copy; 2024</p>
     </div>
 
     <script type="module">
         import { Auth, showPopup } from './js/utils.js';
 
-        const form = document.getElementById('auth-form');
-        const statusMsg = document.getElementById('status-msg');
-        const btnText = document.getElementById('btn-text');
-        const btnLoading = document.getElementById('btn-loading');
-        const submitBtn = document.getElementById('submit-btn');
-        const toggleBtn = document.getElementById('toggle-mode');
-        const registerFields = document.getElementById('register-fields');
-        const formSubtitle = document.getElementById('form-subtitle');
-
         let isLogin = true;
+        const form = document.getElementById('auth-form');
+        const registerFields = document.getElementById('register-fields');
+        const submitBtn = document.getElementById('submit-btn');
+        const toggleBtn = document.getElementById('toggle-auth');
+        const pageTitle = document.getElementById('page-title');
+        const pageDesc = document.getElementById('page-desc');
+        const toggleText = document.getElementById('toggle-text');
 
-        toggleBtn.addEventListener('click', () => {
+        toggleBtn.onclick = () => {
             isLogin = !isLogin;
-            statusMsg.classList.add('hidden');
-            if (isLogin) {
-                formSubtitle.innerText = 'Sistemas de Gestión';
-                btnText.innerText = 'Entrar al Sistema';
-                toggleBtn.innerText = '¿No tienes cuenta? Crear una';
-                registerFields.classList.add('hidden');
-            } else {
-                formSubtitle.innerText = 'Registro de Plataforma';
-                btnText.innerText = 'Activar Cuenta';
-                toggleBtn.innerText = '¿Ya tienes cuenta? Iniciar sesión';
-                registerFields.classList.remove('hidden');
-            }
-        });
+            registerFields.classList.toggle('hidden');
+            pageTitle.innerText = isLogin ? 'Acceder al Panel' : 'Crear Nueva Cuenta';
+            pageDesc.innerText = isLogin ? 'Gestión profesional de contenidos fitness.' : 'Regístrate para comenzar a gestionar tu propio centro.';
+            submitBtn.innerText = isLogin ? 'Ingresar al Panel' : 'Registrar Cuenta';
+            toggleText.innerText = isLogin ? '¿Aún no tienes cuenta?' : '¿Ya eres usuario?';
+            toggleBtn.innerText = isLogin ? 'Regístrate Aquí' : 'Inicia Sesión';
+        };
 
-        form.addEventListener('submit', async (e) => {
+        form.onsubmit = async (e) => {
             e.preventDefault();
-            statusMsg.classList.add('hidden');
-            submitBtn.disabled = true;
-            btnText.classList.add('hidden');
-            btnLoading.classList.remove('hidden');
-
-            const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
             try {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'PROCESANDO...';
+
                 if (isLogin) {
-                    await Auth.login(email, pass);
-                    window.location.href = 'admin.html';
+                    await Auth.login(email, password);
+                    window.location.href = 'gym.html';
                 } else {
-                    const full_name = document.getElementById('full_name').value.trim();
-                    const domain = document.getElementById('domain').value.trim();
+                    const fullName = document.getElementById('full_name').value;
+                    const domain = document.getElementById('domain').value;
 
-                    if (!full_name) throw new Error('El nombre es obligatorio');
+                    if (!fullName) throw new Error('El nombre es obligatorio');
 
-                    await Auth.register(email, pass, {
-                        full_name,
-                        domain,
+                    await Auth.register(email, password, {
+                        full_name: fullName,
+                        domain: domain || null,
                         role: 'gym-owner'
                     });
 
-                    await showPopup('Éxito', 'Cuenta creada. Confirma tu email e inicia sesión.');
-
+                    showPopup('Registro Exitoso', 'Por favor, confirma tu correo electrónico para activar el acceso.', 'success');
                     isLogin = true;
-                    formSubtitle.innerText = 'Sistemas de Gestión';
-                    btnText.innerText = 'Entrar al Sistema';
-                    toggleBtn.innerText = '¿No tienes cuenta? Crear una';
-                    registerFields.classList.add('hidden');
-
-                    statusMsg.innerHTML = 'Revisa tu email para confirmar tu cuenta';
-                    statusMsg.className = 'mt-8 p-5 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-center animate-fade-in bg-blue-50 text-blue-600 border border-blue-100';
-                    statusMsg.classList.remove('hidden');
+                    toggleBtn.click();
                 }
             } catch (err) {
-                console.error(err);
-                let msg = err.message;
-
-                if (msg.includes('CONFIRMAR TU EMAIL')) {
-                    msg = 'CONFIRMA TU CORREO PARA ENTRAR.';
-                } else if (msg.includes('Invalid login credentials')) {
-                    msg = 'Credenciales no válidas.';
-                }
-
-                statusMsg.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i> ${msg}`;
-                statusMsg.className = 'mt-8 p-5 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-center animate-fade-in bg-red-50 text-red-500 border border-red-100';
-                statusMsg.classList.remove('hidden');
+                showPopup('Error de Acceso', err.message, 'error');
             } finally {
                 submitBtn.disabled = false;
-                btnText.classList.remove('hidden');
-                btnLoading.classList.add('hidden');
+                submitBtn.innerText = isLogin ? 'Ingresar al Panel' : 'Registrar Cuenta';
             }
-        });
+        };
     </script>
 </body>
 </html>

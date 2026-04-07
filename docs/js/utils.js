@@ -280,19 +280,19 @@ export function renderNavbar() {
     const user = Auth.getUser();
     const isAdminOrOwner = user && ['gym-admin', 'gym-owner'].includes(user.role);
 
-    nav.className = "bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-lg border-b border-white/5";
+    nav.className = "nav-container mb-8";
     nav.innerHTML = `
         <div class="container mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-black tracking-tighter text-blue-500 italic">CORE <span class="text-white not-italic">PANEL</span></a>
-            <ul class="hidden md:flex space-x-8 items-center font-bold text-xs uppercase tracking-widest text-slate-300">
-                <li><a href="index.html" class="hover:text-blue-400 transition-all hover:-translate-y-0.5 inline-block">Inicio</a></li>
-                <li><a href="nutricion.html" class="hover:text-emerald-400 transition-all hover:-translate-y-0.5 inline-block">Nutrición</a></li>
-                <li><a href="rutinas.html" class="hover:text-orange-400 transition-all hover:-translate-y-0.5 inline-block">Rutinas</a></li>
-                <li><a href="entrenadores.html" class="hover:text-indigo-400 transition-all hover:-translate-y-0.5 inline-block">Equipo</a></li>
-                <li><a href="test.html" class="bg-blue-600 px-6 py-2.5 rounded-full text-white hover:bg-blue-700 transition shadow-lg shadow-blue-900/40">Hacer Test</a></li>
+            <a href="index.html" class="text-xl font-bold tracking-tight text-slate-900 uppercase">Dashboard</a>
+            <ul class="hidden md:flex space-x-6 items-center font-semibold text-sm text-slate-600">
+                <li><a href="index.html" class="hover:text-blue-600 transition-colors">Inicio</a></li>
+                <li><a href="nutricion.html" class="hover:text-blue-600 transition-colors">Nutrición</a></li>
+                <li><a href="rutinas.html" class="hover:text-blue-600 transition-colors">Rutinas</a></li>
+                <li><a href="entrenadores.html" class="hover:text-blue-600 transition-colors">Equipo</a></li>
+                <li><a href="test.html" class="btn btn-primary text-xs uppercase tracking-wider">Hacer Test</a></li>
 
                 ${isAdminOrOwner ? `
-                    <li><a href="admin.html" class="text-slate-500 hover:text-white transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
+                    <li><a href="gym.html" class="text-slate-400 hover:text-blue-500 transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
                 ` : ''}
 
                 ${user ? `
