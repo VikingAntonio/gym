@@ -346,11 +346,15 @@ export async function renderAdminSidebar(onOwnerChange) {
             <span>FIND PROJECT</span>
         </div>
         <div class="admin-sidebar-content">
-            <h3 class="text-orange-500 font-black text-[10px] uppercase tracking-widest mb-6">Find Project</h3>
+            <h3 class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-6">Find Project</h3>
             <input type="text" id="owner-search" class="input mb-6 text-sm" placeholder="Domain or Name...">
-            <div id="owners-list-sidebar" class="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-2 custom-scrollbar">
-                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-orange-500 transition-all owner-item active-owner" data-id="">
-                    <span class="block font-bold text-slate-800 text-sm">Mi Biblioteca</span>
+            <div id="owners-list-sidebar" class="space-y-3 overflow-y-auto flex-grow mb-6 pr-2 custom-scrollbar">
+                <!-- Owners here -->
+            </div>
+            <div class="pt-6 border-t border-slate-100 mt-auto">
+                <h3 class="text-orange-500 font-black text-[10px] uppercase tracking-widest mb-4">Active Project</h3>
+                <div id="active-project-name" class="p-4 bg-white rounded-2xl border border-slate-100 font-bold text-slate-800 text-sm shadow-sm">
+                    Mi Biblioteca
                 </div>
             </div>
         </div>
@@ -360,6 +364,7 @@ export async function renderAdminSidebar(onOwnerChange) {
     const tab = sidebar.querySelector('.admin-sidebar-tab');
     const searchInput = sidebar.querySelector('#owner-search');
     const listContainer = sidebar.querySelector('#owners-list-sidebar');
+    const activeProjectDisplay = sidebar.querySelector('#active-project-name');
 
     tab.onclick = () => {
         sidebar.classList.toggle('admin-sidebar-open');
@@ -381,6 +386,10 @@ export async function renderAdminSidebar(onOwnerChange) {
                 (o.email || '').toLowerCase().includes(filter.toLowerCase()) ||
                 (o.domain || '').toLowerCase().includes(filter.toLowerCase())
             );
+
+            // Update active display
+            const currentOwner = owners.find(o => o.id === currentId);
+            activeProjectDisplay.innerText = currentOwner ? (currentOwner.full_name || currentOwner.email) : 'Mi Biblioteca';
 
             listContainer.innerHTML = `
                 <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-orange-500 transition-all owner-item ${currentId === '' ? 'active-owner' : ''}" data-id="">

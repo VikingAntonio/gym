@@ -78,7 +78,7 @@
                                     <option value="gym-socios">Socio</option>
                                     <option value="gym-entrenador">Entrenador</option>
                                     <option value="gym-owner">Dueño</option>
-                                    <option value="gym-admin">Administrador Global</option>
+                                    <option value="gym-admin">Administrador</option>
                                 </select>
                             </div>
                             <div>
@@ -134,6 +134,7 @@
                 document.getElementById('business-group').classList.remove('hidden');
                 document.getElementById('owner-group').classList.remove('hidden');
                 await loadOwners();
+                renderAdminSidebar(() => loadUsers());
             }
 
             await loadUsers();
@@ -160,7 +161,11 @@
 
         async function loadUsers() {
             let query = supabase.from('wisbe_users').select('*');
-            if (!isAdmin) {
+
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (isAdmin && selectedOwnerId) {
+                query = query.eq('owner_id', selectedOwnerId);
+            } else if (!isAdmin) {
                 query = query.eq('owner_id', currentUser.id);
             }
 
@@ -226,6 +231,13 @@
             document.getElementById('modal-title').innerText = 'Nuevo Registro';
             document.getElementById('password-group').classList.remove('hidden');
             document.getElementById('email').disabled = false;
+
+            // Auto-select owner if sidebar has one
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (selectedOwnerId) {
+                document.getElementById('owner_id_select').value = selectedOwnerId;
+            }
+
             modal.style.display = 'flex';
         };
 
