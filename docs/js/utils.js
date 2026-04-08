@@ -352,7 +352,7 @@ export async function renderAdminSidebar(onOwnerChange) {
                 <!-- Owners here -->
             </div>
             <div class="pt-6 border-t border-slate-100 mt-auto">
-                <h3 class="text-orange-500 font-black text-[10px] uppercase tracking-widest mb-4">Active Project</h3>
+                <h3 class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-4">Active Project</h3>
                 <div id="active-project-name" class="p-4 bg-white rounded-2xl border border-slate-100 font-bold text-slate-800 text-sm shadow-sm">
                     Mi Biblioteca
                 </div>
@@ -392,11 +392,11 @@ export async function renderAdminSidebar(onOwnerChange) {
             activeProjectDisplay.innerText = currentOwner ? (currentOwner.full_name || currentOwner.email) : 'Mi Biblioteca';
 
             listContainer.innerHTML = `
-                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-orange-500 transition-all owner-item ${currentId === '' ? 'active-owner' : ''}" data-id="">
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-blue-500 transition-all owner-item ${currentId === '' ? 'active-owner' : ''}" data-id="">
                     <span class="block font-bold text-slate-800 text-sm">Mi Biblioteca</span>
                 </div>
             ` + filtered.map(o => `
-                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-orange-500 transition-all owner-item ${o.id === currentId ? 'active-owner' : ''}" data-id="${o.id}">
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-blue-500 transition-all owner-item ${o.id === currentId ? 'active-owner' : ''}" data-id="${o.id}">
                     <span class="block font-bold text-slate-800 text-sm">${o.full_name || o.email}</span>
                     ${o.domain ? `<span class="block text-[10px] text-slate-400 font-medium">${o.domain}</span>` : ''}
                 </div>

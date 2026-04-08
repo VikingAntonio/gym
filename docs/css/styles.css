@@ -116,13 +116,13 @@ body {
     border-left: none;
     display: flex;
     flex-direction: column;
-    max-height: 80vh;
+    min-height: 85vh; /* Increased height */
 }
 
 .admin-sidebar-tab {
-    width: 60px;
+    width: 40px; /* Thinner by default */
     height: 160px;
-    background: var(--primary); /* Changed to Blue */
+    background: var(--primary);
     border-radius: 0 24px 24px 0;
     cursor: pointer;
     display: flex;
@@ -130,8 +130,14 @@ body {
     justify-content: center;
     box-shadow: 10px 0 30px rgba(59, 130, 246, 0.3);
     position: absolute;
-    right: -60px;
+    right: -40px; /* Match thinner width */
     top: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-sidebar-tab:hover {
+    width: 60px; /* Expands on hover */
+    right: -60px;
 }
 
 .admin-sidebar-tab span {
@@ -142,12 +148,14 @@ body {
     font-size: 14px;
     letter-spacing: 2px;
     transform: rotate(180deg);
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .active-owner {
-    border-color: #f97316 !important; /* Orange border */
+    border-color: var(--primary) !important; /* Changed to Blue */
     border-width: 2px !important;
-    background-color: #fff7ed !important;
+    background-color: #eff6ff !important; /* Light blue background */
 }
 
 /* Hide scrollbar but keep functionality */
