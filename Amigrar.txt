@@ -1,0 +1,2999 @@
+================================================================================
+GUÍA DE MIGRACIÓN - ARCHIVOS NECESARIOS
+================================================================================
+Este archivo contiene el código fuente de todos los archivos necesarios para
+migrar el panel administrativo y las vistas públicas a otro repositorio.
+
+IMPORTANTE: Mantener la estructura de carpetas (docs/, docs/js/, docs/css/)
+para que las referencias relativas funcionen correctamente.
+================================================================================
+
+================================================================================
+RUTA: docs/gym.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <header class="container mx-auto px-4 pt-10 pb-6 border-b border-slate-200 bg-white shadow-sm mb-12">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl font-black">P</div>
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Panel de Control</h1>
+                    <p class="text-slate-500 font-medium">Gestión administrativa y contenidos</p>
+                </div>
+            </div>
+            <div id="user-badge" class="flex items-center bg-slate-50 border border-slate-200 px-5 py-3 rounded-2xl">
+                <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 mr-4">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <span id="header-user-name" class="block text-sm font-bold text-slate-900 uppercase">Usuario</span>
+                    <span id="user-role-label" class="block text-[10px] text-slate-400 font-black tracking-widest uppercase">Cargando...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 pb-20">
+        <!-- Quick Actions Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20 animate-fade">
+            <!-- Usuarios -->
+            <a href="adminUsuarios.html" class="card group hover:border-blue-500 transition-all duration-300">
+                <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 uppercase">Usuarios</h3>
+                <p class="text-slate-500 text-sm mb-6 leading-relaxed">Gestión de accesos y perfiles del sistema.</p>
+                <div class="flex items-center text-blue-600 text-xs font-black uppercase tracking-widest">
+                    Administrar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- Nutrición -->
+            <a href="adminNutricion.html" class="card group hover:border-emerald-500 transition-all duration-300">
+                <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 uppercase">Nutrición</h3>
+                <p class="text-slate-500 text-sm mb-6 leading-relaxed">Control de recetas y planes de alimentación.</p>
+                <div class="flex items-center text-emerald-600 text-xs font-black uppercase tracking-widest">
+                    Administrar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- Rutinas -->
+            <a href="adminRutinas.html" class="card group hover:border-orange-500 transition-all duration-300">
+                <div class="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center text-xl mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 uppercase">Rutinas</h3>
+                <p class="text-slate-500 text-sm mb-6 leading-relaxed">Constructor de entrenamientos dinámicos.</p>
+                <div class="flex items-center text-orange-600 text-xs font-black uppercase tracking-widest">
+                    Administrar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- Entrenadores -->
+            <a href="adminEntrenadores.html" class="card group hover:border-indigo-500 transition-all duration-300">
+                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-xl mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 uppercase">Equipo</h3>
+                <p class="text-slate-500 text-sm mb-6 leading-relaxed">Personal profesional y especialistas.</p>
+                <div class="flex items-center text-indigo-600 text-xs font-black uppercase tracking-widest">
+                    Administrar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                </div>
+            </a>
+        </div>
+
+        <!-- Widget Section (PRESERVED) -->
+        <section class="mt-20">
+            <div class="flex items-center justify-between mb-10">
+                <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Integración de Widget</h2>
+                <div class="h-px bg-slate-200 flex-grow ml-10"></div>
+            </div>
+
+            <div class="bg-white p-8 md:p-14 rounded-[40px] shadow-sm border border-slate-200">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                    <div class="animate-fade">
+                        <div class="inline-block px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full mb-6">Instrucciones</div>
+                        <h4 class="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Copia y pega el código</h4>
+                        <p class="text-slate-500 text-sm mb-12 leading-relaxed font-medium">Inserta tus módulos en cualquier sitio web utilizando estos fragmentos de código. Toda la configuración se sincroniza automáticamente.</p>
+
+                        <div class="space-y-10">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">1. Script Global</label>
+                                <div class="bg-slate-900 rounded-2xl p-6 relative group border border-slate-800 shadow-2xl">
+                                    <code id="script-code" class="text-blue-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">&lt;script src="https://wisbe.xyz/widget.js"&gt;&lt;/script&gt;</code>
+                                    <button onclick="copyToClipboard('script-code')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-125">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">2. Contenedor de Módulo</label>
+                                <div class="bg-slate-900 rounded-2xl p-6 relative group border border-slate-800 shadow-2xl">
+                                    <code id="widget-code" class="text-emerald-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">&lt;div id="wisbe-rutinas" domain="Cargando..."&gt;&lt;/div&gt;</code>
+                                    <button onclick="copyToClipboard('widget-code')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-125">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 rounded-[40px] p-12 flex flex-col items-center justify-center text-center border border-dashed border-slate-300 relative group overflow-hidden">
+                        <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-40 transition-opacity"></div>
+                        <div class="w-24 h-24 bg-white rounded-[32px] shadow-sm flex items-center justify-center text-blue-600 text-4xl mb-8 relative z-10 border border-slate-100">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h5 class="font-black text-slate-900 text-2xl mb-3 tracking-tight uppercase relative z-10">Dominio de Origen</h5>
+                        <p id="user-domain" class="text-blue-600 font-mono font-black text-xl mb-6 relative z-10 tracking-tight uppercase">Cargando...</p>
+                        <p class="text-[10px] text-slate-400 max-w-xs leading-relaxed uppercase tracking-widest font-black relative z-10 px-4 py-2 bg-slate-100 rounded-lg">Sincronización Automática Activa</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- System Stats Bar -->
+        <section class="mt-20">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card flex items-center bg-white border-slate-200">
+                    <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mr-5 text-xl">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Base de Datos</p>
+                        <p class="text-sm font-bold text-slate-800">Supabase Cloud</p>
+                    </div>
+                    <div class="ml-auto w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+                </div>
+                <div class="card flex items-center bg-white border-slate-200">
+                    <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mr-5 text-xl">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Seguridad</p>
+                        <p class="text-sm font-bold text-slate-800">RLS Protocol Active</p>
+                    </div>
+                </div>
+                <div class="card flex items-center bg-white border-slate-200">
+                    <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mr-5 text-xl">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Multimedia</p>
+                        <p class="text-sm font-bold text-slate-800">Cloudinary CDN</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { renderNavbar, Auth, showPopup } from './js/utils.js';
+        renderNavbar();
+        const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+
+        if (currentUser) {
+            document.getElementById('header-user-name').innerText = currentUser.full_name || currentUser.username;
+            document.getElementById('user-role-label').innerText = currentUser.role.replace('gym-', '');
+
+            const domainText = currentUser.domain || 'SIN DOMINIO';
+            document.getElementById('user-domain').innerText = domainText;
+
+            if (currentUser.domain) {
+                document.getElementById('widget-code').innerText = `<div id="wisbe-rutinas" domain="${currentUser.domain}"></div>`;
+            } else {
+                document.getElementById('widget-code').innerText = 'ERROR: CONFIGURA TU DOMINIO';
+            }
+        }
+
+        window.copyToClipboard = (id) => {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showPopup('¡Copiado!', 'El fragmento de código está listo para usar');
+            });
+        };
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/adminUsuarios.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Usuarios</h1>
+                <p class="text-slate-500 font-medium mt-1">Control de acceso y administración de roles del sistema.</p>
+            </div>
+            <button id="btn-nuevo-usuario" class="btn btn-primary px-6 py-3 uppercase tracking-widest text-xs font-black shadow-lg shadow-blue-600/20">
+                <i class="fas fa-plus mr-2"></i> Nuevo Registro
+            </button>
+        </header>
+
+        <div class="card bg-white border-slate-200 overflow-hidden animate-fade">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200">
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Identidad</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rol</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dominio</th>
+                            <th id="th-business" class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden">Unidad</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-list" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-slate-400 font-medium italic">
+                                Sincronizando con base de datos...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Form Modal -->
+        <div id="modal-usuario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+            <div class="card bg-white w-full max-w-lg p-10 shadow-2xl animate-fade">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 id="modal-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase">Registro de Usuario</h2>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="user-form" class="space-y-8">
+                    <input type="hidden" id="user-id">
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre Completo</label>
+                            <input type="text" id="full_name" required class="input" placeholder="Nombre y Apellidos">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Correo Electrónico</label>
+                            <input type="email" id="email" required class="input" placeholder="correo@ejemplo.com">
+                        </div>
+                        <div id="password-group">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Contraseña</label>
+                            <input type="password" id="password" class="input" placeholder="Mínimo 6 caracteres">
+                        </div>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Rol Asignado</label>
+                                <select id="role" class="input bg-white cursor-pointer">
+                                    <option value="gym-socios">Socio</option>
+                                    <option value="gym-entrenador">Entrenador</option>
+                                    <option value="gym-owner">Dueño</option>
+                                    <option value="gym-admin">Administrador</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">DOMINIO</label>
+                                <input type="text" id="domain" class="input" placeholder="ejemplo.com">
+                            </div>
+                        </div>
+                        <div id="business-group" class="hidden">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Unidad de Negocio</label>
+                            <select id="business_unit" class="input bg-white cursor-pointer">
+                                <option value="gym">Gimnasio</option>
+                                <option value="beauty">Salón de Belleza</option>
+                                <option value="construction">Construcción</option>
+                                <option value="freelance">Independiente</option>
+                                <option value="wisbe">Wisbe</option>
+                            </select>
+                        </div>
+                        <div id="owner-group" class="hidden">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Asignar a</label>
+                            <select id="owner_id_select" class="input bg-white cursor-pointer">
+                                <option value="">Sin Asignar</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="submit" id="submit-btn" class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                            Procesar Registro
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, renderNavbar, Auth, showPopup, showConfirm } from './js/utils.js';
+
+        let currentUser = null;
+        let isAdmin = false;
+        let loadedUsers = [];
+        let loadedOwners = [];
+
+        async function initPage() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+            if (!currentUser) return;
+
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                document.getElementById('th-business').classList.remove('hidden');
+                document.getElementById('business-group').classList.remove('hidden');
+                document.getElementById('owner-group').classList.remove('hidden');
+                await loadOwners();
+                renderAdminSidebar(() => loadUsers());
+            }
+
+            await loadUsers();
+        }
+
+        async function loadOwners() {
+            try {
+                const { data, error } = await supabase
+                    .from('wisbe_users')
+                    .select('id, full_name, email')
+                    .eq('role', 'gym-owner')
+                    .order('full_name');
+                if (error) throw error;
+                loadedOwners = data;
+                const select = document.getElementById('owner_id_select');
+                if (select) {
+                    select.innerHTML = '<option value="">Sin Asignar</option>' +
+                        data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
+                }
+            } catch (err) {
+                console.error('Error loading owners:', err);
+            }
+        }
+
+        async function loadUsers() {
+            let query = supabase.from('wisbe_users').select('*');
+
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (isAdmin && selectedOwnerId) {
+                query = query.eq('owner_id', selectedOwnerId);
+            } else if (!isAdmin) {
+                query = query.eq('owner_id', currentUser.id);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+            if (error) return console.error(error);
+
+            loadedUsers = data;
+            renderUsers(data);
+        }
+
+        function renderUsers(users) {
+            const list = document.getElementById('users-list');
+            if (users.length === 0) {
+                list.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-medium">No se encontraron registros activos.</td></tr>';
+                return;
+            }
+
+            list.innerHTML = users.map(user => `
+                <tr class="hover:bg-slate-50 transition-colors group">
+                    <td class="px-6 py-5">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black mr-4 border border-blue-100">
+                                ${user.full_name?.charAt(0) || 'U'}
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-slate-800">${user.full_name || 'Sin Nombre'}</span>
+                                <span class="block text-xs text-slate-400">${user.email}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-slate-200">
+                            ${user.role.replace('gym-', '')}
+                        </span>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="text-sm font-mono text-slate-500">${user.domain || '—'}</span>
+                    </td>
+                    <td class="px-6 py-5 ${isAdmin ? '' : 'hidden'}">
+                        <span class="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase rounded">${user.business_unit || 'gym'}</span>
+                    </td>
+                    <td class="px-6 py-5 text-right">
+                        ${isAdmin ? `
+                            <button onclick="editUser('${user.id}')" class="p-2 text-slate-400 hover:text-blue-600 transition-colors mr-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteUser('${user.id}')" class="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : '<span class="text-[10px] text-slate-300 font-black uppercase italic">Sólo Lectura</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        const modal = document.getElementById('modal-usuario');
+        const form = document.getElementById('user-form');
+
+        document.getElementById('btn-nuevo-usuario').onclick = () => {
+            if (!isAdmin) return showPopup('Restringido', 'Solo administradores globales pueden registrar nuevo personal.', 'error');
+            form.reset();
+            document.getElementById('user-id').value = '';
+            document.getElementById('modal-title').innerText = 'Nuevo Registro';
+            document.getElementById('password-group').classList.remove('hidden');
+            document.getElementById('email').disabled = false;
+
+            // Auto-select owner if sidebar has one
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (selectedOwnerId) {
+                document.getElementById('owner_id_select').value = selectedOwnerId;
+            }
+
+            modal.style.display = 'flex';
+        };
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+        window.editUser = (id) => {
+            const user = loadedUsers.find(u => u.id === id);
+            if (!user) return;
+
+            document.getElementById('user-id').value = user.id;
+            document.getElementById('full_name').value = user.full_name;
+            document.getElementById('email').value = user.email;
+            document.getElementById('email').disabled = true;
+            document.getElementById('role').value = user.role;
+            document.getElementById('domain').value = user.domain || '';
+            if (isAdmin) {
+                document.getElementById('business_unit').value = user.business_unit || 'gym';
+                document.getElementById('owner_id_select').value = user.owner_id || '';
+            }
+            document.getElementById('password-group').classList.add('hidden');
+
+            document.getElementById('modal-title').innerText = 'Editar Registro';
+            modal.style.display = 'flex';
+        };
+
+        window.deleteUser = async (id) => {
+            if (id === currentUser.id) return showPopup('Error', 'No puedes eliminar tu propia cuenta.', 'error');
+
+            const confirm = await showConfirm('Eliminar Usuario', 'Esta acción es irreversible y podría afectar datos vinculados.');
+            if (confirm) {
+                const { error } = await supabase.from('wisbe_users').delete().eq('id', id);
+                if (error) return showPopup('Error', error.message, 'error');
+                showPopup('Éxito', 'Usuario eliminado correctamente');
+                loadUsers();
+            }
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('user-id').value;
+            const email = document.getElementById('email').value;
+            const userData = {
+                email: email,
+                full_name: document.getElementById('full_name').value,
+                role: document.getElementById('role').value,
+                domain: document.getElementById('domain').value || null,
+                owner_id: isAdmin ? (document.getElementById('owner_id_select').value || null) : currentUser.id,
+                business_unit: isAdmin ? document.getElementById('business_unit').value : 'gym'
+            };
+
+            if (id) {
+                const { error } = await supabase.from('wisbe_users').update(userData).eq('id', id);
+                if (error) return showPopup('Error', error.message, 'error');
+                showPopup('Éxito', 'Perfil actualizado');
+            } else {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                try {
+                    const { data, error: authError } = await supabase.auth.signUp({
+                        email,
+                        password,
+                        options: { data: userData }
+                    });
+                    if (authError) throw authError;
+                    showPopup('Registro Exitoso', 'El usuario debe confirmar su correo para activar el acceso.');
+                } catch (err) {
+                    return showPopup('Error de Registro', err.message, 'error');
+                }
+            }
+            modal.style.display = 'none';
+            loadUsers();
+        };
+
+        initPage();
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/adminNutricion.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Nutrición</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Nutrición</h1>
+                <p class="text-slate-500 font-medium mt-1">Biblioteca de recetas y planificación nutricional.</p>
+            </div>
+            <button id="btn-nueva-receta" class="btn btn-primary px-6 py-3 uppercase tracking-widest text-xs font-black shadow-lg shadow-blue-600/20">
+                <i class="fas fa-plus mr-2"></i> Nueva Receta
+            </button>
+        </header>
+
+        <div id="recetas-grid" class="admin-grid animate-fade">
+            <!-- Cargando -->
+            <div class="card flex flex-col items-center justify-center py-20 text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                <span class="text-sm font-black uppercase tracking-widest">Sincronizando recetas...</span>
+            </div>
+        </div>
+
+        <!-- Recipe Modal -->
+        <div id="modal-receta" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 overflow-y-auto">
+            <div class="card bg-white w-full max-w-4xl p-10 shadow-2xl animate-fade my-10">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 id="modal-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase">Editor de Receta</h2>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="recipe-form" class="space-y-10">
+                    <input type="hidden" id="recipe-id">
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        <!-- Image & Media -->
+                        <div class="space-y-8">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Imagen de Presentación</label>
+                                <div id="drop-zone" class="border-2 border-dashed border-slate-200 rounded-[32px] p-8 text-center cursor-pointer hover:border-blue-400 transition-all bg-slate-50 relative overflow-hidden group min-h-[240px] flex flex-col items-center justify-center">
+                                    <div id="preview-container" class="absolute inset-0 hidden">
+                                        <img id="image-preview" src="" class="w-full h-full object-cover rounded-[32px]">
+                                        <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span class="text-white text-xs font-black uppercase tracking-widest">Cambiar Imagen</span>
+                                        </div>
+                                    </div>
+                                    <div id="upload-placeholder">
+                                        <i class="fas fa-cloud-upload-alt text-4xl text-slate-300 mb-4"></i>
+                                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Arrastra o selecciona archivo</p>
+                                    </div>
+                                    <input type="file" id="image-input" class="hidden" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Tiempo Prep</label>
+                                    <input type="number" id="prep_time" class="input" placeholder="Ej: 20">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Dificultad</label>
+                                    <select id="difficulty" class="input bg-white cursor-pointer">
+                                        <option value="Fácil">Baja</option>
+                                        <option value="Media">Media</option>
+                                        <option value="Difícil">Alta</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data & Macros -->
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre de la Receta</label>
+                                <input type="text" id="title" required class="input" placeholder="Ej: Bowl de Avena con Frutos Rojos">
+                            </div>
+                            <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Tipo de Dieta</label>
+                                <input type="text" id="diet_type" class="input" placeholder="Ej: Vegano, Proteico, Ayuno">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Calorías</label>
+                                    <input type="number" id="calories" class="input" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Proteínas</label>
+                                    <input type="number" id="protein" class="input" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Carbos</label>
+                                    <input type="number" id="carbs" class="input" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Grasas</label>
+                                    <input type="number" id="fats" class="input" placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Ingredientes</label>
+                            <textarea id="ingredients" rows="8" class="input resize-none" placeholder="1 taza de avena..."></textarea>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Instrucciones</label>
+                            <textarea id="instructions" rows="8" class="input resize-none" placeholder="1. Mezclar los ingredientes secos..."></textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="pt-10 flex gap-6">
+                        <button type="submit" id="submit-btn" class="flex-grow btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                            Guardar Receta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, renderNavbar, Auth, showPopup, uploadToCloudinary, setupDragAndDrop, showConfirm, renderAdminSidebar } from './js/utils.js';
+
+        let currentUser = null;
+        let isAdmin = false;
+        let imageUrl = '';
+        let loadedRecipes = [];
+
+        async function initPage() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+            if (!currentUser) return;
+
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                renderAdminSidebar(() => loadRecipes());
+            }
+
+            await loadRecipes();
+        }
+
+        async function loadRecipes() {
+            let query = supabase.from('gym_recipes').select('*');
+
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (isAdmin && selectedOwnerId) {
+                query = query.eq('owner_id', selectedOwnerId);
+            } else {
+                query = query.eq('owner_id', currentUser.id);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+
+            if (error) return console.error(error);
+            loadedRecipes = data || [];
+            renderRecipes(loadedRecipes);
+        }
+
+        function renderRecipes(recipes) {
+            const grid = document.getElementById('recetas-grid');
+            if (recipes.length === 0) {
+                grid.innerHTML = '<div class="card col-span-full py-20 text-center text-slate-400">Aún no has creado ninguna receta profesional.</div>';
+                return;
+            }
+
+            grid.innerHTML = recipes.map(r => `
+                <div class="card group hover:border-blue-500 transition-all p-0 overflow-hidden flex flex-col">
+                    <div class="h-48 overflow-hidden bg-slate-100 relative">
+                        <img src="${r.image_url || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80'}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4">
+                            <span class="px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-slate-900 border border-white/50">
+                                ${r.diet_type || 'Nutrición'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="text-lg font-bold text-slate-900 mb-2 truncate">${r.title}</h3>
+                        <div class="flex items-center gap-4 text-slate-400 text-xs font-bold mb-6">
+                            <span class="flex items-center"><i class="far fa-clock mr-1.5"></i> ${r.prep_time || 0}'</span>
+                            <span class="flex items-center"><i class="fas fa-fire mr-1.5"></i> ${r.calories || 0} kcal</span>
+                        </div>
+                        <div class="mt-auto flex justify-between items-center pt-6 border-t border-slate-100">
+                            <button onclick="editRecipe('${r.id}')" class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors">
+                                EDITAR <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                            <button onclick="deleteRecipe('${r.id}')" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all border border-slate-100">
+                                <i class="fas fa-trash-alt text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const modal = document.getElementById('modal-receta');
+        const form = document.getElementById('recipe-form');
+        const imagePreview = document.getElementById('image-preview');
+        const previewContainer = document.getElementById('preview-container');
+
+        document.getElementById('btn-nueva-receta').onclick = () => {
+            form.reset();
+            document.getElementById('recipe-id').value = '';
+            imageUrl = '';
+            previewContainer.classList.add('hidden');
+            document.getElementById('modal-title').innerText = 'Crear Receta';
+            modal.style.display = 'flex';
+        };
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+        setupDragAndDrop(
+            document.getElementById('drop-zone'),
+            document.getElementById('image-input'),
+            async (file) => {
+                try {
+                    const btn = document.getElementById('submit-btn');
+                    btn.disabled = true;
+                    btn.innerText = 'PROCESANDO IMAGEN...';
+
+                    imageUrl = await uploadToCloudinary(file);
+                    imagePreview.src = imageUrl;
+                    previewContainer.classList.remove('hidden');
+
+                    btn.disabled = false;
+                    btn.innerText = 'GUARDAR RECETA';
+                } catch (err) {
+                    showPopup('Error', 'Fallo al subir a Cloudinary', 'error');
+                }
+            }
+        );
+
+        window.editRecipe = (id) => {
+            const r = loadedRecipes.find(x => x.id == id);
+            if (!r) return;
+
+            document.getElementById('recipe-id').value = r.id;
+            document.getElementById('title').value = r.title;
+            document.getElementById('prep_time').value = r.prep_time;
+            document.getElementById('difficulty').value = r.difficulty || 'Media';
+            document.getElementById('diet_type').value = r.diet_type;
+            document.getElementById('calories').value = r.calories;
+            document.getElementById('protein').value = r.protein;
+            document.getElementById('carbs').value = r.carbs;
+            document.getElementById('fats').value = r.fats;
+            document.getElementById('ingredients').value = Array.isArray(r.ingredients) ? r.ingredients.join('\n') : r.ingredients;
+            document.getElementById('instructions').value = Array.isArray(r.instructions) ? r.instructions.join('\n') : r.instructions;
+
+            if (r.image_url) {
+                imageUrl = r.image_url;
+                imagePreview.src = r.image_url;
+                previewContainer.classList.remove('hidden');
+            }
+
+            document.getElementById('modal-title').innerText = 'Modificar Receta';
+            modal.style.display = 'flex';
+        };
+
+        window.deleteRecipe = async (id) => {
+            if (await showConfirm('Eliminar Receta', '¿Seguro que deseas eliminar esta receta de la biblioteca?')) {
+                const { error } = await supabase.from('gym_recipes').delete().eq('id', id);
+                if (error) return showPopup('Error', error.message, 'error');
+                loadRecipes();
+            }
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('recipe-id').value;
+            const data = {
+                title: document.getElementById('title').value,
+                image_url: imageUrl,
+                prep_time: parseInt(document.getElementById('prep_time').value) || 0,
+                difficulty: document.getElementById('difficulty').value,
+                diet_type: document.getElementById('diet_type').value,
+                calories: parseInt(document.getElementById('calories').value) || 0,
+                protein: parseInt(document.getElementById('protein').value) || 0,
+                carbs: parseInt(document.getElementById('carbs').value) || 0,
+                fats: parseInt(document.getElementById('fats').value) || 0,
+                ingredients: document.getElementById('ingredients').value.split('\n').filter(x => x.trim()),
+                instructions: document.getElementById('instructions').value.split('\n').filter(x => x.trim()),
+                owner_id: isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id
+            };
+
+            const { error } = id
+                ? await supabase.from('gym_recipes').update(data).eq('id', id)
+                : await supabase.from('gym_recipes').insert([data]);
+
+            if (error) return showPopup('Error de Conexión', error.message, 'error');
+
+            modal.style.display = 'none';
+            showPopup('Guardado', 'La receta se ha actualizado en la biblioteca global.');
+            loadRecipes();
+        };
+
+        initPage();
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/adminRutinas.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Rutinas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Rutinas</h1>
+                <p class="text-slate-500 font-medium mt-1">Diseñador dinámico de planes de entrenamiento semanal.</p>
+            </div>
+            <button id="btn-nueva-rutina" class="btn btn-primary px-6 py-3 uppercase tracking-widest text-xs font-black shadow-lg shadow-blue-600/20">
+                <i class="fas fa-plus mr-2"></i> Nuevo Plan
+            </button>
+        </header>
+
+        <div id="rutinas-list" class="space-y-6 animate-fade">
+            <!-- Cargando -->
+            <div class="card flex flex-col items-center justify-center py-20 text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                <span class="text-sm font-black uppercase tracking-widest">Sincronizando planes...</span>
+            </div>
+        </div>
+
+        <!-- Routine Builder Modal -->
+        <div id="modal-rutina" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-start justify-center p-4 overflow-y-auto pt-10">
+            <div class="card bg-white w-full max-w-5xl p-10 shadow-2xl animate-fade my-10">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-100 pb-8">
+                    <h2 id="modal-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase">Constructor de Plan</h2>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="routine-form" class="space-y-12">
+                    <input type="hidden" id="routine-id">
+
+                    <!-- Metadata Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        <div class="space-y-8">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Título del Plan Maestro</label>
+                                <input type="text" id="title" required class="input" placeholder="Ej: Powerlifting Nivel 1">
+                            </div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Dificultad</label>
+                                    <select id="difficulty_level" class="input bg-white">
+                                        <option value="Principiante">Iniciación</option>
+                                        <option value="Intermedio">Intermedio</option>
+                                        <option value="Avanzado">Avanzado</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Semanas Totales</label>
+                                    <input type="number" id="plan_duration_weeks" class="input" value="4">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-8 rounded-[32px] border border-slate-100 space-y-6">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Público Objetivo</label>
+                                <div class="flex gap-4">
+                                    <select id="target_gender" class="input bg-white"><option value="Unisex">Cualquiera</option><option value="Hombre">Masculino</option><option value="Mujer">Femenino</option></select>
+                                    <input type="text" id="target_age_group" class="input" placeholder="Edad: 18-45">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Condiciones de Salud</label>
+                                <input type="text" id="health_conditions" class="input" placeholder="Ej: Sin problemas articulares">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Exercise Builder -->
+                    <div class="space-y-8">
+                        <div class="flex items-center gap-6">
+                            <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">Programación Semanal</h3>
+                            <div class="h-px bg-slate-100 flex-grow"></div>
+                            <button type="button" id="add-day" class="btn btn-primary text-[10px] font-black py-2 px-4 uppercase tracking-widest">
+                                <i class="fas fa-calendar-day mr-2"></i> Añadir Jornada
+                            </button>
+                        </div>
+
+                        <div id="days-container" class="space-y-6">
+                            <!-- Los días se generan dinámicamente -->
+                        </div>
+                    </div>
+
+
+                    <div class="pt-10 border-t border-slate-100 flex gap-6">
+                        <button type="submit" id="submit-btn" class="flex-grow btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                            Publicar Plan de Entrenamiento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, renderNavbar, Auth, showPopup, showConfirm, renderAdminSidebar } from './js/utils.js';
+
+        let currentUser = null;
+        let isAdmin = false;
+        let loadedRoutines = [];
+        let exerciseData = [];
+
+        async function initPage() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+            if (!currentUser) return;
+
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                renderAdminSidebar(() => loadRoutines());
+            }
+
+            await loadRoutines();
+        }
+
+        async function loadRoutines() {
+            let query = supabase.from('gym_routines').select('*');
+
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (selectedOwnerId) {
+                query = query.eq('owner_id', selectedOwnerId);
+            } else if (!isAdmin) {
+                query = query.eq('owner_id', currentUser.id);
+            } else {
+                query = query.eq('owner_id', currentUser.id);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+            if (error) return console.error(error);
+            loadedRoutines = data;
+            renderRoutines(data);
+        }
+
+        function renderRoutines(routines) {
+            const list = document.getElementById('rutinas-list');
+            if (routines.length === 0) {
+                list.innerHTML = '<div class="card py-20 text-center text-slate-400 font-medium">Aún no has definido planes maestros de entrenamiento.</div>';
+                return;
+            }
+
+            list.innerHTML = routines.map(r => `
+                <div class="card group hover:border-blue-500 transition-all flex flex-col md:flex-row md:items-center gap-8 animate-fade">
+                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl shrink-0 border border-blue-100 font-black">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="text-xl font-bold text-slate-900 uppercase tracking-tight mb-2">${r.title}</h3>
+                        <div class="flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <span class="px-2 py-0.5 bg-slate-50 border border-slate-100 rounded text-slate-500">${r.difficulty_level}</span>
+                            <span class="flex items-center"><i class="far fa-calendar-alt mr-2 text-blue-400"></i> ${r.plan_duration_weeks} Semanas</span>
+                            <span class="flex items-center"><i class="fas fa-users mr-2 text-blue-400"></i> ${r.target_gender}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-8">
+                        <button onclick="editRoutine('${r.id}')" class="btn bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white transition-all px-4 py-2 text-[10px] font-black uppercase tracking-widest">
+                            Editar <i class="fas fa-edit ml-2"></i>
+                        </button>
+                        <button onclick="deleteRoutine('${r.id}')" class="btn bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all w-10 h-10 border border-slate-100">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const modal = document.getElementById('modal-rutina');
+        const form = document.getElementById('routine-form');
+        const daysContainer = document.getElementById('days-container');
+
+        document.getElementById('btn-nueva-rutina').onclick = () => {
+            form.reset();
+            document.getElementById('routine-id').value = '';
+            daysContainer.innerHTML = '';
+            document.getElementById('modal-title').innerText = 'Nuevo Maestro de Rutina';
+            modal.style.display = 'block';
+        };
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+        document.getElementById('add-day').onclick = () => addDayUI();
+
+        function addDayUI(dayData = { day: 'Lunes', exercises: [] }) {
+            const dayId = 'day-' + Date.now();
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'card bg-slate-50 border-slate-200 p-8 animate-fade day-row';
+            dayDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-8 border-b border-slate-200 pb-4">
+                    <div class="flex items-center gap-4">
+                        <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Nombre del Día</label>
+                        <input type="text" class="day-title input bg-white font-bold w-48 py-2 px-4" value="${dayData.day}">
+                    </div>
+                    <button type="button" class="text-slate-300 hover:text-red-500 transition-colors" onclick="this.closest('.day-row').remove()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="exercises-list space-y-4"></div>
+                <button type="button" class="mt-6 text-[10px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-widest transition-colors flex items-center gap-2" onclick="addExerciseUI(this.previousElementSibling)">
+                    <i class="fas fa-plus-circle"></i> Añadir Ejercicio
+                </button>
+            `;
+            daysContainer.appendChild(dayDiv);
+            const exList = dayDiv.querySelector('.exercises-list');
+            dayData.exercises.forEach(ex => addExerciseUI(exList, ex));
+        }
+
+        window.addExerciseUI = (container, ex = { name: '', sets: '', reps: '', video: '' }) => {
+            const exDiv = document.createElement('div');
+            exDiv.className = 'grid grid-cols-1 lg:grid-cols-4 gap-4 bg-white p-5 rounded-2xl border border-slate-100 items-end animate-fade exercise-row';
+            exDiv.innerHTML = `
+                <div class="lg:col-span-1">
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Ejercicio</label>
+                    <input type="text" class="ex-name input text-xs font-bold" placeholder="Ej: Press de Banca" value="${ex.name}">
+                </div>
+                <div>
+                                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Series y Reps</label>
+                    <div class="flex gap-2">
+                        <input type="text" class="ex-sets input text-xs font-bold text-center" placeholder="3" value="${ex.sets}">
+                        <input type="text" class="ex-reps input text-xs font-bold text-center" placeholder="12" value="${ex.reps}">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">URL Video</label>
+                    <input type="text" class="ex-video input text-xs" placeholder="YouTube/Cloudinary" value="${ex.video}">
+                </div>
+                <div class="flex justify-end lg:pb-3">
+                    <button type="button" class="text-slate-200 hover:text-red-400 transition-colors" onclick="this.closest('.exercise-row').remove()">
+                        <i class="fas fa-minus-circle"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(exDiv);
+        }
+
+        window.editRoutine = (id) => {
+            const r = loadedRoutines.find(x => x.id == id);
+            if (!r) return;
+
+            document.getElementById('routine-id').value = r.id;
+            document.getElementById('title').value = r.title;
+            document.getElementById('difficulty_level').value = r.difficulty_level;
+            document.getElementById('plan_duration_weeks').value = r.plan_duration_weeks;
+            document.getElementById('target_gender').value = r.target_gender;
+            document.getElementById('target_age_group').value = r.target_age_group;
+            document.getElementById('health_conditions').value = r.health_conditions;
+
+            daysContainer.innerHTML = '';
+            if (r.exercises && Array.isArray(r.exercises)) {
+                r.exercises.forEach(day => addDayUI(day));
+            }
+
+            document.getElementById('modal-title').innerText = 'Modificar Plan';
+            modal.style.display = 'block';
+        };
+
+        window.deleteRoutine = async (id) => {
+            if (await showConfirm('Eliminar Plan', '¿Estás seguro de que deseas eliminar este plan maestro?')) {
+                const { error } = await supabase.from('gym_routines').delete().eq('id', id);
+                if (error) return showPopup('Error', error.message, 'error');
+                loadRoutines();
+            }
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('routine-id').value;
+
+            const weeksData = [];
+            document.querySelectorAll('.day-row').forEach(dayRow => {
+                const dayName = dayRow.querySelector('.day-title').value;
+                const exercises = [];
+                dayRow.querySelectorAll('.exercise-row').forEach(exRow => {
+                    exercises.push({
+                        name: exRow.querySelector('.ex-name').value,
+                        sets: exRow.querySelector('.ex-sets').value,
+                        reps: exRow.querySelector('.ex-reps').value,
+                        video: exRow.querySelector('.ex-video').value
+                    });
+                });
+                weeksData.push({ day: dayName, exercises });
+            });
+
+            const data = {
+                title: document.getElementById('title').value,
+                difficulty_level: document.getElementById('difficulty_level').value,
+                plan_duration_weeks: parseInt(document.getElementById('plan_duration_weeks').value) || 4,
+                target_gender: document.getElementById('target_gender').value,
+                target_age_group: document.getElementById('target_age_group').value,
+                health_conditions: document.getElementById('health_conditions').value,
+                exercises: weeksData,
+                owner_id: isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id
+            };
+
+            const { error } = id
+                ? await supabase.from('gym_routines').update(data).eq('id', id)
+                : await supabase.from('gym_routines').insert([data]);
+
+            if (error) return showPopup('Error', error.message, 'error');
+
+            modal.style.display = 'none';
+            showPopup('Guardado', 'El plan maestro ha sido actualizado correctamente.');
+            loadRoutines();
+        };
+
+        initPage();
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/adminEntrenadores.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Equipo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Equipo</h1>
+                <p class="text-slate-500 font-medium mt-1">Directorio de entrenadores y personal profesional.</p>
+            </div>
+            <button id="btn-nuevo-entrenador" class="btn btn-primary px-6 py-3 uppercase tracking-widest text-xs font-black shadow-lg shadow-blue-600/20">
+                <i class="fas fa-plus mr-2"></i> Nuevo Perfil
+            </button>
+        </header>
+
+        <div id="trainers-grid" class="admin-grid animate-fade">
+            <!-- Cargando -->
+            <div class="card flex flex-col items-center justify-center py-20 text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                <span class="text-sm font-black uppercase tracking-widest">Sincronizando equipo...</span>
+            </div>
+        </div>
+
+        <!-- Trainer Modal -->
+        <div id="modal-entrenador" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 overflow-y-auto">
+            <div class="card bg-white w-full max-w-2xl p-10 shadow-2xl animate-fade my-10">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 id="modal-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase">Perfil Profesional</h2>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="trainer-form" class="space-y-8">
+                    <input type="hidden" id="trainer-id">
+
+                    <div class="flex flex-col items-center mb-10">
+                        <div id="drop-zone" class="w-32 h-32 rounded-full border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center cursor-pointer hover:border-blue-400 transition-all relative group overflow-hidden">
+                            <img id="image-preview" src="" class="w-full h-full object-cover rounded-full hidden">
+                            <div id="upload-placeholder" class="text-center">
+                                <i class="fas fa-camera text-2xl text-slate-300"></i>
+                                <span class="block text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Foto</span>
+                            </div>
+                            <input type="file" id="image-input" class="hidden" accept="image/*">
+                        </div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">Imagen de Perfil</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre del Profesional</label>
+                            <input type="text" id="full_name" required class="input" placeholder="Ej: Coach Manuel">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Especialidad Principal</label>
+                            <input type="text" id="specialty" required class="input" placeholder="Ej: Powerlifting, Yoga">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Biografía Corta</label>
+                            <textarea id="bio" rows="4" class="input resize-none" placeholder="Breve descripción del perfil..."></textarea>
+                        </div>
+                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Enlace WhatsApp</label>
+                                <input type="text" id="whatsapp_url" class="input" placeholder="https://wa.me/...">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Enlace Instagram</label>
+                                <input type="text" id="instagram_url" class="input" placeholder="@usuario">
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="pt-6">
+                        <button type="submit" id="submit-btn" class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                            Guardar Perfil de Entrenador
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, renderNavbar, Auth, showPopup, uploadToCloudinary, setupDragAndDrop, showConfirm, renderAdminSidebar } from './js/utils.js';
+
+        let currentUser = null;
+        let isAdmin = false;
+        let imageUrl = '';
+        let loadedTrainers = [];
+
+        async function initPage() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+            if (!currentUser) return;
+
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                renderAdminSidebar(() => loadTrainers());
+            }
+
+            await loadTrainers();
+        }
+
+        async function loadTrainers() {
+            let query = supabase.from('gym_trainers').select('*');
+
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (selectedOwnerId) {
+                query = query.eq('owner_id', selectedOwnerId);
+            } else if (!isAdmin) {
+                query = query.eq('owner_id', currentUser.id);
+            } else {
+                query = query.eq('owner_id', currentUser.id);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+            if (error) return console.error(error);
+            loadedTrainers = data;
+            renderTrainers(data);
+        }
+
+        function renderTrainers(trainers) {
+            const grid = document.getElementById('trainers-grid');
+            if (trainers.length === 0) {
+                grid.innerHTML = '<div class="card col-span-full py-20 text-center text-slate-400 font-medium">No has registrado entrenadores en tu equipo.</div>';
+                return;
+            }
+
+            grid.innerHTML = trainers.map(t => `
+                <div class="card group hover:border-blue-500 transition-all text-center flex flex-col items-center py-10 animate-fade">
+                    <div class="w-24 h-24 rounded-full border-4 border-slate-50 overflow-hidden mb-6 bg-slate-100 shadow-sm relative">
+                        <img src="${t.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80'}"
+                             class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-1">${t.full_name}</h3>
+                    <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">${t.specialty}</p>
+                    <p class="text-xs text-slate-500 mb-8 line-clamp-2 px-4">${t.bio || 'Sin descripción'}</p>
+
+                    <div class="mt-auto flex gap-3 pt-6 border-t border-slate-100 w-full px-6">
+                        <button onclick="editTrainer('${t.id}')" class="flex-grow btn bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest py-2">
+                            EDITAR
+                        </button>
+                        <button onclick="deleteTrainer('${t.id}')" class="btn bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all w-10 h-10">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const modal = document.getElementById('modal-entrenador');
+        const form = document.getElementById('trainer-form');
+        const imagePreview = document.getElementById('image-preview');
+        const placeholder = document.getElementById('upload-placeholder');
+
+        document.getElementById('btn-nuevo-entrenador').onclick = () => {
+            form.reset();
+            document.getElementById('trainer-id').value = '';
+            imageUrl = '';
+            imagePreview.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            document.getElementById('modal-title').innerText = 'Nuevo Entrenador';
+            modal.style.display = 'flex';
+        };
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+        setupDragAndDrop(
+            document.getElementById('drop-zone'),
+            document.getElementById('image-input'),
+            async (file) => {
+                const btn = document.getElementById('submit-btn');
+                btn.disabled = true;
+                btn.innerText = 'PROCESANDO...';
+
+                imageUrl = await uploadToCloudinary(file);
+                imagePreview.src = imageUrl;
+                imagePreview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+
+                btn.disabled = false;
+                btn.innerText = 'GUARDAR PERFIL';
+            }
+        );
+
+        window.editTrainer = (id) => {
+            const t = loadedTrainers.find(x => x.id == id);
+            if (!t) return;
+
+            document.getElementById('trainer-id').value = t.id;
+            document.getElementById('full_name').value = t.full_name;
+            document.getElementById('specialty').value = t.specialty;
+            document.getElementById('bio').value = t.bio || '';
+            document.getElementById('whatsapp_url').value = t.whatsapp_url || '';
+            document.getElementById('instagram_url').value = t.instagram_url || '';
+
+            if (t.image_url) {
+                imageUrl = t.image_url;
+                imagePreview.src = t.image_url;
+                imagePreview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+
+            document.getElementById('modal-title').innerText = 'Modificar Perfil';
+            modal.style.display = 'flex';
+        };
+
+        window.deleteTrainer = async (id) => {
+            if (await showConfirm('Eliminar Perfil', '¿Seguro que deseas eliminar este profesional de tu equipo?')) {
+                const { error } = await supabase.from('gym_trainers').delete().eq('id', id);
+                if (error) return showPopup('Error', error.message, 'error');
+                loadTrainers();
+            }
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('trainer-id').value;
+            const data = {
+                full_name: document.getElementById('full_name').value,
+                specialty: document.getElementById('specialty').value,
+                bio: document.getElementById('bio').value,
+                image_url: imageUrl,
+                whatsapp_url: document.getElementById('whatsapp_url').value,
+                instagram_url: document.getElementById('instagram_url').value,
+                owner_id: isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id
+            };
+
+            const { error } = id
+                ? await supabase.from('gym_trainers').update(data).eq('id', id)
+                : await supabase.from('gym_trainers').insert([data]);
+
+            if (error) return showPopup('Error', error.message, 'error');
+
+            modal.style.display = 'none';
+            showPopup('Guardado', 'El perfil profesional se ha actualizado correctamente.');
+            loadTrainers();
+        };
+
+        initPage();
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/nutricion.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrición y Recetas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <header class="bg-emerald-600 py-32 text-white text-center relative overflow-hidden">
+        <div class="container mx-auto px-4 z-10 relative">
+            <h1 class="text-7xl font-black mb-6 tracking-tighter uppercase">Nutrición <span class="text-emerald-950">Inteligente</span></h1>
+            <p class="text-emerald-100 text-2xl max-w-4xl mx-auto font-light leading-relaxed">
+                Recetas profesionales diseñadas para potenciar tu rendimiento y salud.
+            </p>
+        </div>
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/20 rounded-full blur-[100px] animate-pulse"></div>
+    </header>
+
+    <main class="container mx-auto px-4 py-20">
+        <!-- Advanced Filters -->
+        <div class="bg-white rounded-[40px] shadow-sm border border-slate-100 p-8 mb-20 flex flex-wrap gap-6 items-center justify-between">
+            <div class="flex flex-wrap gap-4">
+                <select id="filter-diet" class="bg-slate-50 px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 border-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                    <option value="All">Dieta: Todas</option>
+                    <option value="Keto">Keto</option>
+                    <option value="Vegana">Vegana</option>
+                    <option value="Alta Proteína">Alta Proteína</option>
+                    <option value="Sin Gluten">Sin Gluten</option>
+                    <option value="Equilibrada">Equilibrada</option>
+                </select>
+                <select id="filter-category" class="bg-slate-50 px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 border-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                    <option value="All">Categoría: Todas</option>
+                    <option value="Desayuno">Desayuno</option>
+                    <option value="Almuerzo">Almuerzo</option>
+                    <option value="Cena">Cena</option>
+                    <option value="Postre Fitness">Postre</option>
+                    <option value="Snack Proteico">Snack</option>
+                </select>
+            </div>
+            <div id="results-count" class="text-[10px] font-black uppercase tracking-widest text-slate-400">Escaneando recetario...</div>
+        </div>
+
+        <div id="recipes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+            <!-- Cargando... -->
+        </div>
+    </main>
+
+    <!-- Ultra Recipe Modal -->
+    <div id="recipe-modal" class="fixed inset-0 bg-slate-950/95 z-[100] hidden items-center justify-center p-4 backdrop-blur-2xl">
+        <div class="bg-white w-full max-w-6xl max-h-[95vh] rounded-[60px] overflow-hidden shadow-2xl flex flex-col xl:flex-row border border-white/10 animate-fade-in">
+            <div class="xl:w-5/12 h-80 xl:h-auto relative">
+                <img id="modal-image" src="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-12">
+                    <span id="modal-category" class="bg-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-2xl w-fit shadow-xl shadow-emerald-900/40 mb-4"></span>
+                    <h2 id="modal-title" class="text-5xl font-black text-white leading-[0.9] tracking-tighter"></h2>
+                </div>
+            </div>
+            <div class="xl:w-7/12 p-8 xl:p-16 overflow-y-auto bg-white flex flex-col">
+                <div class="flex justify-between items-start mb-12">
+                    <div class="grid grid-cols-4 gap-4 w-full mr-12">
+                        <div class="bg-slate-50 p-6 rounded-[35px] text-center border border-slate-100 transition-all hover:bg-emerald-50 group">
+                            <span id="modal-calories" class="block text-3xl font-black text-emerald-600 group-hover:scale-110 transition-transform"></span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Kcal</span>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-[35px] text-center border border-slate-100 transition-all hover:bg-emerald-50 group">
+                            <span id="modal-protein" class="block text-3xl font-black text-slate-800 group-hover:scale-110 transition-transform"></span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Proteínas</span>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-[35px] text-center border border-slate-100 transition-all hover:bg-emerald-50 group">
+                            <span id="modal-carbs" class="block text-3xl font-black text-slate-800 group-hover:scale-110 transition-transform"></span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Carbs</span>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-[35px] text-center border border-slate-100 transition-all hover:bg-emerald-50 group">
+                            <span id="modal-fats" class="block text-3xl font-black text-slate-800 group-hover:scale-110 transition-transform"></span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Grasas</span>
+                        </div>
+                    </div>
+                    <button onclick="closeModal()" class="text-slate-200 hover:text-emerald-500 transition-all text-3xl"><i class="fas fa-times-circle"></i></button>
+                </div>
+
+                <div class="space-y-16">
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <div>
+                            <h4 class="text-xl font-black text-slate-800 mb-6 flex items-center uppercase tracking-tighter">
+                                <span class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xs mr-3 font-black">01</span> Ingredientes
+                            </h4>
+                            <div id="modal-ingredients" class="text-slate-600 leading-loose whitespace-pre-wrap pl-6 border-l-2 border-emerald-50 text-sm italic"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-black text-slate-800 mb-6 flex items-center uppercase tracking-tighter">
+                                <span class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xs mr-3 font-black">02</span> Bio-Datos
+                            </h4>
+                            <div class="space-y-4">
+                                <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center text-xs font-bold uppercase tracking-widest text-slate-400 border border-slate-100">
+                                    <span>⏱ Tiempo</span> <span id="modal-time" class="text-slate-900 font-black"></span>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center text-xs font-bold uppercase tracking-widest text-slate-400 border border-slate-100">
+                                    <span>🔪 Dificultad</span> <span id="modal-difficulty" class="text-emerald-600 font-black"></span>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center text-xs font-bold uppercase tracking-widest text-slate-400 border border-slate-100">
+                                    <span>🥗 Estilo</span> <span id="modal-diet" class="text-slate-900 font-black"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xl font-black text-slate-800 mb-8 flex items-center uppercase tracking-tighter">
+                            <span class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xs mr-3 font-black">03</span> Preparación Master
+                        </h4>
+                        <div id="modal-instructions" class="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm bg-slate-50 p-10 rounded-[40px] border border-dashed border-slate-200 border-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase, renderNavbar } from './js/utils.js';
+        renderNavbar();
+
+        const grid = document.getElementById('recipes-grid');
+        const modal = document.getElementById('recipe-modal');
+        let allRecipes = [];
+
+        async function loadRecipes() {
+            const params = new URLSearchParams(window.location.search);
+            const domain = params.get('domain');
+
+            let query = supabase.from('gym_recipes').select('*').order('created_at', { ascending: false });
+
+            if (domain) {
+                // Fetch owner_id for this domain
+                const { data: userData, error: userError } = await supabase.from('wisbe_users')
+                    .select('id')
+                    .ilike('domain', domain.trim())
+                    .eq('role', 'gym-owner')
+                    .maybeSingle();
+
+                if (userData) {
+                    query = query.eq('owner_id', userData.id);
+                } else {
+                    grid.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-20">Gimnasio no encontrado para el dominio especificado.</div>';
+                    document.getElementById('results-count').innerText = '0 Opciones Maestro';
+                    return;
+                }
+            }
+
+            const { data, error } = await query;
+            if (error) return;
+            allRecipes = data;
+            filterRecipes();
+        }
+
+        function filterRecipes() {
+            const diet = document.getElementById('filter-diet').value;
+            const category = document.getElementById('filter-category').value;
+
+            const filtered = allRecipes.filter(r => {
+                return (diet === 'All' || r.diet_type === diet) &&
+                       (category === 'All' || r.category === category);
+            });
+
+            document.getElementById('results-count').innerText = `${filtered.length} Opciones Maestro`;
+            renderGrid(filtered);
+        }
+
+        function renderGrid(data) {
+            grid.innerHTML = data.map(r => `
+                <div class="bg-white rounded-[50px] shadow-sm border border-slate-50 overflow-hidden group hover:shadow-2xl hover:-translate-y-3 transition-all duration-700 animate-fade-in">
+                    <div class="h-64 relative overflow-hidden bg-slate-200">
+                        <img src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600'}"
+                             class="w-full h-full object-cover group-hover:scale-125 transition duration-1000 grayscale-[0.2] group-hover:grayscale-0">
+                        <div class="absolute top-6 left-6">
+                            <span class="bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-2xl">${r.category}</span>
+                        </div>
+                    </div>
+                    <div class="p-10">
+                        <h3 class="text-2xl font-black text-slate-800 mb-6 tracking-tight line-clamp-1">${r.title}</h3>
+                        <div class="flex justify-between items-center mb-10 border-t border-b border-slate-50 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <div class="text-center">
+                                <span class="block text-2xl font-black text-emerald-600 mb-1">${r.calories || 0}</span>
+                                <span>Kcal</span>
+                            </div>
+                            <div class="text-center">
+                                <span class="block text-2xl font-black text-slate-800 mb-1">${r.protein || 0}g</span>
+                                <span>Prote</span>
+                            </div>
+                        </div>
+                        <button onclick='openModal(${JSON.stringify(r).replace(/'/g, "&apos;")})'
+                                class="w-full py-5 bg-slate-900 hover:bg-emerald-600 text-white font-black rounded-3xl transition-all shadow-xl hover:shadow-emerald-200 uppercase tracking-widest text-xs">
+                            Receta Master
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.openModal = (r) => {
+            document.getElementById('modal-title').innerText = r.title;
+            document.getElementById('modal-category').innerText = r.category;
+            document.getElementById('modal-calories').innerText = r.calories || 0;
+            document.getElementById('modal-protein').innerText = r.protein || 0;
+            document.getElementById('modal-carbs').innerText = r.carbs || 0;
+            document.getElementById('modal-fats').innerText = r.fats || 0;
+            document.getElementById('modal-time').innerText = r.prep_time || '20 min';
+            document.getElementById('modal-difficulty').innerText = r.difficulty || 'Media';
+            document.getElementById('modal-diet').innerText = r.diet_type || 'Equilibrada';
+            document.getElementById('modal-ingredients').innerText = r.ingredients || 'Secretos culinarios no especificados.';
+            document.getElementById('modal-instructions').innerText = r.instructions || 'Sigue los instintos maestros de un chef fitness.';
+            document.getElementById('modal-image').src = r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800';
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        window.closeModal = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        ['filter-diet', 'filter-category'].forEach(id => {
+            document.getElementById(id).addEventListener('change', filterRecipes);
+        });
+
+        loadRecipes();
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/rutinas.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes de Entrenamiento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="text-center mb-16 animate-fade">
+            <h1 class="text-4xl font-black text-slate-900 tracking-tight uppercase mb-4">Planes de Entrenamiento</h1>
+            <p class="text-slate-500 font-medium max-w-xl mx-auto">Rutinas profesionales diseñadas para cada nivel y objetivo deportivo.</p>
+        </header>
+
+        <div id="routines-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 animate-fade">
+            <!-- Cargando -->
+            <div class="col-span-full py-20 text-center">
+                <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-4"></i>
+                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Sincronizando planes de entrenamiento...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Routine Modal -->
+    <div id="routine-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-5xl rounded-[40px] shadow-2xl relative animate-fade my-10 min-h-[80vh] flex flex-col">
+            <button id="close-modal" class="absolute top-8 right-8 w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all z-10">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+
+            <div id="modal-header" class="p-10 lg:p-16 border-b border-slate-100 bg-slate-50"></div>
+            <div id="modal-body" class="p-10 lg:p-16 flex-grow overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase, renderNavbar } from './js/utils.js';
+        renderNavbar();
+
+        let allRoutines = [];
+        const container = document.getElementById('routines-container');
+
+        async function fetchRoutines() {
+            const params = new URLSearchParams(window.location.search);
+            const domain = params.get('domain');
+
+            let query = supabase.from('gym_routines').select('*');
+
+            if (domain) {
+                const { data: userData } = await supabase
+                    .from('wisbe_users')
+                    .select('id')
+                    .ilike('domain', domain.trim())
+                    .maybeSingle();
+
+                if (userData) {
+                    query = query.eq('owner_id', userData.id);
+                }
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+            if (error) return console.error(error);
+
+            allRoutines = data;
+            renderRoutines(data);
+        }
+
+        function renderRoutines(routines) {
+            if (routines.length === 0) {
+                container.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 font-medium">No se han publicado rutinas todavía.</div>';
+                return;
+            }
+
+            container.innerHTML = routines.map(r => `
+                <div class="card group hover:border-blue-500 transition-all cursor-pointer flex flex-col p-8" onclick="openRoutine('${r.id}')">
+                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-8 group-hover:bg-blue-600 group-hover:text-white transition-colors border border-blue-100">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 uppercase tracking-tight">${r.title}</h3>
+                    <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8">
+                        <span class="px-2 py-0.5 bg-slate-50 rounded border border-slate-100">${r.difficulty_level}</span>
+                        <span class="flex items-center"><i class="far fa-calendar-alt mr-2"></i> ${r.plan_duration_weeks} Semanas</span>
+                    </div>
+                    <div class="mt-auto pt-6 border-t border-slate-100 flex items-center text-blue-600 text-[10px] font-black uppercase tracking-widest">
+                        Explorar Plan <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.openRoutine = (id) => {
+            const r = allRoutines.find(x => x.id === id);
+            if (!r) return;
+
+            const modal = document.getElementById('routine-modal');
+            const header = document.getElementById('modal-header');
+            const body = document.getElementById('modal-body');
+
+            header.innerHTML = `
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <span class="text-blue-600 text-[10px] font-black uppercase tracking-widest block mb-2">${r.difficulty_level}</span>
+                        <h2 class="text-4xl font-black text-slate-900 tracking-tight uppercase">${r.title}</h2>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="bg-white px-6 py-3 rounded-2xl border border-slate-200">
+                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Duración</p>
+                            <p class="text-slate-700 font-bold">${r.plan_duration_weeks} Semanas</p>
+                        </div>
+                        <div class="bg-white px-6 py-3 rounded-2xl border border-slate-200">
+                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Público</p>
+                            <p class="text-slate-700 font-bold">${r.target_gender}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            body.innerHTML = `
+                <div class="space-y-12">
+                    ${(r.exercises || []).map((day, idx) => `
+                        <div class="animate-fade" style="animation-delay: ${idx * 0.1}s">
+                            <div class="flex items-center gap-4 mb-8">
+                                <h4 class="text-sm font-black text-slate-900 uppercase tracking-widest bg-slate-100 px-6 py-2 rounded-full border border-slate-200">${day.day}</h4>
+                                <div class="h-px bg-slate-100 flex-grow"></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                ${day.exercises.map(ex => `
+                                    <div class="card bg-slate-50 border-slate-200 flex items-center justify-between p-6">
+                                        <div>
+                                            <p class="text-slate-900 font-bold uppercase tracking-tight text-sm mb-1">${ex.name}</p>
+                                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                                                <span class="text-blue-500">${ex.sets}</span> Series &times; <span class="text-blue-500">${ex.reps}</span> Repeticiones
+                                            </p>
+                                        </div>
+                                        ${ex.video ? `
+                                            <a href="${ex.video}" target="_blank" class="w-10 h-10 bg-white text-blue-500 rounded-full flex items-center justify-center border border-slate-200 hover:bg-blue-500 hover:text-white transition-all shadow-sm">
+                                                <i class="fas fa-play text-xs ml-0.5"></i>
+                                            </a>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+
+        document.getElementById('close-modal').onclick = () => {
+            document.getElementById('routine-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+
+        fetchRoutines();
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/entrenadores.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipo Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="text-center mb-20 animate-fade">
+            <h1 class="text-4xl font-black text-slate-900 tracking-tight uppercase mb-4 tracking-tighter">Equipo de Especialistas</h1>
+            <p class="text-slate-500 font-medium max-w-xl mx-auto">Profesionales certificados dedicados a maximizar tu potencial y alcanzar tus metas.</p>
+        </header>
+
+        <div id="trainers-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 animate-fade">
+            <!-- Cargando -->
+            <div class="col-span-full py-20 text-center">
+                <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-4"></i>
+                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Sincronizando perfiles profesionales...</p>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, renderNavbar } from './js/utils.js';
+        renderNavbar();
+
+        const container = document.getElementById('trainers-container');
+
+        async function fetchTrainers() {
+            const params = new URLSearchParams(window.location.search);
+            const domain = params.get('domain');
+
+            let query = supabase.from('gym_trainers').select('*');
+
+            if (domain) {
+                const { data: userData } = await supabase
+                    .from('wisbe_users')
+                    .select('id')
+                    .ilike('domain', domain.trim())
+                    .maybeSingle();
+
+                if (userData) {
+                    query = query.eq('owner_id', userData.id);
+                }
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+            if (error) return console.error(error);
+
+            renderTrainers(data);
+        }
+
+        function renderTrainers(trainers) {
+            if (trainers.length === 0) {
+                container.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 font-medium italic">No se han registrado entrenadores para este dominio.</div>';
+                return;
+            }
+
+            container.innerHTML = trainers.map(t => `
+                <div class="card bg-white group hover:border-blue-500 transition-all flex flex-col items-center text-center p-10 animate-fade">
+                    <div class="w-28 h-28 rounded-full border-4 border-slate-50 overflow-hidden mb-8 shadow-sm group-hover:scale-105 transition-transform duration-500">
+                        <img src="${t.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80'}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="mb-6">
+                        <span class="text-blue-600 text-[10px] font-black uppercase tracking-widest block mb-2 px-3 py-1 bg-blue-50 rounded-full inline-block border border-blue-100">${t.specialty}</span>
+                        <h3 class="text-xl font-bold text-slate-900 tracking-tight uppercase">${t.full_name}</h3>
+                    </div>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3">${t.bio || 'Sin descripción adicional disponible.'}</p>
+                    <div class="mt-auto w-full pt-8 border-t border-slate-100 flex gap-4">
+                        ${t.whatsapp_url ? `
+                            <a href="${t.whatsapp_url}" target="_blank" class="flex-grow btn btn-primary py-3 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20">
+                                Contactar <i class="fab fa-whatsapp ml-2"></i>
+                            </a>
+                        ` : ''}
+                        ${t.instagram_url ? `
+                            <a href="https://instagram.com/${t.instagram_url.replace('@','')}" target="_blank" class="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center hover:bg-slate-200 hover:text-blue-500 transition-all">
+                                <i class="fab fa-instagram text-xl"></i>
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        fetchTrainers();
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/login.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso al Panel Administrativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-6">
+    <div class="card w-full max-w-lg p-12 bg-white shadow-2xl animate-fade">
+        <header class="text-center mb-12">
+            <div class="w-16 h-16 bg-blue-600 text-white rounded-3xl flex items-center justify-center text-3xl font-black mx-auto mb-8 shadow-xl shadow-blue-600/30">
+                P
+            </div>
+            <h1 id="page-title" class="text-3xl font-black text-slate-900 tracking-tight uppercase mb-3">Acceder al Panel</h1>
+            <p id="page-desc" class="text-slate-500 font-medium">Gestión profesional de contenidos fitness.</p>
+        </header>
+
+        <form id="auth-form" class="space-y-8">
+            <div id="register-fields" class="hidden space-y-6">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre Completo</label>
+                    <input type="text" id="full_name" class="input" placeholder="Nombre y Apellidos">
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Correo Electrónico</label>
+                    <input type="email" id="email" required class="input" placeholder="correo@ejemplo.com">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Contraseña</label>
+                    <input type="password" id="password" required class="input" placeholder="••••••••">
+                </div>
+            </div>
+
+            <div class="pt-6">
+                <button type="submit" id="submit-btn" class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                    Ingresar al Panel
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 text-center">
+            <p class="text-sm font-medium text-slate-500">
+                <span id="toggle-text">¿Aún no tienes cuenta?</span>
+                <button id="toggle-auth" class="text-blue-600 font-black uppercase tracking-widest text-[10px] ml-2 hover:text-blue-700 transition-colors">Regístrate Aquí</button>
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { Auth, showPopup } from './js/utils.js';
+
+        let isLogin = true;
+        const form = document.getElementById('auth-form');
+        const registerFields = document.getElementById('register-fields');
+        const submitBtn = document.getElementById('submit-btn');
+        const toggleBtn = document.getElementById('toggle-auth');
+        const pageTitle = document.getElementById('page-title');
+        const pageDesc = document.getElementById('page-desc');
+        const toggleText = document.getElementById('toggle-text');
+
+        toggleBtn.onclick = () => {
+            isLogin = !isLogin;
+            registerFields.classList.toggle('hidden');
+            pageTitle.innerText = isLogin ? 'Acceder al Panel' : 'Crear Nueva Cuenta';
+            pageDesc.innerText = isLogin ? 'Gestión profesional de contenidos fitness.' : 'Regístrate para comenzar a gestionar tu propio centro.';
+            submitBtn.innerText = isLogin ? 'Ingresar al Panel' : 'Registrar Cuenta';
+            toggleText.innerText = isLogin ? '¿Aún no tienes cuenta?' : '¿Ya eres usuario?';
+            toggleBtn.innerText = isLogin ? 'Regístrate Aquí' : 'Inicia Sesión';
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'PROCESANDO...';
+
+                if (isLogin) {
+                    await Auth.login(email, password);
+                    window.location.href = 'gym.html';
+                } else {
+                    const fullName = document.getElementById('full_name').value;
+
+                    if (!fullName) throw new Error('El nombre es obligatorio');
+
+                    await Auth.register(email, password, {
+                        full_name: fullName,
+                        role: 'gym-owner',
+                        business_unit: 'gym'
+                    });
+
+                    showPopup('Registro Exitoso', 'Por favor, confirma tu correo electrónico para activar el acceso.', 'success');
+                    isLogin = true;
+                    toggleBtn.click();
+                }
+            } catch (err) {
+                showPopup('Error de Acceso', err.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = isLogin ? 'Ingresar al Panel' : 'Registrar Cuenta';
+            }
+        };
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/index.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Gestión Fitness</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-16">
+        <!-- Hero Section -->
+        <section class="text-center max-w-4xl mx-auto mb-20 animate-fade">
+            <h1 class="text-5xl font-black text-slate-900 mb-6 tracking-tight">
+                Gestiona tu centro fitness con una <span class="text-blue-600">interfaz profesional</span>
+            </h1>
+            <p class="text-xl text-slate-600 mb-10 leading-relaxed">
+                Controla rutinas, nutrición y equipo desde un solo lugar. Nuestra plataforma te permite integrar módulos dinámicos directamente en tu propio sitio web.
+            </p>
+            <div class="flex justify-center gap-4">
+                <a href="login.html" class="btn btn-primary px-8 py-4 text-lg">Comenzar Ahora</a>
+                <a href="#features" class="btn bg-white border border-slate-200 px-8 py-4 text-lg hover:bg-slate-50 transition-colors">Ver Funciones</a>
+            </div>
+        </section>
+
+        <!-- Features Grid -->
+        <section id="features" class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+            <div class="card flex flex-col items-center text-center p-10 hover:shadow-lg transition-shadow">
+                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Nutrición Inteligente</h3>
+                <p class="text-slate-600">Crea y organiza recetas detalladas con macros automáticos para tus clientes.</p>
+            </div>
+            <div class="card flex flex-col items-center text-center p-10 hover:shadow-lg transition-shadow">
+                <div class="w-16 h-16 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center text-2xl mb-6">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Rutinas Dinámicas</h3>
+                <p class="text-slate-600">Diseña planes de entrenamiento semanales con videos y guías paso a paso.</p>
+            </div>
+            <div class="card flex flex-col items-center text-center p-10 hover:shadow-lg transition-shadow">
+                <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl mb-6">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Gestión de Equipo</h3>
+                <p class="text-slate-600">Administra perfiles de entrenadores y personal de forma centralizada.</p>
+            </div>
+        </section>
+
+        <!-- Integration Preview -->
+        <section class="card bg-slate-900 border-none p-12 text-white overflow-hidden relative">
+            <div class="relative z-10 max-w-2xl">
+                <h2 class="text-3xl font-bold mb-4">Integración Invisible</h2>
+                <p class="text-slate-400 mb-8 text-lg">
+                    Copia un simple código y muestra tus contenidos en tu propio dominio. Sin marcas externas, manteniendo tu identidad corporativa.
+                </p>
+                <a href="gym.html" class="text-blue-400 font-bold hover:text-blue-300 flex items-center gap-2">
+                    Explorar el panel de administración <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
+        </section>
+    </main>
+
+    <footer class="container mx-auto px-4 py-12 border-t border-slate-200 text-center">
+        <p class="text-slate-500 text-sm">&copy; 2024 Plataforma de Gestión Fitness. Todos los derechos reservados.</p>
+    </footer>
+
+    <script type="module">
+        import { renderNavbar } from './js/utils.js';
+        renderNavbar();
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/js/config.js
+================================================================================
+
+const CONFIG = {
+    SUPABASE_URL: 'https://wwcmtqqbxdamxebkfsqk.supabase.co',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3Y210cXFieGRhbXhlYmtmc3FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MDUzNzksImV4cCI6MjA5MDA4MTM3OX0.4C5gGKxJrpF5BS8FfEAu8FLa9VudEHxCYxwwtb991Io',
+    CLOUDINARY_CLOUD_NAME: 'de3n9pg8x',
+    CLOUDINARY_UPLOAD_PRESET: 'vikingdevBdd'
+};
+export default CONFIG;
+
+
+================================================================================
+RUTA: docs/js/utils.js
+================================================================================
+
+import CONFIG from './config.js';
+
+// Inicializar Supabase (usando la librería cargada vía CDN en el HTML)
+const { createClient } = window.supabase;
+export const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+
+/**
+ * Helper para subir a Cloudinary
+ */
+export async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CONFIG.CLOUDINARY_UPLOAD_PRESET);
+
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData
+    });
+
+    if (!response.ok) {
+        throw new Error('Error al subir imagen a Cloudinary');
+    }
+
+    const data = await response.json();
+    return data.secure_url;
+}
+
+/**
+ * Muestra un popup estilizado
+ */
+export function showPopup(title, message, type = 'success') {
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    const bgClass = type === 'success' ? 'bg-emerald-50' : 'bg-red-50';
+    const textClass = type === 'success' ? 'text-emerald-500' : 'text-red-500';
+    const btnClass = type === 'success' ? 'hover:bg-emerald-600' : 'hover:bg-red-600';
+
+    const popup = document.createElement('div');
+    popup.className = `fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in`;
+    popup.innerHTML = `
+        <div class="bg-white rounded-[40px] p-10 max-w-sm w-full text-center shadow-2xl border border-white/20">
+            <div class="w-20 h-20 ${bgClass} ${textClass} rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
+                <i class="fas ${icon}"></i>
+            </div>
+            <h3 class="text-2xl font-black text-slate-900 mb-2">${title}</h3>
+            <p class="text-slate-500 font-medium mb-8">${message}</p>
+            <button id="popup-close" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs ${btnClass} transition-colors">
+                Entendido
+            </button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    document.body.style.overflow = 'hidden';
+
+    return new Promise((resolve) => {
+        document.getElementById('popup-close').onclick = () => {
+            popup.remove();
+            document.body.style.overflow = 'auto';
+            resolve();
+        };
+    });
+}
+
+/**
+ * Muestra un popup de confirmación
+ */
+export function showConfirm(title, message) {
+    const popup = document.createElement('div');
+    popup.className = `fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in`;
+    popup.innerHTML = `
+        <div class="bg-white rounded-[40px] p-10 max-w-sm w-full text-center shadow-2xl border border-white/20">
+            <div class="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <h3 class="text-2xl font-black text-slate-900 mb-2">${title}</h3>
+            <p class="text-slate-500 font-medium mb-8">${message}</p>
+            <div class="flex space-x-3">
+                <button id="confirm-cancel" class="flex-grow py-4 bg-slate-100 text-slate-400 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-colors">
+                    Cancelar
+                </button>
+                <button id="confirm-ok" class="flex-grow py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition-colors">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    document.body.style.overflow = 'hidden';
+
+    return new Promise((resolve) => {
+        document.getElementById('confirm-cancel').onclick = () => {
+            popup.remove();
+            document.body.style.overflow = 'auto';
+            resolve(false);
+        };
+        document.getElementById('confirm-ok').onclick = () => {
+            popup.remove();
+            document.body.style.overflow = 'auto';
+            resolve(true);
+        };
+    });
+}
+
+export function setupDragAndDrop(dropZone, fileInput, callback) {
+    if (!dropZone || !fileInput) return;
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.add('border-blue-500', 'bg-blue-50', 'scale-[1.02]');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50', 'scale-[1.02]');
+        }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            // Restore DataTransfer for robust file setting
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            callback(file);
+        }
+    }, false);
+
+    dropZone.addEventListener('click', (e) => {
+        // Prevent event from bubbling if it's the input itself
+        if (e.target === fileInput) return;
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) callback(file);
+    });
+}
+
+/**
+ * SISTEMA DE AUTENTICACIÓN REAL (Supabase Auth)
+ */
+export const Auth = {
+    async register(email, password, metadata) {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: metadata
+            }
+        });
+        if (error) throw error;
+        return data;
+    },
+
+    async login(email, password) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) throw error;
+
+        // Check if session is confirmed
+        if (!data.session) {
+             throw new Error('DEBES CONFIRMAR TU EMAIL. Revisa tu bandeja de entrada.');
+        }
+
+        // Fetch user profile from wisbe_users
+        let { data: profile, error: profileError } = await supabase
+            .from('wisbe_users')
+            .select('*')
+            .eq('id', data.user.id)
+            .maybeSingle();
+
+        // SELF-HEALING: If profile is missing (trigger/RLS issue), use RPC Bridge
+        if (!profile || profileError) {
+            console.warn('Profile missing or blocked by RLS, using Security Bridge RPC...');
+            const metadata = data.user.user_metadata || {};
+
+            const { data: rpcProfile, error: rpcError } = await supabase
+                .rpc('create_profile_if_missing', {
+                    p_id: data.user.id,
+                    p_email: data.user.email,
+                    p_full_name: metadata.full_name || '',
+                    p_domain: metadata.domain || null,
+                    p_role: metadata.role || 'gym-owner',
+                    p_owner_id: metadata.owner_id || null,
+                    p_business_unit: metadata.business_unit || 'gym'
+                });
+
+            if (rpcError) {
+                console.warn('RPC Security Bridge failed (Silent Fallback):', rpcError);
+                // No lanzamos error aquí, dejaremos que el fallback de abajo actúe
+            }
+            profile = rpcProfile;
+        }
+
+        if (!profile) {
+            // Last resort: manual profile creation if everything failed
+            profile = {
+                id: data.user.id,
+                email: data.user.email,
+                username: data.user.email.split('@')[0],
+                full_name: data.user.user_metadata?.full_name || '',
+                domain: data.user.user_metadata?.domain || '',
+                role: data.user.user_metadata?.role || 'gym-owner',
+                owner_id: data.user.user_metadata?.owner_id || null
+            };
+        }
+
+        localStorage.setItem('gym_user', JSON.stringify(profile));
+        return profile;
+    },
+
+    async logout() {
+        await supabase.auth.signOut();
+        localStorage.removeItem('gym_user');
+        window.location.href = 'index.html';
+    },
+
+    getUser() {
+        const user = localStorage.getItem('gym_user');
+        return user ? JSON.parse(user) : null;
+    },
+
+    getSelectedOwnerId() {
+        return localStorage.getItem('admin_selected_owner_id') || null;
+    },
+
+    setSelectedOwnerId(id) {
+        if (!id) localStorage.removeItem('admin_selected_owner_id');
+        else localStorage.setItem('admin_selected_owner_id', id);
+    },
+
+    async checkAccess(rolesPermitidos = []) {
+        // First check session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            window.location.href = 'login.html';
+            return null;
+        }
+
+        // Always fetch fresh profile to ensure role updates are reflected immediately
+        const { data: freshProfile, error: profileError } = await supabase
+            .from('wisbe_users')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+        if (profileError || !freshProfile) {
+            console.warn('Could not fetch fresh profile in checkAccess, falling back to local storage');
+        } else {
+            localStorage.setItem('gym_user', JSON.stringify(freshProfile));
+        }
+
+        const user = this.getUser();
+        if (!user) {
+            window.location.href = 'login.html';
+            return null;
+        }
+
+        if (rolesPermitidos.length > 0 && !rolesPermitidos.includes(user.role)) {
+            await showPopup('Acceso no autorizado', 'No tienes permisos para ver esta sección', 'error');
+            window.location.href = 'index.html';
+            return null;
+        }
+        return user;
+    }
+};
+
+/**
+ * Helper para navegación (Navbar común)
+ */
+export function renderNavbar() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('embedded')) return; // Hide navbar if embedded
+
+    const nav = document.getElementById('main-nav');
+    if (!nav) return;
+
+    const user = Auth.getUser();
+    const isAdminOrOwner = user && ['gym-admin', 'gym-owner'].includes(user.role);
+
+    nav.className = "nav-container mb-8";
+    nav.innerHTML = `
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold tracking-tight text-slate-900 uppercase">Dashboard</a>
+            <ul class="hidden md:flex space-x-6 items-center font-semibold text-sm text-slate-600">
+                <li><a href="index.html" class="hover:text-blue-600 transition-colors">Inicio</a></li>
+                <li><a href="nutricion.html" class="hover:text-blue-600 transition-colors">Nutrición</a></li>
+                <li><a href="rutinas.html" class="hover:text-blue-600 transition-colors">Rutinas</a></li>
+                <li><a href="entrenadores.html" class="hover:text-blue-600 transition-colors">Equipo</a></li>
+                <li><a href="test.html" class="btn btn-primary text-xs uppercase tracking-wider">Hacer Test</a></li>
+
+                ${isAdminOrOwner ? `
+                    <li><a href="gym.html" class="text-slate-400 hover:text-blue-500 transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
+                ` : ''}
+
+                ${user ? `
+                    <li class="flex items-center space-x-3 border-l border-white/10 pl-8 ml-4">
+                        <span class="text-[10px] text-slate-500 font-black">${user.full_name || user.username} ${user.role.replace('gym-', '')}</span>
+                        <button id="logout-btn" class="text-red-400 hover:text-red-300 transition-colors" title="Cerrar Sesión">
+                            <i class="fas fa-power-off text-lg"></i>
+                        </button>
+                    </li>
+                ` : `
+                    <li class="pl-8 ml-4">
+                        <a href="login.html" class="text-blue-500 hover:text-blue-400 transition-colors flex items-center">
+                            <i class="fas fa-user-circle mr-2 text-lg"></i> Login
+                        </a>
+                    </li>
+                `}
+            </ul>
+            <button class="md:hidden text-white text-2xl"><i class="fas fa-bars"></i></button>
+        </div>
+    `;
+
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.onclick = () => Auth.logout();
+    }
+}
+
+/**
+ * Renderiza el panel lateral para administradores (Wisbe)
+ */
+export async function renderAdminSidebar(onOwnerChange) {
+    const user = Auth.getUser();
+    if (!user || user.role !== 'gym-admin') return;
+
+    // Crear el contenedor del panel
+    const sidebar = document.createElement('div');
+    sidebar.id = 'admin-sidebar';
+    sidebar.className = 'admin-sidebar-closed';
+    sidebar.innerHTML = `
+        <div class="admin-sidebar-tab">
+            <span>FIND PROJECT</span>
+        </div>
+        <div class="admin-sidebar-content">
+            <h3 class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-6">Find Project</h3>
+            <input type="text" id="owner-search" class="input mb-6 text-sm" placeholder="Domain or Name...">
+            <div id="owners-list-sidebar" class="space-y-3 overflow-y-auto flex-grow mb-6 pr-2 custom-scrollbar">
+                <!-- Owners here -->
+            </div>
+            <div class="pt-6 border-t border-slate-100 mt-auto">
+                <h3 class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-4">Active Project</h3>
+                <div id="active-project-name" class="p-4 bg-white rounded-2xl border border-slate-100 font-bold text-slate-800 text-sm shadow-sm">
+                    Mi Biblioteca
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(sidebar);
+
+    const tab = sidebar.querySelector('.admin-sidebar-tab');
+    const searchInput = sidebar.querySelector('#owner-search');
+    const listContainer = sidebar.querySelector('#owners-list-sidebar');
+    const activeProjectDisplay = sidebar.querySelector('#active-project-name');
+
+    tab.onclick = () => {
+        sidebar.classList.toggle('admin-sidebar-open');
+        sidebar.classList.toggle('admin-sidebar-closed');
+    };
+
+    // Cargar dueños
+    const { data: owners, error } = await supabase
+        .from('wisbe_users')
+        .select('id, full_name, email, domain')
+        .eq('role', 'gym-owner')
+        .order('full_name');
+
+    if (!error && owners) {
+        const renderList = (filter = '') => {
+            const currentId = Auth.getSelectedOwnerId() || '';
+            const filtered = owners.filter(o =>
+                (o.full_name || '').toLowerCase().includes(filter.toLowerCase()) ||
+                (o.email || '').toLowerCase().includes(filter.toLowerCase()) ||
+                (o.domain || '').toLowerCase().includes(filter.toLowerCase())
+            );
+
+            // Update active display
+            const currentOwner = owners.find(o => o.id === currentId);
+            activeProjectDisplay.innerText = currentOwner ? (currentOwner.full_name || currentOwner.email) : 'Mi Biblioteca';
+
+            listContainer.innerHTML = `
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-blue-500 transition-all owner-item ${currentId === '' ? 'active-owner' : ''}" data-id="">
+                    <span class="block font-bold text-slate-800 text-sm">Mi Biblioteca</span>
+                </div>
+            ` + filtered.map(o => `
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:border-blue-500 transition-all owner-item ${o.id === currentId ? 'active-owner' : ''}" data-id="${o.id}">
+                    <span class="block font-bold text-slate-800 text-sm">${o.full_name || o.email}</span>
+                    ${o.domain ? `<span class="block text-[10px] text-slate-400 font-medium">${o.domain}</span>` : ''}
+                </div>
+            `).join('');
+
+            listContainer.querySelectorAll('.owner-item').forEach(item => {
+                item.onclick = () => {
+                    const id = item.dataset.id;
+                    Auth.setSelectedOwnerId(id);
+                    renderList(searchInput.value);
+                    if (onOwnerChange) onOwnerChange(id);
+                };
+            });
+        };
+
+        searchInput.oninput = (e) => renderList(e.target.value);
+        renderList();
+    }
+}
+
+
+================================================================================
+RUTA: docs/css/styles.css
+================================================================================
+
+
+:root {
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --radius-lg: 1rem;
+    --radius-md: 0.5rem;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+}
+
+/* Base Utility Classes */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.input {
+    width: 100%;
+    padding: 0.625rem;
+    background-color: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input:focus {
+    border-color: var(--primary);
+    ring: 2px solid var(--primary);
+}
+
+/* Specific Layouts */
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.nav-container {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Admin Sidebar Styles */
+#admin-sidebar {
+    position: fixed;
+    top: 140px; /* Align with header */
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-sidebar-closed {
+    left: -380px !important;
+}
+
+.admin-sidebar-open {
+    left: 0 !important;
+}
+
+.admin-sidebar-content {
+    width: 380px; /* Made bigger */
+    background: white;
+    padding: 2.5rem;
+    border-radius: 0 40px 40px 0;
+    box-shadow: 20px 0 60px rgba(0,0,0,0.1);
+    border: 2px solid var(--border);
+    border-left: none;
+    display: flex;
+    flex-direction: column;
+    min-height: 85vh; /* Increased height */
+}
+
+.admin-sidebar-tab {
+    width: 40px; /* Thinner by default */
+    height: 160px;
+    background: var(--primary);
+    border-radius: 0 24px 24px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 10px 0 30px rgba(59, 130, 246, 0.3);
+    position: absolute;
+    right: -40px; /* Match thinner width */
+    top: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-sidebar-tab:hover {
+    width: 60px; /* Expands on hover */
+    right: -60px;
+}
+
+.admin-sidebar-tab span {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 2px;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.active-owner {
+    border-color: var(--primary) !important; /* Changed to Blue */
+    border-width: 2px !important;
+    background-color: #eff6ff !important; /* Light blue background */
+}
+
+/* Hide scrollbar but keep functionality */
+.custom-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+.custom-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+
+================================================================================
+RUTA: docs/widget.js
+================================================================================
+
+(function() {
+    // Detectar automáticamente la base URL desde el script
+    const scriptTag = document.currentScript;
+    let BASE_URL = 'https://wisbe.xyz';
+    if (scriptTag && scriptTag.src.includes('widget.js')) {
+        BASE_URL = new URL(scriptTag.src).origin;
+    }
+
+    class WisbeWidget extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open' });
+        }
+
+        connectedCallback() {
+            const type = this.getAttribute('type') || 'rutinas';
+            const domain = this.getAttribute('domain') || window.location.hostname;
+            const height = this.getAttribute('height') || '800px';
+
+            const iframe = document.createElement('iframe');
+            iframe.src = `${BASE_URL}/${type}.html?domain=${domain}&embedded=true`;
+            iframe.style.width = '100%';
+            iframe.style.height = height;
+            iframe.style.border = 'none';
+            iframe.style.borderRadius = '20px';
+            iframe.style.overflow = 'hidden';
+
+            this.shadowRoot.appendChild(iframe);
+        }
+    }
+
+    if (!customElements.get('wisbe-widget')) {
+        customElements.define('wisbe-widget', WisbeWidget);
+    }
+
+    // Compatibilidad con divs tradicionales
+    function initWidgets() {
+        const containers = [
+            { id: 'wisbe-rutinas', type: 'rutinas' },
+            { id: 'wisbe-nutricion', type: 'nutricion' },
+            { id: 'wisbe-entrenadores', type: 'entrenadores' }
+        ];
+
+        containers.forEach(c => {
+            const el = document.getElementById(c.id);
+            if (el && !el.dataset.initialized) {
+                const domain = el.getAttribute('domain') || window.location.hostname;
+                const height = el.getAttribute('height') || '800px';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = `${BASE_URL}/${c.type}.html?domain=${domain}&embedded=true`;
+                iframe.style.width = '100%';
+                iframe.style.height = height;
+                iframe.style.border = 'none';
+                iframe.style.borderRadius = '20px';
+                iframe.style.overflow = 'hidden';
+
+                el.appendChild(iframe);
+                el.dataset.initialized = 'true';
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWidgets);
+    } else {
+        initWidgets();
+    }
+})();
+
+
+================================================================================
+RUTA: docs/test_widget.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista Previa de Integración</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="widget.js"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="text-center mb-16 animate-fade">
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase mb-4 tracking-tighter">Previsualización de Widget</h1>
+            <p class="text-slate-500 font-medium">Así es como tus clientes verán los módulos integrados en tu sitio web.</p>
+        </header>
+
+        <div class="space-y-20 animate-fade">
+            <!-- Widget Nutrición -->
+            <section class="card bg-white p-12 shadow-sm border-slate-200">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-[10px] font-black text-blue-600 uppercase tracking-widest px-4 py-1 bg-blue-50 rounded-full inline-block border border-blue-100">Módulo Nutrición</h2>
+                    <div class="h-px bg-slate-100 flex-grow ml-8"></div>
+                </div>
+                <div id="wisbe-nutricion" domain="wisbe.xyz" class="rounded-3xl border border-slate-100 shadow-xl overflow-hidden min-h-[600px] bg-white"></div>
+            </section>
+
+            <!-- Widget Rutinas -->
+            <section class="card bg-white p-12 shadow-sm border-slate-200">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-[10px] font-black text-orange-600 uppercase tracking-widest px-4 py-1 bg-orange-50 rounded-full inline-block border border-orange-100">Módulo Rutinas</h2>
+                    <div class="h-px bg-slate-100 flex-grow ml-8"></div>
+                </div>
+                <div id="wisbe-rutinas" domain="wisbe.xyz" class="rounded-3xl border border-slate-100 shadow-xl overflow-hidden min-h-[600px] bg-white"></div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        import { renderNavbar } from './js/utils.js';
+        renderNavbar();
+    </script>
+</body>
+</html>
+
+
+================================================================================
+RUTA: docs/test.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valoración Fitness</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12 max-w-2xl">
+        <header class="text-center mb-16 animate-fade">
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase mb-4 tracking-tighter">Fitness Assessment</h1>
+            <p class="text-slate-500 font-medium">Completa este cuestionario para que nuestros profesionales puedan diseñar un plan a tu medida.</p>
+        </header>
+
+        <div class="card bg-white p-10 animate-fade">
+            <form id="fitness-test" class="space-y-12">
+                <div class="space-y-10">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">1. Objetivo principal</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="btn bg-slate-50 border border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-500 transition-all cursor-pointer p-4">
+                                <input type="radio" name="goal" value="perder_peso" class="hidden"> 📉 Perder Grasa
+                            </label>
+                            <label class="btn bg-slate-50 border border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-500 transition-all cursor-pointer p-4">
+                                <input type="radio" name="goal" value="ganar_musculo" class="hidden"> 💪 Ganar Músculo
+                            </label>
+                            <label class="btn bg-slate-50 border border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-500 transition-all cursor-pointer p-4">
+                                <input type="radio" name="goal" value="mejorar_resistencia" class="hidden"> 🏃‍♂️ Resistencia
+                            </label>
+                            <label class="btn bg-slate-50 border border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-500 transition-all cursor-pointer p-4">
+                                <input type="radio" name="goal" value="mantenimiento" class="hidden"> ✨ Salud General
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">2. Peso Actual</label>
+                            <input type="number" class="input" placeholder="Ej: 75">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">3. Altura</label>
+                            <input type="number" class="input" placeholder="Ej: 175">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">4. Nivel de Actividad Semanal</label>
+                        <select class="input bg-white cursor-pointer py-3 px-6 font-bold text-slate-600">
+                            <option value="sedentario">Sedentario</option>
+                            <option value="ligero">Ligero</option>
+                            <option value="moderado">Moderado</option>
+                            <option value="intenso">Intenso</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">5. Restricciones / Notas Médicas</label>
+                        <textarea rows="4" class="input resize-none" placeholder="Indica lesiones, alergias o preferencias especiales..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                    Enviar Valoración
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script type="module">
+        import { renderNavbar, showPopup } from './js/utils.js';
+        renderNavbar();
+
+        document.getElementById('fitness-test').onsubmit = (e) => {
+            e.preventDefault();
+            showPopup('Enviado Correctamente', 'Tu valoración ha sido registrada. Un profesional revisará tus datos pronto.', 'success');
+        };
+    </script>
+</body>
+</html>
