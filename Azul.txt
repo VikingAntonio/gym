@@ -1,27 +1,45 @@
 -- ######################################################
--- # CONFIGURACIÓN DE ACCESO GLOBAL PARA WISBE (Azul.txt) #
+-- # REPARACIÓN DE EMERGENCIA - WISBE (Azul.txt) #
 -- ######################################################
--- Este script otorga permisos CRUD completos a los usuarios 'gym-admin'
--- sobre todos los perfiles, recetas, rutinas y equipo.
+-- Ejecuta este script para desbloquear la lista de usuarios si se queda cargando.
+
+-- 1. REPARACIÓN DE FUNCIÓN IS_ADMIN (Ultra-rápida y no recursiva)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  -- Usamos directamente los metadatos del JWT para evitar consultar tablas
+  RETURN (auth.jwt() -> 'user_metadata' ->> 'role') = 'gym-admin';
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
 
 DO $$
 BEGIN
-    -- 1. Permisos para wisbe_users
+    -- 2. RESET DE POLÍTICAS PARA WISBE_USERS
+    -- Borramos políticas conflictivas previas
     DROP POLICY IF EXISTS "Admins full" ON public.wisbe_users;
-    CREATE POLICY "Admins full" ON public.wisbe_users FOR ALL TO authenticated USING (public.is_admin());
-
+    DROP POLICY IF EXISTS "Users view own or owner group" ON public.wisbe_users;
     DROP POLICY IF EXISTS "Users can insert their own profile" ON public.wisbe_users;
-    CREATE POLICY "Users can insert their own profile" ON public.wisbe_users FOR INSERT WITH CHECK (auth.uid() = id);
+    DROP POLICY IF EXISTS "Enable read access for all users" ON public.wisbe_users;
 
-    -- 2. Permisos para gym_recipes
+    -- 3. NUEVAS POLÍTICAS LIMPIAS
+    -- Admins tienen control total
+    CREATE POLICY "Admins full" ON public.wisbe_users FOR ALL TO authenticated
+    USING ( public.is_admin() );
+
+    -- Usuarios ven su perfil o el de su grupo
+    CREATE POLICY "Users view self or group" ON public.wisbe_users FOR SELECT TO authenticated
+    USING ( auth.uid() = id OR owner_id = auth.uid() OR public.is_admin() );
+
+    -- Permitir registro inicial
+    CREATE POLICY "Users insert self" ON public.wisbe_users FOR INSERT WITH CHECK (auth.uid() = id);
+
+    -- 4. OTRAS TABLAS (Admin full access)
     DROP POLICY IF EXISTS "Admins manage all recipes" ON public.gym_recipes;
     CREATE POLICY "Admins manage all recipes" ON public.gym_recipes FOR ALL TO authenticated USING (public.is_admin());
 
-    -- 3. Permisos para gym_routines
     DROP POLICY IF EXISTS "Admins manage all routines" ON public.gym_routines;
     CREATE POLICY "Admins manage all routines" ON public.gym_routines FOR ALL TO authenticated USING (public.is_admin());
 
-    -- 4. Permisos para gym_trainers
     DROP POLICY IF EXISTS "Admins manage all trainers" ON public.gym_trainers;
     CREATE POLICY "Admins manage all trainers" ON public.gym_trainers FOR ALL TO authenticated USING (public.is_admin());
 END $$;
