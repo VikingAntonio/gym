@@ -1,0 +1,27 @@
+LISTA DE ARCHIVOS PARA MIGRACIÓN (SOLO RUTAS):
+
+PANEL ADMINISTRATIVO:
+- docs/gym.html
+- docs/adminUsuarios.html
+- docs/adminNutricion.html
+- docs/adminRutinas.html
+- docs/adminEntrenadores.html
+
+VISTAS PÚBLICAS:
+- docs/nutricion.html
+- docs/rutinas.html
+- docs/entrenadores.html
+
+SISTEMA DE ACCESO Y CONFIGURACIÓN:
+- docs/login.html
+- docs/index.html
+- docs/js/config.js
+- docs/js/utils.js
+
+ESTILOS Y ACTIVOS:
+- docs/css/styles.css
+
+INTEGRACIÓN (WIDGET):
+- docs/widget.js
+- docs/test_widget.html
+- docs/test.html
