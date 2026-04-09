@@ -215,9 +215,12 @@
                 let query = supabase.from('wisbe_users').select('*');
 
                 const selectedOwnerId = Auth.getSelectedOwnerId();
-                if (isAdmin && selectedOwnerId) {
-                    query = query.eq('owner_id', selectedOwnerId);
-                } else if (!isAdmin && currentUser?.id) {
+                if (isAdmin) {
+                    if (selectedOwnerId) {
+                        query = query.eq('owner_id', selectedOwnerId);
+                    }
+                    // Si es admin y no hay owner seleccionado, NO filtramos para ver TODO
+                } else if (currentUser?.id) {
                     query = query.eq('owner_id', currentUser.id);
                 }
 

@@ -159,8 +159,10 @@
             let query = supabase.from('gym_recipes').select('*');
 
             const selectedOwnerId = Auth.getSelectedOwnerId();
-            if (isAdmin && selectedOwnerId) {
-                query = query.eq('owner_id', selectedOwnerId);
+            if (isAdmin) {
+                if (selectedOwnerId) {
+                    query = query.eq('owner_id', selectedOwnerId);
+                }
             } else {
                 query = query.eq('owner_id', currentUser.id);
             }
