@@ -37,7 +37,7 @@
                     </thead>
                     <tbody id="users-list" class="divide-y divide-slate-100">
                         <tr>
-                            <td colspan="4" class="px-6 py-12 text-center text-slate-400 font-medium italic">
+                            <td colspan="5" class="px-6 py-12 text-center text-slate-400 font-medium italic">
                                 Sincronizando con base de datos...
                             </td>
                         </tr>
@@ -122,22 +122,49 @@
         let loadedUsers = [];
         let loadedOwners = [];
 
-        async function initPage() {
-            renderNavbar();
-            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
-            if (!currentUser) return;
+        // Función de entrada ultra-segura
+        function initPage() {
+            try {
+                renderNavbar();
 
-            isAdmin = currentUser.role === 'gym-admin';
+                // 1. Identidad inmediata desde caché para no bloquear
+                const user = Auth.getUser();
+                if (user) {
+                    currentUser = user;
+                    isAdmin = user.role === 'gym-admin';
+                    if (isAdmin) {
+                        document.getElementById('th-business')?.classList.remove('hidden');
+                        document.getElementById('business-group')?.classList.remove('hidden');
+                        document.getElementById('owner-group')?.classList.remove('hidden');
+                        renderAdminSidebar(() => loadUsers());
+                        loadOwners();
+                    }
+                }
 
-            if (isAdmin) {
-                document.getElementById('th-business').classList.remove('hidden');
-                document.getElementById('business-group').classList.remove('hidden');
-                document.getElementById('owner-group').classList.remove('hidden');
-                await loadOwners();
-                renderAdminSidebar(() => loadUsers());
+                // 2. Cargar lista de usuarios DE INMEDIATO
+                loadUsers();
+
+                // 3. Validación de sesión en segundo plano (no bloqueante)
+                supabase.auth.getSession().then(({data: {session}}) => {
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    // Si el usuario es nuevo o cambió, refrescar
+                    if (!currentUser || currentUser.id !== session.user.id) {
+                        Auth.checkAccess(['gym-admin', 'gym-owner']).then(fresh => {
+                            if (fresh) {
+                                currentUser = fresh;
+                                isAdmin = fresh.role === 'gym-admin';
+                                loadUsers();
+                            }
+                        });
+                    }
+                }).catch(e => console.warn("Fallo validación silenciosa:", e));
+
+            } catch (err) {
+                console.error("Fallo crítico init:", err);
             }
-
-            await loadUsers();
         }
 
         async function loadOwners() {
@@ -147,12 +174,14 @@
                     .select('id, full_name, email')
                     .eq('role', 'gym-owner')
                     .order('full_name');
+
                 if (error) throw error;
-                loadedOwners = data;
+
+                loadedOwners = data || [];
                 const select = document.getElementById('owner_id_select');
                 if (select) {
                     select.innerHTML = '<option value="">Sin Asignar</option>' +
-                        data.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
+                        loadedOwners.map(o => `<option value="${o.id}">${o.full_name || o.email}</option>`).join('');
                 }
             } catch (err) {
                 console.error('Error loading owners:', err);
@@ -160,65 +189,112 @@
         }
 
         async function loadUsers() {
-            let query = supabase.from('wisbe_users').select('*');
+            const list = document.getElementById('users-list');
+            if (!list) return;
 
-            const selectedOwnerId = Auth.getSelectedOwnerId();
-            if (isAdmin && selectedOwnerId) {
-                query = query.eq('owner_id', selectedOwnerId);
-            } else if (!isAdmin) {
-                query = query.eq('owner_id', currentUser.id);
+            // 1. Mostrar estado de carga real para confirmar actividad del JS
+            list.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 font-medium italic">
+                <i class="fas fa-sync fa-spin mr-2 text-blue-500"></i> Sincronizando con Wisbe...
+            </td></tr>`;
+
+            // 2. Hang Detector (detección de bucle RLS) - 5 segundos
+            const rlsDetector = setTimeout(() => {
+                if (loadedUsers.length === 0) {
+                    list.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-blue-500 font-medium italic">
+                        <i class="fas fa-shield-alt mb-4 text-3xl block text-blue-400"></i>
+                        <span class="text-lg font-black block mb-2 uppercase tracking-tight">Verificando Permisos Globales</span>
+                        La base de datos está tardando más de lo normal.<br>
+                        <div class="mt-4 p-5 bg-blue-50 border border-blue-100 rounded-[24px] text-[10px] text-blue-700 leading-relaxed uppercase font-black">
+                            Asegúrate de haber ejecutado el script <b class="underline">Azul.txt</b> en Supabase.
+                        </div>
+                    </td></tr>`;
+                }
+            }, 5000);
+
+            try {
+                let query = supabase.from('wisbe_users').select('*');
+
+                const selectedOwnerId = Auth.getSelectedOwnerId();
+                if (isAdmin && selectedOwnerId) {
+                    query = query.eq('owner_id', selectedOwnerId);
+                } else if (!isAdmin && currentUser?.id) {
+                    query = query.eq('owner_id', currentUser.id);
+                }
+
+                const { data, error } = await query.order('created_at', { ascending: false });
+                clearTimeout(rlsDetector);
+
+                if (error) throw error;
+
+                loadedUsers = data || [];
+                renderUsers(loadedUsers);
+            } catch (err) {
+                clearTimeout(rlsDetector);
+                console.error('Load Error:', err);
+                list.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500 font-bold italic">
+                    <i class="fas fa-exclamation-circle mb-2 block"></i> No se pudo cargar la lista: ${err.message}
+                </td></tr>`;
             }
-
-            const { data, error } = await query.order('created_at', { ascending: false });
-            if (error) return console.error(error);
-
-            loadedUsers = data;
-            renderUsers(data);
         }
 
         function renderUsers(users) {
             const list = document.getElementById('users-list');
-            if (users.length === 0) {
-                list.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-medium">No se encontraron registros activos.</td></tr>';
-                return;
-            }
+            if (!list) return;
 
-            list.innerHTML = users.map(user => `
-                <tr class="hover:bg-slate-50 transition-colors group">
-                    <td class="px-6 py-5">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black mr-4 border border-blue-100">
-                                ${user.full_name?.charAt(0) || 'U'}
-                            </div>
-                            <div>
-                                <span class="block text-sm font-bold text-slate-800">${user.full_name || 'Sin Nombre'}</span>
-                                <span class="block text-xs text-slate-400">${user.email}</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-5">
-                        <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-slate-200">
-                            ${user.role.replace('gym-', '')}
-                        </span>
-                    </td>
-                    <td class="px-6 py-5">
-                        <span class="text-sm font-mono text-slate-500">${user.domain || '—'}</span>
-                    </td>
-                    <td class="px-6 py-5 ${isAdmin ? '' : 'hidden'}">
-                        <span class="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase rounded">${user.business_unit || 'gym'}</span>
-                    </td>
-                    <td class="px-6 py-5 text-right">
-                        ${isAdmin ? `
-                            <button onclick="editUser('${user.id}')" class="p-2 text-slate-400 hover:text-blue-600 transition-colors mr-2">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="deleteUser('${user.id}')" class="p-2 text-slate-400 hover:text-red-500 transition-colors">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        ` : '<span class="text-[10px] text-slate-300 font-black uppercase italic">Sólo Lectura</span>'}
-                    </td>
-                </tr>
-            `).join('');
+            try {
+                if (!users || users.length === 0) {
+                    list.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 font-medium">No se encontraron registros activos en la base de datos.</td></tr>`;
+                    return;
+                }
+
+                const html = users.map(user => {
+                    if (!user) return '';
+                    const safeRole = (user.role || 'socio').replace('gym-', '');
+                    const safeName = user.full_name || user.email || 'Usuario';
+                    const initial = (safeName.charAt(0) || 'U').toUpperCase();
+
+                    return `
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="px-6 py-5">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black mr-4 border border-blue-100">
+                                        ${initial}
+                                    </div>
+                                    <div>
+                                        <span class="block text-sm font-bold text-slate-800">${safeName}</span>
+                                        <span class="block text-xs text-slate-400">${user.email || '—'}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5">
+                                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-slate-200">
+                                    ${safeRole}
+                                </span>
+                            </td>
+                            <td class="px-6 py-5">
+                                <span class="text-sm font-mono text-slate-500">${user.domain || '—'}</span>
+                            </td>
+                            <td class="px-6 py-5 ${isAdmin ? '' : 'hidden'}">
+                                <span class="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase rounded">${user.business_unit || 'gym'}</span>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                ${isAdmin ? `
+                                    <button onclick="editUser('${user.id}')" class="p-2 text-slate-400 hover:text-blue-600 transition-colors mr-2">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteUser('${user.id}')" class="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                ` : '<span class="text-[10px] text-slate-300 font-black uppercase italic">Sólo Lectura</span>'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                list.innerHTML = html;
+            } catch (err) {
+                console.error("Error en renderUsers:", err);
+                list.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-400">Error visual en la tabla.</td></tr>`;
+            }
         }
 
         const modal = document.getElementById('modal-usuario');
