@@ -16,14 +16,18 @@
             display: block;
             font-family: 'Inter', sans-serif;
             color: #0f172a;
-            --primary: #10b981;
-            --primary-blue: #3b82f6;
+            --emerald-500: #10b981;
+            --emerald-600: #059669;
+            --emerald-100: #d1fae5;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-800: #1e293b;
             --slate-900: #0f172a;
-        }
-
-        .widget-container {
-            width: 100%;
-            box-sizing: border-box;
+            --slate-950: #020617;
         }
 
         .grid-layout {
@@ -37,8 +41,8 @@
             background: white;
             border-radius: 50px;
             overflow: hidden;
-            border: 1px solid #f8fafc;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            border: 1px solid var(--slate-50);
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
             transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
@@ -55,7 +59,7 @@
             height: 256px;
             position: relative;
             overflow: hidden;
-            background: #e2e8f0;
+            background: var(--slate-200);
         }
 
         .card-image {
@@ -67,24 +71,8 @@
         }
 
         .item-card:hover .card-image {
-            transform: scale(1.1);
+            transform: scale(1.25);
             filter: grayscale(0);
-        }
-
-        .category-badge {
-            position: absolute;
-            top: 24px;
-            left: 24px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            padding: 8px 16px;
-            border-radius: 16px;
-            font-size: 10px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--primary);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
         }
 
         .card-content {
@@ -97,14 +85,15 @@
         .card-title {
             font-size: 1.5rem;
             font-weight: 900;
-            color: #1e293b;
+            color: var(--slate-800);
             margin-bottom: 24px;
             line-height: 1.2;
+            letter-spacing: -0.025em;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            text-transform: uppercase;
+            text-transform: none;
         }
 
         .card-macros {
@@ -112,14 +101,14 @@
             justify-content: space-between;
             align-items: center;
             padding: 24px 0;
-            border-top: 1px solid #f1f5f9;
-            border-bottom: 1px solid #f1f5f9;
+            border-top: 1px solid var(--slate-50);
+            border-bottom: 1px solid var(--slate-50);
             margin-bottom: 40px;
             font-size: 10px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: #94a3b8;
+            color: var(--slate-400);
         }
 
         .macro-item {
@@ -133,8 +122,8 @@
             margin-bottom: 4px;
         }
 
-        .macro-highlight { color: var(--primary); }
-        .macro-dark { color: #1e293b; }
+        .macro-highlight { color: var(--emerald-600); }
+        .macro-dark { color: var(--slate-800); }
 
         .btn-action {
             width: 100%;
@@ -154,12 +143,12 @@
         }
 
         .btn-action:hover {
-            background: var(--primary);
+            background: var(--emerald-600);
             box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.2);
         }
 
         .btn-blue:hover {
-            background: var(--primary-blue);
+            background: #3b82f6;
             box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.2);
         }
 
@@ -167,8 +156,8 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
+            background: rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(24px);
             z-index: 10000;
             display: none;
             align-items: center;
@@ -183,24 +172,26 @@
         .modal-container {
             background: white;
             width: 100%;
-            max-width: 1100px;
-            max-height: 90vh;
+            max-width: 1152px;
+            max-height: 95vh;
             border-radius: 60px;
             overflow: hidden;
             display: flex;
             position: relative;
             box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             animation: modalFadeIn 0.5s ease-out;
         }
 
         @keyframes modalFadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .modal-left {
-            width: 45%;
+            width: 41.666667%;
             position: relative;
+            height: auto;
         }
 
         .modal-image {
@@ -220,7 +211,7 @@
         }
 
         .modal-badge {
-            background: var(--primary);
+            background: var(--emerald-500);
             color: white;
             font-size: 10px;
             font-weight: 900;
@@ -230,23 +221,25 @@
             border-radius: 16px;
             width: fit-content;
             margin-bottom: 16px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);
         }
 
         .modal-title {
             font-size: 3rem;
             font-weight: 900;
             color: white;
-            line-height: 1;
+            line-height: 0.9;
             letter-spacing: -0.05em;
-            text-transform: uppercase;
+            text-transform: none;
         }
 
         .modal-right {
-            width: 55%;
+            width: 58.333333%;
             padding: 64px;
             overflow-y: auto;
             background: white;
+            display: flex;
+            flex-direction: column;
         }
 
         .modal-close {
@@ -255,41 +248,42 @@
             right: 32px;
             width: 48px;
             height: 48px;
-            background: #f8fafc;
-            border: none;
+            background: var(--slate-50);
+            border: 1px solid var(--slate-100);
             border-radius: 50%;
             color: #cbd5e1;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
-            z-index: 10;
+            z-index: 100;
         }
 
         .modal-close:hover {
-            color: var(--primary);
+            color: var(--emerald-500);
             background: white;
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            transform: scale(1.1);
         }
 
         .section-title {
             font-size: 1.25rem;
             font-weight: 900;
-            color: #1e293b;
+            color: var(--slate-800);
             margin-bottom: 24px;
             display: flex;
             align-items: center;
             text-transform: uppercase;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.05em;
         }
 
         .section-number {
             width: 32px;
             height: 32px;
-            background: #ecfdf5;
-            color: var(--primary);
+            background: var(--emerald-100);
+            color: var(--emerald-600);
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -299,9 +293,72 @@
             font-weight: 900;
         }
 
-        .blue-number {
-            background: #eff6ff;
-            color: var(--primary-blue);
+        .macro-card {
+            background: var(--slate-50);
+            padding: 24px;
+            border-radius: 35px;
+            text-align: center;
+            border: 1px solid var(--slate-100);
+            transition: all 0.3s;
+        }
+
+        .macro-card:hover {
+            background: #ecfdf5;
+        }
+
+        .macro-card .value {
+            display: block;
+            font-size: 30px;
+            font-weight: 900;
+            color: var(--slate-800);
+        }
+
+        .macro-card .value.highlight {
+            color: var(--emerald-600);
+        }
+
+        .macro-card .label {
+            font-size: 8px;
+            font-weight: 900;
+            color: var(--slate-400);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .bio-data-row {
+            background: var(--slate-50);
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--slate-400);
+            margin-bottom: 16px;
+            border: 1px solid var(--slate-100);
+        }
+
+        .bio-data-row .val {
+            color: var(--slate-900);
+            font-weight: 900;
+        }
+
+        .bio-data-row .val.highlight {
+            color: var(--emerald-600);
+        }
+
+        .instructions-box {
+            background: var(--slate-50);
+            padding: 40px;
+            border-radius: 40px;
+            border: 2px dashed var(--slate-200);
+            color: var(--slate-600);
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
 
         @media (max-width: 1024px) {
@@ -313,10 +370,13 @@
                 width: 100%;
             }
             .modal-left {
-                height: 300px;
+                height: 320px;
             }
             .modal-right {
                 padding: 40px;
+            }
+            .modal-title {
+                font-size: 2rem;
             }
         }
     `;
@@ -386,7 +446,6 @@
                 <div class="item-card" data-recipe='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
                     <div class="card-image-wrapper">
                         <img class="card-image" src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600'}">
-                        <div class="category-badge">${r.category || r.diet_type || 'Nutrición'}</div>
                     </div>
                     <div class="card-content">
                         <h3 class="card-title">${r.title}</h3>
@@ -413,20 +472,31 @@
                         <button class="modal-close" id="modal-close"><i class="fas fa-times"></i></button>
                         <div class="modal-left"><img id="modal-img" class="modal-image" src=""><div class="modal-image-overlay"><div class="modal-badge" id="modal-badge"></div><h2 class="modal-title" id="modal-title"></h2></div></div>
                         <div class="modal-right">
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 48px;">
-                                <div style="background: #f8fafc; padding: 24px 12px; border-radius: 35px; text-align: center; border: 1px solid #f1f5f9;">
-                                    <span style="display: block; font-size: 28px; font-weight: 900; margin-bottom: 4px; color: var(--primary)" id="m-kcal"></span>
-                                    <span style="font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Kcal</span>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 48px;">
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: 100%;">
+                                    <div class="macro-card"><span class="value highlight" id="m-kcal"></span><span class="label">Kcal</span></div>
+                                    <div class="macro-card"><span class="value" id="m-prote"></span><span class="label">Proteínas</span></div>
+                                    <div class="macro-card"><span class="value" id="m-carbs"></span><span class="label">Carbs</span></div>
+                                    <div class="macro-card"><span class="value" id="m-fats"></span><span class="label">Grasas</span></div>
                                 </div>
-                                <div style="background: #f8fafc; padding: 24px 12px; border-radius: 35px; text-align: center; border: 1px solid #f1f5f9;"><span style="display: block; font-size: 28px; font-weight: 900; margin-bottom: 4px;" id="m-prote"></span><span style="font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Proteínas</span></div>
-                                <div style="background: #f8fafc; padding: 24px 12px; border-radius: 35px; text-align: center; border: 1px solid #f1f5f9;"><span style="display: block; font-size: 28px; font-weight: 900; margin-bottom: 4px;" id="m-carbs"></span><span style="font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Carbs</span></div>
-                                <div style="background: #f8fafc; padding: 24px 12px; border-radius: 35px; text-align: center; border: 1px solid #f1f5f9;"><span style="display: block; font-size: 28px; font-weight: 900; margin-bottom: 4px;" id="m-fats"></span><span style="font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Grasas</span></div>
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
-                                <div><h4 class="section-title"><span class="section-number">01</span> Ingredientes</h4><div style="color: #475569; line-height: 1.8; padding-left: 24px; border-left: 2px solid #ecfdf5; font-style: italic; font-size: 14px; margin-bottom: 48px; white-space: pre-wrap;" id="m-ingredients"></div></div>
-                                <div><h4 class="section-title"><span class="section-number">02</span> Bio-Datos</h4><div style="background: #f8fafc; padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 12px; border: 1px solid #f1f5f9;"><span>⏱ Tiempo</span><span style="color: #0f172a; font-weight: 900;" id="m-time"></span></div><div style="background: #f8fafc; padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 12px; border: 1px solid #f1f5f9;"><span>🔪 Dificultad</span><span style="color: var(--primary); font-weight: 900;" id="m-diff"></span></div><div style="background: #f8fafc; padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 12px; border: 1px solid #f1f5f9;"><span>🥗 Estilo</span><span style="color: #0f172a; font-weight: 900;" id="m-diet"></span></div></div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px;">
+                                <div>
+                                    <h4 class="section-title"><span class="section-number">01</span> Ingredientes</h4>
+                                    <div style="color: #475569; line-height: 2; padding-left: 24px; border-left: 2px solid #ecfdf5; font-style: italic; font-size: 14px; margin-bottom: 0; white-space: pre-wrap;" id="m-ingredients"></div>
+                                </div>
+                                <div>
+                                    <h4 class="section-title"><span class="section-number">02</span> Bio-Datos</h4>
+                                    <div class="bio-data-row"><span>⏱ Tiempo</span><span class="val" id="m-time"></span></div>
+                                    <div class="bio-data-row"><span>🔪 Dificultad</span><span class="val highlight" id="m-diff"></span></div>
+                                    <div class="bio-data-row"><span>🥗 Estilo</span><span class="val" id="m-diet"></span></div>
+                                </div>
                             </div>
-                            <div style="margin-top: 48px;"><h4 class="section-title"><span class="section-number">03</span> Preparación Master</h4><div style="background: #f8fafc; padding: 40px; border-radius: 40px; border: 2px dashed #e2e8f0; color: #475569; font-size: 14px; line-height: 1.8; white-space: pre-wrap;" id="m-instructions"></div></div>
+                            <div style="margin-top: 64px;">
+                                <h4 class="section-title"><span class="section-number">03</span> Preparación Master</h4>
+                                <div class="instructions-box" id="m-instructions"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -443,14 +513,14 @@
             s.getElementById('modal-title').innerText = r.title;
             s.getElementById('modal-badge').innerText = r.category || r.diet_type || 'Nutrición';
             s.getElementById('m-kcal').innerText = r.calories || 0;
-            s.getElementById('m-prote').innerText = (r.protein || 0) + 'g';
-            s.getElementById('m-carbs').innerText = (r.carbs || 0) + 'g';
-            s.getElementById('m-fats').innerText = (r.fats || 0) + 'g';
-            s.getElementById('m-ingredients').innerText = cleanData(r.ingredients);
-            s.getElementById('m-instructions').innerText = cleanData(r.instructions);
-            s.getElementById('m-time').innerText = (r.prep_time || 20) + ' MIN';
-            s.getElementById('m-diff').innerText = (r.difficulty || 'MEDIA').toUpperCase();
-            s.getElementById('m-diet').innerText = (r.diet_type || 'EQUILIBRADA').toUpperCase();
+            s.getElementById('m-prote').innerText = (r.protein || 0);
+            s.getElementById('m-carbs').innerText = (r.carbs || 0);
+            s.getElementById('m-fats').innerText = (r.fats || 0);
+            s.getElementById('m-ingredients').innerText = cleanData(r.ingredients) || 'Secretos culinarios no especificados.';
+            s.getElementById('m-instructions').innerText = cleanData(r.instructions) || 'Sigue los instintos maestros de un chef fitness.';
+            s.getElementById('m-time').innerText = (r.prep_time || 20) + ' min';
+            s.getElementById('m-diff').innerText = (r.difficulty || 'Media');
+            s.getElementById('m-diet').innerText = (r.diet_type || 'Equilibrada');
             s.getElementById('modal-overlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -495,7 +565,7 @@
                 <div class="modal-overlay" id="modal-overlay">
                     <div class="modal-container" style="flex-direction: column; max-width: 900px;">
                         <button class="modal-close" id="modal-close"><i class="fas fa-times"></i></button>
-                        <div style="padding: 64px; background: #f8fafc; border-bottom: 1px solid #f1f5f9;"><span id="m-diff" style="color: #3b82f6; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; display: block; margin-bottom: 12px;"></span><h2 id="m-title" style="font-size: 2.5rem; font-weight: 900; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: -0.05em;"></h2></div>
+                        <div style="padding: 64px; background: #f8fafc; border-bottom: 1px solid #f1f5f9;"><span id="m-diff" style="color: #3b82f6; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; display: block; margin-bottom: 12px;"></span><h2 id="m-title" style="font-size: 2.5rem; font-weight: 900; color: #0f172a; margin: 0; text-transform: none; letter-spacing: -0.05em;"></h2></div>
                         <div id="m-body" style="padding: 64px; overflow-y: auto; background: white;"></div>
                     </div>
                 </div>
@@ -540,10 +610,10 @@
                 <div class="item-card" style="padding: 40px; align-items: center; text-align: center;">
                     <div style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 4px solid #f8fafc; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);"><img src="${t.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80'}" style="width: 100%; height: 100%; object-fit: cover;"></div>
                     <span style="background: #eff6ff; color: #3b82f6; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 50px; margin-bottom: 12px; display: inline-block; border: 1px solid #dbeafe;">${t.specialty}</span>
-                    <h3 style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin: 0 0 16px 0; text-transform: uppercase;">${t.full_name}</h3>
+                    <h3 style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin: 0 0 16px 0; text-transform: none;">${t.full_name}</h3>
                     <p style="font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 32px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${t.bio || 'Sin descripción.'}</p>
                     <div style="margin-top: auto; width: 100%; display: flex; gap: 12px;">
-                        ${t.whatsapp_url ? `<a href="${t.whatsapp_url}" target="_blank" style="flex-grow: 1; background: #3b82f6; color: white; padding: 12px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; text-decoration: none; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); transition: all 0.3s;">Contactar</a>` : ''}
+                        ${t.whatsapp_url ? `<a href="${t.whatsapp_url}" target="_blank" style="flex-grow: 1; background: #3b82f6; color: white; padding: 12px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; text-decoration: none; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); transition: all 0.3s; display: flex; align-items: center; justify-content: center;">Contactar</a>` : ''}
                         ${t.instagram_url ? `<a href="https://instagram.com/${t.instagram_url.replace('@','')}" target="_blank" style="width: 44px; height: 44px; background: #f8fafc; color: #64748b; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid #f1f5f9; transition: all 0.3s;"><i class="fab fa-instagram text-xl"></i></a>` : ''}
                     </div>
                 </div>
