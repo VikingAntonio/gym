@@ -169,7 +169,7 @@
             background: #dbeafe; color: #1e40af; border: none;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1000; font-size: 18px;
+            z-index: 1000;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         .close-btn:hover {
@@ -296,7 +296,12 @@
             root.innerHTML = `
                 <div class="modal-overlay" id="overlay" style="display:flex">
                     <div class="modal-container">
-                        <button class="close-btn" id="close-modal"><i class="fas fa-times"></i></button>
+                        <button class="close-btn" id="close-modal">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
                         <div class="modal-image-side">
                             <img src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800'}">
                             <div class="modal-image-overlay">
@@ -415,7 +420,7 @@
         }
     }
 
-    customElements.define('wisbe-gymnutricion', WisbeGymRecetas);
-    customElements.define('wisbe-gymrutinas', WisbeGymRutinas);
-    customElements.define('wisbe-gymstaff', WisbeGymStaff);
+    customElements.define('wisbe-gym-recetas', WisbeGymRecetas);
+    customElements.define('wisbe-gym-rutinas', WisbeGymRutinas);
+    customElements.define('wisbe-gym-staff', WisbeGymStaff);
 })();
