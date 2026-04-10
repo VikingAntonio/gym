@@ -12,11 +12,19 @@
     const COMMON_STYLE = `
         @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-        @import url('https://wisbe.xyz/assets/css/styleGYM.css');
 
         :host {
             display: block;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #0f172a;
+        }
+
+        .widget-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .line-clamp-1 {
@@ -42,6 +50,18 @@
         .animate-fade {
             animation: fadeIn 0.6s ease-out forwards;
         }
+
+        /* Fix for scrollbar in modal */
+        .modal-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
     `;
 
     async function getOwnerIdByDomain(supabaseClient, domain) {
@@ -56,48 +76,28 @@
     }
 
     function cleanData(val) {
-        if (!val) return '';
+        if (val === null || val === undefined) return '';
 
-        const isJson = (str) => {
-            if (typeof str !== 'string') return false;
-            const s = str.trim();
-            return (s.startsWith('[') && s.endsWith(']')) || (s.startsWith('{') && s.endsWith('}'));
-        };
-
-        let result = val;
-
-        if (Array.isArray(result)) {
-            let flattened = [];
-            result.forEach(item => {
-                if (isJson(item)) {
-                    try {
-                        const p = JSON.parse(item);
-                        if (Array.isArray(p)) flattened = flattened.concat(p);
-                        else flattened.push(p);
-                    } catch(e) { flattened.push(item); }
-                } else {
-                    flattened.push(item);
-                }
-            });
-            result = flattened;
+        if (typeof val === 'string') {
+            const trimmed = val.trim();
+            if ((trimmed.startsWith('[') && trimmed.endsWith(']')) || (trimmed.startsWith('{') && trimmed.endsWith('}'))) {
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    return cleanData(parsed);
+                } catch (e) {}
+            }
+            // Remove escaped quotes if any remain from multiple encodings
+            return trimmed.replace(/\\"/g, '"').replace(/^"|"$/g, '').trim();
         }
 
-        if (typeof result === 'string' && isJson(result)) {
-            try {
-                const p = JSON.parse(result);
-                return cleanData(p);
-            } catch(e) { return result.trim(); }
-        }
-
-        if (Array.isArray(result)) {
-            return result
-                .filter(i => i !== null && i !== undefined)
-                .map(i => typeof i === 'string' ? i.trim() : i)
-                .filter(i => i !== '')
+        if (Array.isArray(val)) {
+            return val
+                .map(item => cleanData(item))
+                .filter(item => item !== '')
                 .join('\n');
         }
 
-        return result.toString().trim();
+        return String(val).trim();
     }
 
     class WisbeGymNutricion extends HTMLElement {
@@ -191,12 +191,14 @@
 
             this.shadowRoot.innerHTML = `
                 <style>${COMMON_STYLE}</style>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-                    ${gridHTML}
+                <div class="widget-container">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+                        ${gridHTML}
+                    </div>
                 </div>
-                <div id="recipe-modal" class="fixed inset-0 bg-slate-950/95 z-[100] hidden items-center justify-center p-4 backdrop-blur-2xl">
+                <div id="recipe-modal" class="fixed inset-0 bg-slate-950/95 z-[1000] hidden items-center justify-center p-4 backdrop-blur-2xl">
                     <div class="bg-white w-full max-w-6xl max-h-[95vh] rounded-[60px] overflow-hidden shadow-2xl flex flex-col xl:flex-row border border-white/10 relative animate-fade-in">
-                         <button id="close-modal" class="absolute top-8 right-8 text-slate-200 hover:text-emerald-500 transition-all text-3xl z-50"><i class="fas fa-times-circle"></i></button>
+                         <button id="close-modal" class="absolute top-8 right-8 text-slate-400 hover:text-emerald-500 transition-all text-3xl z-[1050] bg-white/80 rounded-full w-12 h-12 flex items-center justify-center shadow-lg"><i class="fas fa-times-circle"></i></button>
                          <div class="xl:w-5/12 h-80 xl:h-auto relative">
                             <img id="modal-image" src="" class="w-full h-full object-cover">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-12">
@@ -204,7 +206,7 @@
                                 <h2 id="modal-title" class="text-5xl font-black text-white leading-[0.9] tracking-tighter"></h2>
                             </div>
                         </div>
-                        <div class="xl:w-7/12 p-8 xl:p-16 overflow-y-auto bg-white flex flex-col">
+                        <div class="xl:w-7/12 p-8 xl:p-16 overflow-y-auto bg-white flex flex-col modal-scroll">
                             <div class="flex justify-between items-start mb-12">
                                 <div class="grid grid-cols-4 gap-4 w-full mr-12">
                                     <div class="bg-slate-50 p-6 rounded-[35px] text-center border border-slate-100 transition-all hover:bg-emerald-50 group">
@@ -359,7 +361,7 @@
             }
 
             const gridHTML = routines.map(r => `
-                <div class="card group hover:border-blue-500 transition-all cursor-pointer flex flex-col p-8 bg-white border border-slate-200 rounded-3xl btn-open-routine animate-fade" data-routine='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
+                <div class="group hover:border-blue-500 transition-all cursor-pointer flex flex-col p-8 bg-white border border-slate-200 rounded-3xl btn-open-routine animate-fade shadow-sm hover:shadow-xl" data-routine='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
                     <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-8 group-hover:bg-blue-600 group-hover:text-white transition-colors border border-blue-100">
                         <i class="fas fa-dumbbell"></i>
                     </div>
@@ -376,16 +378,18 @@
 
             this.shadowRoot.innerHTML = `
                 <style>${COMMON_STYLE}</style>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                    ${gridHTML}
+                <div class="widget-container">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        ${gridHTML}
+                    </div>
                 </div>
-                <div id="routine-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] hidden items-center justify-center p-4 overflow-y-auto">
+                <div id="routine-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] hidden items-center justify-center p-4 overflow-y-auto">
                     <div class="bg-white w-full max-w-5xl rounded-[40px] shadow-2xl relative my-10 min-h-[80vh] flex flex-col animate-fade">
-                        <button id="close-modal" class="absolute top-8 right-8 w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all z-50">
+                        <button id="close-modal" class="absolute top-8 right-8 w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all z-[1050] shadow-md">
                             <i class="fas fa-times text-xl"></i>
                         </button>
                         <div id="modal-header" class="p-10 lg:p-16 border-b border-slate-100 bg-slate-50"></div>
-                        <div id="modal-body" class="p-10 lg:p-16 flex-grow overflow-y-auto"></div>
+                        <div id="modal-body" class="p-10 lg:p-16 flex-grow overflow-y-auto modal-scroll"></div>
                     </div>
                 </div>
             `;
@@ -528,7 +532,7 @@
             }
 
             const gridHTML = trainers.map(t => `
-                <div class="card bg-white group hover:border-blue-500 transition-all flex flex-col items-center text-center p-10 border border-slate-200 rounded-3xl animate-fade">
+                <div class="group hover:border-blue-500 transition-all flex flex-col items-center text-center p-10 bg-white border border-slate-200 rounded-3xl animate-fade shadow-sm hover:shadow-xl">
                     <div class="w-28 h-28 rounded-full border-4 border-slate-50 overflow-hidden mb-8 shadow-sm group-hover:scale-105 transition-transform duration-500">
                         <img src="${t.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80'}" class="w-full h-full object-cover">
                     </div>
@@ -539,7 +543,7 @@
                     <p class="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3">${t.bio || 'Sin descripción adicional.'}</p>
                     <div class="mt-auto w-full pt-8 border-t border-slate-100 flex gap-4">
                         ${t.whatsapp_url ? `
-                            <a href="${t.whatsapp_url}" target="_blank" class="flex-grow btn btn-primary py-3 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 bg-blue-600 text-white rounded-xl text-center no-underline">
+                            <a href="${t.whatsapp_url}" target="_blank" class="flex-grow py-3 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 bg-blue-600 text-white rounded-xl text-center no-underline hover:bg-blue-700 transition-all">
                                 Contactar <i class="fab fa-whatsapp ml-2"></i>
                             </a>
                         ` : ''}
@@ -554,15 +558,17 @@
 
             this.shadowRoot.innerHTML = `
                 <style>${COMMON_STYLE}</style>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
-                    ${gridHTML}
+                <div class="widget-container">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
+                        ${gridHTML}
+                    </div>
                 </div>
             `;
         }
     }
 
-    if (!customElements.get('wisbe-gymnutricion')) customElements.define('wisbe-gymnutricion', WisbeGymNutricion);
-    if (!customElements.get('wisbe-gymrutinas')) customElements.define('wisbe-gymrutinas', WisbeGymRutinas);
-    if (!customElements.get('wisbe-gymentrenadores')) customElements.define('wisbe-gymentrenadores', WisbeGymEntrenadores);
+    if (!customElements.get('wisbe-gym-recetas')) customElements.define('wisbe-gym-recetas', WisbeGymNutricion);
+    if (!customElements.get('wisbe-gym-rutinas')) customElements.define('wisbe-gym-rutinas', WisbeGymRutinas);
+    if (!customElements.get('wisbe-gym-staff')) customElements.define('wisbe-gym-staff', WisbeGymEntrenadores);
 
 })();
