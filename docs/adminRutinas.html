@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <!-- Widget Section -->
+        <!-- Widget Integration Section -->
         <section class="mt-20">
             <div class="flex items-center justify-between mb-10">
                 <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Integración de Widget</h2>
@@ -191,19 +191,22 @@
             }
 
             const domainText = domain || 'SIN DOMINIO';
-            document.getElementById('user-domain').innerText = domainText;
+            if (document.getElementById('user-domain')) document.getElementById('user-domain').innerText = domainText;
 
-            if (domain) {
-                document.getElementById('script-code').innerText = `<script src="https://wisbe.xyz/wisbeUI.js"></script>`;
-                document.getElementById('widget-code').innerText = `<wisbe-gymrutinas domain="${domain}"></wisbe-gymrutinas>`;
-            } else {
-                document.getElementById('widget-code').innerText = 'ERROR: CONFIGURA TU DOMINIO';
+            const widgetCode = document.getElementById('widget-code');
+            if (widgetCode) {
+                if (domain) {
+                    widgetCode.innerText = `<wisbe-gymrutinas domain="${domain}"></wisbe-gymrutinas>`;
+                } else {
+                    widgetCode.innerText = 'ERROR: CONFIGURA TU DOMINIO';
+                }
             }
         }
 
         window.copyToClipboard = (id) => {
-            const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text).then(() => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            navigator.clipboard.writeText(el.innerText).then(() => {
                 showPopup('¡Copiado!', 'El fragmento de código está listo para usar');
             });
         };
@@ -275,7 +278,6 @@
         document.getElementById('add-day').onclick = () => addDayUI();
 
         function addDayUI(dayData = { day: 'Lunes', exercises: [] }) {
-            const dayId = 'day-' + Date.now();
             const dayDiv = document.createElement('div');
             dayDiv.className = 'card bg-slate-50 border-slate-200 p-8 animate-fade day-row';
             dayDiv.innerHTML = `
@@ -395,6 +397,12 @@
             showPopup('Guardado', 'El plan maestro ha sido actualizado correctamente.');
             loadRoutines();
         };
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.owner-item')) {
+                setTimeout(updateWidgetCode, 500);
+            }
+        });
 
         initPage();
     </script>
