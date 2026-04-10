@@ -330,6 +330,22 @@
             }
         );
 
+        function cleanArrayData(data) {
+            if (!data) return '';
+            if (Array.isArray(data)) return data.join('\n');
+            if (typeof data === 'string') {
+                const trimmed = data.trim();
+                if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                    try {
+                        const parsed = JSON.parse(trimmed);
+                        return cleanArrayData(parsed);
+                    } catch (e) {}
+                }
+                return trimmed;
+            }
+            return String(data);
+        }
+
         window.editRecipe = (id) => {
             const r = loadedRecipes.find(x => x.id == id);
             if (!r) return;
@@ -343,8 +359,8 @@
             document.getElementById('protein').value = r.protein;
             document.getElementById('carbs').value = r.carbs;
             document.getElementById('fats').value = r.fats;
-            document.getElementById('ingredients').value = Array.isArray(r.ingredients) ? r.ingredients.join('\n') : r.ingredients;
-            document.getElementById('instructions').value = Array.isArray(r.instructions) ? r.instructions.join('\n') : r.instructions;
+            document.getElementById('ingredients').value = cleanArrayData(r.ingredients);
+            document.getElementById('instructions').value = cleanArrayData(r.instructions);
 
             if (r.image_url) {
                 imageUrl = r.image_url;
