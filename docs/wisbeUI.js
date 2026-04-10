@@ -2,7 +2,6 @@
     const SUPABASE_URL = 'https://wwcmtqqbxdamxebkfsqk.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3Y210cXFieGRhbXhlYmtmc3FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MDUzNzksImV4cCI6MjA5MDA4MTM3OX0.4C5gGKxJrpF5BS8FfEAu8FLa9VudEHxCYxwwtb991Io';
 
-    // Dynamically load Supabase if not present
     if (typeof supabase === 'undefined') {
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
@@ -10,57 +9,315 @@
     }
 
     const COMMON_STYLE = `
-        @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
         :host {
             display: block;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             color: #0f172a;
+            --primary: #10b981;
+            --primary-blue: #3b82f6;
+            --slate-900: #0f172a;
         }
 
         .widget-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
             width: 100%;
             box-sizing: border-box;
         }
 
-        .line-clamp-1 {
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .line-clamp-3 {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2.5rem;
+            padding: 1rem;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+        .item-card {
+            background: white;
+            border-radius: 50px;
+            overflow: hidden;
+            border: 1px solid #f8fafc;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .item-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+        }
+
+        .card-image-wrapper {
+            height: 256px;
+            position: relative;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1s;
+            filter: grayscale(0.2);
+        }
+
+        .item-card:hover .card-image {
+            transform: scale(1.1);
+            filter: grayscale(0);
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .card-content {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #1e293b;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        .card-macros {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 0;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 40px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #94a3b8;
+        }
+
+        .macro-item {
+            text-align: center;
+        }
+
+        .macro-value {
+            display: block;
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .macro-highlight { color: var(--primary); }
+        .macro-dark { color: #1e293b; }
+
+        .btn-action {
+            width: 100%;
+            padding: 20px;
+            background: var(--slate-900);
+            color: white;
+            font-weight: 900;
+            border-radius: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            margin-top: auto;
+        }
+
+        .btn-action:hover {
+            background: var(--primary);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-blue:hover {
+            background: var(--primary-blue);
+            box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-container {
+            background: white;
+            width: 100%;
+            max-width: 1100px;
+            max-height: 90vh;
+            border-radius: 60px;
+            overflow: hidden;
+            display: flex;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+            animation: modalFadeIn 0.5s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in {
-            animation: fadeIn 0.8s ease forwards;
-        }
-        .animate-fade {
-            animation: fadeIn 0.6s ease-out forwards;
+
+        .modal-left {
+            width: 45%;
+            position: relative;
         }
 
-        /* Fix for scrollbar in modal */
-        .modal-scroll::-webkit-scrollbar {
-            width: 6px;
+        .modal-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        .modal-scroll::-webkit-scrollbar-track {
-            background: #f1f5f9;
+
+        .modal-image-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 48px;
         }
-        .modal-scroll::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
+
+        .modal-badge {
+            background: var(--primary);
+            color: white;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            padding: 8px 20px;
+            border-radius: 16px;
+            width: fit-content;
+            margin-bottom: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4);
+        }
+
+        .modal-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            line-height: 1;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+        }
+
+        .modal-right {
+            width: 55%;
+            padding: 64px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 32px;
+            right: 32px;
+            width: 48px;
+            height: 48px;
+            background: #f8fafc;
+            border: none;
+            border-radius: 50%;
+            color: #cbd5e1;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            color: var(--primary);
+            background: white;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #1e293b;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .section-number {
+            width: 32px;
+            height: 32px;
+            background: #ecfdf5;
+            color: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-right: 12px;
+            font-weight: 900;
+        }
+
+        .blue-number {
+            background: #eff6ff;
+            color: var(--primary-blue);
+        }
+
+        @media (max-width: 1024px) {
+            .modal-container {
+                flex-direction: column;
+                max-height: 95vh;
+            }
+            .modal-left, .modal-right {
+                width: 100%;
+            }
+            .modal-left {
+                height: 300px;
+            }
+            .modal-right {
+                padding: 40px;
+            }
         }
     `;
 
@@ -77,26 +334,19 @@
 
     function cleanData(val) {
         if (val === null || val === undefined) return '';
-
         if (typeof val === 'string') {
-            const trimmed = val.trim();
-            if ((trimmed.startsWith('[') && trimmed.endsWith(']')) || (trimmed.startsWith('{') && trimmed.endsWith('}'))) {
+            let trimmed = val.trim();
+            while ((trimmed.startsWith('[') && trimmed.endsWith(']')) || (trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('"') && trimmed.endsWith('"'))) {
                 try {
                     const parsed = JSON.parse(trimmed);
-                    return cleanData(parsed);
-                } catch (e) {}
+                    if (typeof parsed === 'string') trimmed = parsed.trim();
+                    else if (Array.isArray(parsed)) return parsed.map(item => cleanData(item)).filter(i => i).join('\n');
+                    else break;
+                } catch (e) { break; }
             }
-            // Remove escaped quotes if any remain from multiple encodings
             return trimmed.replace(/\\"/g, '"').replace(/^"|"$/g, '').trim();
         }
-
-        if (Array.isArray(val)) {
-            return val
-                .map(item => cleanData(item))
-                .filter(item => item !== '')
-                .join('\n');
-        }
-
+        if (Array.isArray(val)) return val.map(item => cleanData(item)).filter(item => item !== '').join('\n');
         return String(val).trim();
     }
 
@@ -109,466 +359,201 @@
         async connectedCallback() {
             const domain = this.getAttribute('domain');
             this.renderLoading();
-
             const checkSupabase = setInterval(async () => {
                 if (window.supabase) {
                     clearInterval(checkSupabase);
                     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                     const ownerId = await getOwnerIdByDomain(supabaseClient, domain);
-
-                    if (!ownerId) {
-                        this.renderError('Dominio no configurado o no encontrado.');
-                        return;
-                    }
-
-                    const { data: recipes, error } = await supabaseClient
-                        .from('gym_recipes')
-                        .select('*')
-                        .eq('owner_id', ownerId)
-                        .order('created_at', { ascending: false });
-
-                    if (error) {
-                        this.renderError('Error al cargar las recetas.');
-                        return;
-                    }
-
+                    if (!ownerId) { this.renderError('Dominio no configurado o no encontrado.'); return; }
+                    const { data: recipes, error } = await supabaseClient.from('gym_recipes').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false });
+                    if (error) { this.renderError('Error al cargar las recetas.'); return; }
                     this.render(recipes);
                 }
             }, 100);
         }
 
         renderLoading() {
-            this.shadowRoot.innerHTML = `
-                <style>${COMMON_STYLE}</style>
-                <div class="flex flex-col items-center justify-center py-20 text-slate-400">
-                    <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
-                    <span class="text-sm font-black uppercase tracking-widest text-emerald-600">Sincronizando Recetario...</span>
-                </div>
-            `;
+            this.shadowRoot.innerHTML = `<style>${COMMON_STYLE}</style><div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px; color: #94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 16px;"></i><span style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #10b981;">Sincronizando Recetario...</span></div>`;
         }
 
         renderError(msg) {
-            this.shadowRoot.innerHTML = `
-                <style>${COMMON_STYLE}</style>
-                <div class="py-20 text-center text-slate-500 font-bold">${msg}</div>
-            `;
+            this.shadowRoot.innerHTML = `<style>${COMMON_STYLE}</style><div style="padding: 80px; text-align: center; color: #64748b; font-weight: 700;">${msg}</div>`;
         }
 
         render(recipes) {
-            if (recipes.length === 0) {
-                this.renderError('No hay recetas disponibles para este dominio.');
-                return;
-            }
-
+            if (recipes.length === 0) { this.renderError('No hay recetas disponibles.'); return; }
             const gridHTML = recipes.map(r => `
-                <div class="bg-white rounded-[50px] shadow-sm border border-slate-50 overflow-hidden group hover:shadow-2xl hover:-translate-y-3 transition-all duration-700 animate-fade-in">
-                    <div class="h-64 relative overflow-hidden bg-slate-200">
-                        <img src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600'}"
-                             class="w-full h-full object-cover group-hover:scale-125 transition duration-1000 grayscale-[0.2] group-hover:grayscale-0">
-                        <div class="absolute top-6 left-6">
-                            <span class="bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-2xl">${r.diet_type || 'Nutrición'}</span>
-                        </div>
+                <div class="item-card" data-recipe='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
+                    <div class="card-image-wrapper">
+                        <img class="card-image" src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600'}">
+                        <div class="category-badge">${r.category || r.diet_type || 'Nutrición'}</div>
                     </div>
-                    <div class="p-10">
-                        <h3 class="text-2xl font-black text-slate-800 mb-6 tracking-tight line-clamp-1">${r.title}</h3>
-                        <div class="flex justify-between items-center mb-10 border-t border-b border-slate-50 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            <div class="text-center">
-                                <span class="block text-2xl font-black text-emerald-600 mb-1">${r.calories || 0}</span>
+                    <div class="card-content">
+                        <h3 class="card-title">${r.title}</h3>
+                        <div class="card-macros">
+                            <div class="macro-item">
+                                <span class="macro-value macro-highlight">${r.calories || 0}</span>
                                 <span>Kcal</span>
                             </div>
-                            <div class="text-center">
-                                <span class="block text-2xl font-black text-slate-800 mb-1">${r.protein || 0}g</span>
+                            <div class="macro-item">
+                                <span class="macro-value macro-dark">${r.protein || 0}g</span>
                                 <span>Prote</span>
                             </div>
                         </div>
-                        <button class="w-full py-5 bg-slate-900 hover:bg-emerald-600 text-white font-black rounded-3xl transition-all shadow-xl hover:shadow-emerald-200 uppercase tracking-widest text-xs btn-open-recipe"
-                                data-recipe='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
-                            Receta Master
-                        </button>
+                        <button class="btn-action">Receta Master</button>
                     </div>
                 </div>
             `).join('');
 
             this.shadowRoot.innerHTML = `
                 <style>${COMMON_STYLE}</style>
-                <div class="widget-container">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-                        ${gridHTML}
-                    </div>
-                </div>
-                <div id="recipe-modal" class="fixed inset-0 bg-slate-950/95 z-[1000] hidden items-center justify-center p-4 backdrop-blur-2xl">
-                    <div class="bg-white w-full max-w-6xl max-h-[95vh] rounded-[60px] overflow-hidden shadow-2xl flex flex-col xl:flex-row border border-white/10 relative animate-fade-in">
-                         <button id="close-modal" class="absolute top-8 right-8 text-slate-400 hover:text-emerald-500 transition-all text-3xl z-[1050] bg-white/80 rounded-full w-12 h-12 flex items-center justify-center shadow-lg"><i class="fas fa-times-circle"></i></button>
-                         <div class="xl:w-5/12 h-80 xl:h-auto relative">
-                            <img id="modal-image" src="" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-12">
-                                <span id="modal-diet-badge" class="bg-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-2xl w-fit shadow-xl shadow-emerald-900/40 mb-4"></span>
-                                <h2 id="modal-title" class="text-5xl font-black text-white leading-[0.9] tracking-tighter"></h2>
-                            </div>
-                        </div>
-                        <div class="xl:w-7/12 p-8 xl:p-16 overflow-y-auto bg-white flex flex-col modal-scroll">
-                            <div class="flex justify-between items-start mb-12">
-                                <div class="grid grid-cols-4 gap-4 w-full mr-12">
-                                    <div class="bg-slate-50 p-6 rounded-[35px] text-center border border-slate-100 transition-all hover:bg-emerald-50 group">
-                                        <span id="modal-calories" class="block text-3xl font-black text-emerald-600 group-hover:scale-110 transition-transform"></span>
-                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Kcal</span>
-                                    </div>
-                                    <div class="bg-slate-50 p-6 rounded-[35px] text-center border border-slate-100 transition-all hover:bg-emerald-50 group">
-                                        <span id="modal-protein" class="block text-3xl font-black text-slate-800 group-hover:scale-110 transition-transform"></span>
-                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Proteínas</span>
-                                    </div>
-                                    <div class="bg-slate-50 p-6 rounded-[35px] text-center border border-slate-100 transition-all hover:bg-emerald-50 group">
-                                        <span id="modal-carbs" class="block text-3xl font-black text-slate-800 group-hover:scale-110 transition-transform"></span>
-                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Carbs</span>
-                                    </div>
-                                    <div class="bg-slate-50 p-6 rounded-[35px] text-center border border-slate-100 transition-all hover:bg-emerald-50 group">
-                                        <span id="modal-fats" class="block text-3xl font-black text-slate-800 group-hover:scale-110 transition-transform"></span>
-                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Grasas</span>
-                                    </div>
+                <div class="widget-container"><div class="grid-layout">${gridHTML}</div></div>
+                <div class="modal-overlay" id="modal-overlay">
+                    <div class="modal-container">
+                        <button class="modal-close" id="modal-close"><i class="fas fa-times"></i></button>
+                        <div class="modal-left"><img id="modal-img" class="modal-image" src=""><div class="modal-image-overlay"><div class="modal-badge" id="modal-badge"></div><h2 class="modal-title" id="modal-title"></h2></div></div>
+                        <div class="modal-right">
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 48px;">
+                                <div style="background: #f8fafc; padding: 24px 12px; border-radius: 35px; text-align: center; border: 1px solid #f1f5f9;">
+                                    <span style="display: block; font-size: 28px; font-weight: 900; margin-bottom: 4px; color: var(--primary)" id="m-kcal"></span>
+                                    <span style="font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Kcal</span>
                                 </div>
+                                <div style="background: #f8fafc; padding: 24px 12px; border-radius: 35px; text-align: center; border: 1px solid #f1f5f9;"><span style="display: block; font-size: 28px; font-weight: 900; margin-bottom: 4px;" id="m-prote"></span><span style="font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Proteínas</span></div>
+                                <div style="background: #f8fafc; padding: 24px 12px; border-radius: 35px; text-align: center; border: 1px solid #f1f5f9;"><span style="display: block; font-size: 28px; font-weight: 900; margin-bottom: 4px;" id="m-carbs"></span><span style="font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Carbs</span></div>
+                                <div style="background: #f8fafc; padding: 24px 12px; border-radius: 35px; text-align: center; border: 1px solid #f1f5f9;"><span style="display: block; font-size: 28px; font-weight: 900; margin-bottom: 4px;" id="m-fats"></span><span style="font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Grasas</span></div>
                             </div>
-                            <div class="space-y-16">
-                                <div class="grid md:grid-cols-2 gap-12">
-                                    <div>
-                                        <h4 class="text-xl font-black text-slate-800 mb-6 flex items-center uppercase tracking-tighter">
-                                            <span class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xs mr-3 font-black">01</span> Ingredientes
-                                        </h4>
-                                        <div id="modal-ingredients" class="text-slate-600 leading-loose whitespace-pre-wrap pl-6 border-l-2 border-emerald-50 text-sm italic"></div>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-xl font-black text-slate-800 mb-6 flex items-center uppercase tracking-tighter">
-                                            <span class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xs mr-3 font-black">02</span> Bio-Datos
-                                        </h4>
-                                        <div class="space-y-4">
-                                            <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center text-xs font-bold uppercase tracking-widest text-slate-400 border border-slate-100">
-                                                <span>⏱ Tiempo</span> <span id="modal-time" class="text-slate-900 font-black"></span>
-                                            </div>
-                                            <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center text-xs font-bold uppercase tracking-widest text-slate-400 border border-slate-100">
-                                                <span>🔪 Dificultad</span> <span id="modal-difficulty" class="text-emerald-600 font-black"></span>
-                                            </div>
-                                            <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center text-xs font-bold uppercase tracking-widest text-slate-400 border border-slate-100">
-                                                <span>🥗 Estilo</span> <span id="modal-diet" class="text-slate-900 font-black"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-xl font-black text-slate-800 mb-8 flex items-center uppercase tracking-tighter">
-                                        <span class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xs mr-3 font-black">03</span> Preparación Master
-                                    </h4>
-                                    <div id="modal-instructions" class="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm bg-slate-50 p-10 rounded-[40px] border border-dashed border-slate-200 border-2"></div>
-                                </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                                <div><h4 class="section-title"><span class="section-number">01</span> Ingredientes</h4><div style="color: #475569; line-height: 1.8; padding-left: 24px; border-left: 2px solid #ecfdf5; font-style: italic; font-size: 14px; margin-bottom: 48px; white-space: pre-wrap;" id="m-ingredients"></div></div>
+                                <div><h4 class="section-title"><span class="section-number">02</span> Bio-Datos</h4><div style="background: #f8fafc; padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 12px; border: 1px solid #f1f5f9;"><span>⏱ Tiempo</span><span style="color: #0f172a; font-weight: 900;" id="m-time"></span></div><div style="background: #f8fafc; padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 12px; border: 1px solid #f1f5f9;"><span>🔪 Dificultad</span><span style="color: var(--primary); font-weight: 900;" id="m-diff"></span></div><div style="background: #f8fafc; padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 12px; border: 1px solid #f1f5f9;"><span>🥗 Estilo</span><span style="color: #0f172a; font-weight: 900;" id="m-diet"></span></div></div>
                             </div>
+                            <div style="margin-top: 48px;"><h4 class="section-title"><span class="section-number">03</span> Preparación Master</h4><div style="background: #f8fafc; padding: 40px; border-radius: 40px; border: 2px dashed #e2e8f0; color: #475569; font-size: 14px; line-height: 1.8; white-space: pre-wrap;" id="m-instructions"></div></div>
                         </div>
                     </div>
                 </div>
             `;
 
-            this.shadowRoot.querySelectorAll('.btn-open-recipe').forEach(btn => {
-                btn.onclick = () => {
-                    const r = JSON.parse(btn.dataset.recipe);
-                    this.openModal(r);
-                };
-            });
-
-            this.shadowRoot.getElementById('close-modal').onclick = () => this.closeModal();
+            this.shadowRoot.querySelectorAll('.item-card').forEach(card => card.onclick = () => this.openModal(JSON.parse(card.dataset.recipe)));
+            this.shadowRoot.getElementById('modal-close').onclick = () => this.closeModal();
+            this.shadowRoot.getElementById('modal-overlay').onclick = (e) => { if (e.target.id === 'modal-overlay') this.closeModal(); };
         }
 
         openModal(r) {
-            const modal = this.shadowRoot.getElementById('recipe-modal');
-            this.shadowRoot.getElementById('modal-title').innerText = r.title;
-            this.shadowRoot.getElementById('modal-diet-badge').innerText = r.diet_type || 'Equilibrada';
-            this.shadowRoot.getElementById('modal-calories').innerText = r.calories || 0;
-            this.shadowRoot.getElementById('modal-protein').innerText = r.protein || 0;
-            this.shadowRoot.getElementById('modal-carbs').innerText = r.carbs || 0;
-            this.shadowRoot.getElementById('modal-fats').innerText = r.fats || 0;
-            this.shadowRoot.getElementById('modal-time').innerText = r.prep_time ? r.prep_time + ' min' : '20 min';
-            this.shadowRoot.getElementById('modal-difficulty').innerText = r.difficulty || 'Media';
-            this.shadowRoot.getElementById('modal-diet').innerText = r.diet_type || 'Equilibrada';
-            this.shadowRoot.getElementById('modal-ingredients').innerText = cleanData(r.ingredients);
-            this.shadowRoot.getElementById('modal-instructions').innerText = cleanData(r.instructions);
-            this.shadowRoot.getElementById('modal-image').src = r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800';
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            const s = this.shadowRoot;
+            s.getElementById('modal-img').src = r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800';
+            s.getElementById('modal-title').innerText = r.title;
+            s.getElementById('modal-badge').innerText = r.category || r.diet_type || 'Nutrición';
+            s.getElementById('m-kcal').innerText = r.calories || 0;
+            s.getElementById('m-prote').innerText = (r.protein || 0) + 'g';
+            s.getElementById('m-carbs').innerText = (r.carbs || 0) + 'g';
+            s.getElementById('m-fats').innerText = (r.fats || 0) + 'g';
+            s.getElementById('m-ingredients').innerText = cleanData(r.ingredients);
+            s.getElementById('m-instructions').innerText = cleanData(r.instructions);
+            s.getElementById('m-time').innerText = (r.prep_time || 20) + ' MIN';
+            s.getElementById('m-diff').innerText = (r.difficulty || 'MEDIA').toUpperCase();
+            s.getElementById('m-diet').innerText = (r.diet_type || 'EQUILIBRADA').toUpperCase();
+            s.getElementById('modal-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
-        closeModal() {
-            const modal = this.shadowRoot.getElementById('recipe-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
+        closeModal() { this.shadowRoot.getElementById('modal-overlay').classList.remove('active'); document.body.style.overflow = ''; }
     }
 
     class WisbeGymRutinas extends HTMLElement {
-        constructor() {
-            super();
-            this.attachShadow({ mode: 'open' });
-        }
-
+        constructor() { super(); this.attachShadow({ mode: 'open' }); }
         async connectedCallback() {
             const domain = this.getAttribute('domain');
             this.renderLoading();
-
             const checkSupabase = setInterval(async () => {
                 if (window.supabase) {
                     clearInterval(checkSupabase);
                     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                     const ownerId = await getOwnerIdByDomain(supabaseClient, domain);
-
-                    if (!ownerId) {
-                        this.renderError('Dominio no configurado.');
-                        return;
-                    }
-
-                    const { data: routines, error } = await supabaseClient
-                        .from('gym_routines')
-                        .select('*')
-                        .eq('owner_id', ownerId)
-                        .order('created_at', { ascending: false });
-
-                    if (error) {
-                        this.renderError('Error al cargar las rutinas.');
-                        return;
-                    }
-
+                    if (!ownerId) { this.renderError('Dominio no configurado.'); return; }
+                    const { data: routines, error } = await supabaseClient.from('gym_routines').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false });
+                    if (error) { this.renderError('Error al cargar las rutinas.'); return; }
                     this.render(routines);
                 }
             }, 100);
         }
-
-        renderLoading() {
-            this.shadowRoot.innerHTML = `
-                <style>${COMMON_STYLE}</style>
-                <div class="flex flex-col items-center justify-center py-20 text-slate-400">
-                    <i class="fas fa-spinner fa-spin text-2xl mb-4 text-blue-500"></i>
-                    <span class="text-sm font-black uppercase tracking-widest">Sincronizando Planes de Entrenamiento...</span>
-                </div>
-            `;
-        }
-
-        renderError(msg) {
-            this.shadowRoot.innerHTML = `
-                <style>${COMMON_STYLE}</style>
-                <div class="py-20 text-center text-slate-500 font-bold">${msg}</div>
-            `;
-        }
-
+        renderLoading() { this.shadowRoot.innerHTML = `<style>${COMMON_STYLE}</style><div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px; color: #94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 16px; color: #3b82f6;"></i><span style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #3b82f6;">Sincronizando Planes...</span></div>`; }
+        renderError(msg) { this.shadowRoot.innerHTML = `<style>${COMMON_STYLE}</style><div style="padding: 80px; text-align: center; color: #64748b; font-weight: 700;">${msg}</div>`; }
         render(routines) {
-            if (routines.length === 0) {
-                this.renderError('No se han publicado rutinas todavía.');
-                return;
-            }
-
+            if (routines.length === 0) { this.renderError('No hay rutinas disponibles.'); return; }
             const gridHTML = routines.map(r => `
-                <div class="group hover:border-blue-500 transition-all cursor-pointer flex flex-col p-8 bg-white border border-slate-200 rounded-3xl btn-open-routine animate-fade shadow-sm hover:shadow-xl" data-routine='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
-                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-8 group-hover:bg-blue-600 group-hover:text-white transition-colors border border-blue-100">
-                        <i class="fas fa-dumbbell"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 uppercase tracking-tight">${r.title}</h3>
-                    <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8">
-                        <span class="px-2 py-0.5 bg-slate-50 rounded border border-slate-100">${r.difficulty_level}</span>
-                        <span class="flex items-center"><i class="far fa-calendar-alt mr-2"></i> ${r.plan_duration_weeks} Semanas</span>
-                    </div>
-                    <div class="mt-auto pt-6 border-t border-slate-100 flex items-center text-blue-600 text-[10px] font-black uppercase tracking-widest">
-                        Explorar Plan <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                <div class="item-card" data-routine='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
+                    <div class="card-content">
+                        <div style="width: 64px; height: 64px; background: #eff6ff; color: #3b82f6; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 32px; border: 1px solid #dbeafe;"><i class="fas fa-dumbbell"></i></div>
+                        <h3 class="card-title">${r.title}</h3>
+                        <div style="display: flex; gap: 12px; margin-bottom: 32px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;"><span style="background: #f8fafc; padding: 4px 12px; border-radius: 8px; border: 1px solid #f1f5f9;">${r.difficulty_level}</span><span><i class="far fa-calendar-alt" style="margin-right: 6px;"></i> ${r.plan_duration_weeks} SEM</span></div>
+                        <button class="btn-action btn-blue">Explorar Plan</button>
                     </div>
                 </div>
             `).join('');
-
             this.shadowRoot.innerHTML = `
                 <style>${COMMON_STYLE}</style>
-                <div class="widget-container">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        ${gridHTML}
-                    </div>
-                </div>
-                <div id="routine-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] hidden items-center justify-center p-4 overflow-y-auto">
-                    <div class="bg-white w-full max-w-5xl rounded-[40px] shadow-2xl relative my-10 min-h-[80vh] flex flex-col animate-fade">
-                        <button id="close-modal" class="absolute top-8 right-8 w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all z-[1050] shadow-md">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                        <div id="modal-header" class="p-10 lg:p-16 border-b border-slate-100 bg-slate-50"></div>
-                        <div id="modal-body" class="p-10 lg:p-16 flex-grow overflow-y-auto modal-scroll"></div>
+                <div class="widget-container"><div class="grid-layout">${gridHTML}</div></div>
+                <div class="modal-overlay" id="modal-overlay">
+                    <div class="modal-container" style="flex-direction: column; max-width: 900px;">
+                        <button class="modal-close" id="modal-close"><i class="fas fa-times"></i></button>
+                        <div style="padding: 64px; background: #f8fafc; border-bottom: 1px solid #f1f5f9;"><span id="m-diff" style="color: #3b82f6; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; display: block; margin-bottom: 12px;"></span><h2 id="m-title" style="font-size: 2.5rem; font-weight: 900; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: -0.05em;"></h2></div>
+                        <div id="m-body" style="padding: 64px; overflow-y: auto; background: white;"></div>
                     </div>
                 </div>
             `;
-
-            this.shadowRoot.querySelectorAll('.btn-open-routine').forEach(btn => {
-                btn.onclick = () => {
-                    const r = JSON.parse(btn.dataset.routine);
-                    this.openModal(r);
-                };
-            });
-
-            this.shadowRoot.getElementById('close-modal').onclick = () => this.closeModal();
+            this.shadowRoot.querySelectorAll('.item-card').forEach(card => card.onclick = () => this.openModal(JSON.parse(card.dataset.routine)));
+            this.shadowRoot.getElementById('modal-close').onclick = () => this.closeModal();
+            this.shadowRoot.getElementById('modal-overlay').onclick = (e) => { if (e.target.id === 'modal-overlay') this.closeModal(); };
         }
-
         openModal(r) {
-            const modal = this.shadowRoot.getElementById('routine-modal');
-            const header = this.shadowRoot.getElementById('modal-header');
-            const body = this.shadowRoot.getElementById('modal-body');
-
-            header.innerHTML = `
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                    <div>
-                        <span class="text-blue-600 text-[10px] font-black uppercase tracking-widest block mb-2">${r.difficulty_level}</span>
-                        <h2 class="text-4xl font-black text-slate-900 tracking-tight uppercase">${r.title}</h2>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="bg-white px-6 py-3 rounded-2xl border border-slate-200">
-                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Duración</p>
-                            <p class="text-slate-700 font-bold">${r.plan_duration_weeks} Semanas</p>
-                        </div>
-                        ${r.target_gender ? `
-                            <div class="bg-white px-6 py-3 rounded-2xl border border-slate-200">
-                                <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Público</p>
-                                <p class="text-slate-700 font-bold">${r.target_gender}</p>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-
-            body.innerHTML = `
-                <div class="space-y-12">
-                    ${(r.exercises || []).map((day, idx) => `
-                        <div class="animate-fade" style="animation-delay: ${idx * 0.1}s">
-                            <div class="flex items-center gap-4 mb-8">
-                                <h4 class="text-sm font-black text-slate-900 uppercase tracking-widest bg-slate-100 px-6 py-2 rounded-full border border-slate-200">${day.day}</h4>
-                                <div class="h-px bg-slate-100 flex-grow"></div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                ${day.exercises.map(ex => `
-                                    <div class="card bg-slate-50 border border-slate-200 flex items-center justify-between p-6 rounded-2xl">
-                                        <div>
-                                            <p class="text-slate-900 font-bold uppercase tracking-tight text-sm mb-1">${ex.name}</p>
-                                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">
-                                                <span class="text-blue-500">${ex.sets}</span> Series &times; <span class="text-blue-500">${ex.reps}</span> Repeticiones
-                                            </p>
-                                        </div>
-                                        ${ex.video ? `
-                                            <a href="${ex.video}" target="_blank" class="w-10 h-10 bg-white text-blue-500 rounded-full flex items-center justify-center border border-slate-200 hover:bg-blue-500 hover:text-white transition-all shadow-sm no-underline">
-                                                <i class="fas fa-play text-xs ml-0.5"></i>
-                                            </a>
-                                        ` : ''}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            const s = this.shadowRoot;
+            s.getElementById('m-title').innerText = r.title;
+            s.getElementById('m-diff').innerText = r.difficulty_level;
+            s.getElementById('m-body').innerHTML = `<div style="display: flex; gap: 24px; margin-bottom: 64px;"><div style="background: white; padding: 16px 32px; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);"><span style="font-size: 8px; font-weight: 900; color: #94a3b8; text-transform: uppercase; display: block;">Duración</span><span style="font-weight: 900; color: #0f172a;">${r.plan_duration_weeks} Semanas</span></div><div style="background: white; padding: 16px 32px; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);"><span style="font-size: 8px; font-weight: 900; color: #94a3b8; text-transform: uppercase; display: block;">Público</span><span style="font-weight: 900; color: #0f172a;">${r.target_gender}</span></div></div><div style="display: flex; flex-direction: column; gap: 48px;">${(r.exercises || []).map(day => `<div><div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;"><span style="background: #f1f5f9; padding: 8px 24px; border-radius: 50px; font-size: 12px; font-weight: 900; text-transform: uppercase;">${day.day}</span><div style="height: 1px; background: #f1f5f9; flex-grow: 1;"></div></div><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px;">${day.exercises.map(ex => `<div style="background: #f8fafc; padding: 24px; border-radius: 24px; border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;"><div><p style="font-weight: 900; margin: 0 0 4px 0; text-transform: uppercase; font-size: 14px;">${ex.name}</p><p style="font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin: 0;"><span style="color: #3b82f6;">${ex.sets}</span> Series &times; <span style="color: #3b82f6;">${ex.reps}</span> Reps</p></div>${ex.video ? `<a href="${ex.video}" target="_blank" style="width: 32px; height: 32px; background: white; color: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1px solid #f1f5f9; transition: all 0.3s;"><i class="fas fa-play" style="margin-left: 2px;"></i></a>` : ''}</div>`).join('')}</div></div>`).join('')}</div>`;
+            s.getElementById('modal-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
-
-        closeModal() {
-            const modal = this.shadowRoot.getElementById('routine-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
+        closeModal() { this.shadowRoot.getElementById('modal-overlay').classList.remove('active'); document.body.style.overflow = ''; }
     }
 
     class WisbeGymEntrenadores extends HTMLElement {
-        constructor() {
-            super();
-            this.attachShadow({ mode: 'open' });
-        }
-
+        constructor() { super(); this.attachShadow({ mode: 'open' }); }
         async connectedCallback() {
             const domain = this.getAttribute('domain');
             this.renderLoading();
-
             const checkSupabase = setInterval(async () => {
                 if (window.supabase) {
                     clearInterval(checkSupabase);
                     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                     const ownerId = await getOwnerIdByDomain(supabaseClient, domain);
-
-                    if (!ownerId) {
-                        this.renderError('Dominio no configurado.');
-                        return;
-                    }
-
-                    const { data: trainers, error } = await supabaseClient
-                        .from('gym_trainers')
-                        .select('*')
-                        .eq('owner_id', ownerId)
-                        .order('created_at', { ascending: false });
-
-                    if (error) {
-                        this.renderError('Error al cargar equipo.');
-                        return;
-                    }
-
+                    if (!ownerId) { this.renderError('Dominio no configurado.'); return; }
+                    const { data: trainers, error } = await supabaseClient.from('gym_trainers').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false });
+                    if (error) { this.renderError('Error al cargar equipo.'); return; }
                     this.render(trainers);
                 }
             }, 100);
         }
-
-        renderLoading() {
-            this.shadowRoot.innerHTML = `
-                <style>${COMMON_STYLE}</style>
-                <div class="flex flex-col items-center justify-center py-20 text-slate-400">
-                    <i class="fas fa-spinner fa-spin text-2xl mb-4 text-blue-500"></i>
-                    <span class="text-sm font-black uppercase tracking-widest">Sincronizando Perfiles Profesionales...</span>
-                </div>
-            `;
-        }
-
-        renderError(msg) {
-            this.shadowRoot.innerHTML = `
-                <style>${COMMON_STYLE}</style>
-                <div class="py-20 text-center text-slate-500 font-bold">${msg}</div>
-            `;
-        }
-
+        renderLoading() { this.shadowRoot.innerHTML = `<style>${COMMON_STYLE}</style><div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px; color: #94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 16px; color: #3b82f6;"></i><span style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em;">Sincronizando Equipo...</span></div>`; }
+        renderError(msg) { this.shadowRoot.innerHTML = `<style>${COMMON_STYLE}</style><div style="padding: 80px; text-align: center; color: #64748b; font-weight: 700;">${msg}</div>`; }
         render(trainers) {
-            if (trainers.length === 0) {
-                this.renderError('No hay entrenadores registrados.');
-                return;
-            }
-
+            if (trainers.length === 0) { this.renderError('No hay entrenadores.'); return; }
             const gridHTML = trainers.map(t => `
-                <div class="group hover:border-blue-500 transition-all flex flex-col items-center text-center p-10 bg-white border border-slate-200 rounded-3xl animate-fade shadow-sm hover:shadow-xl">
-                    <div class="w-28 h-28 rounded-full border-4 border-slate-50 overflow-hidden mb-8 shadow-sm group-hover:scale-105 transition-transform duration-500">
-                        <img src="${t.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80'}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="mb-6">
-                        <span class="text-blue-600 text-[10px] font-black uppercase tracking-widest block mb-2 px-3 py-1 bg-blue-50 rounded-full inline-block border border-blue-100">${t.specialty}</span>
-                        <h3 class="text-xl font-bold text-slate-900 tracking-tight uppercase">${t.full_name}</h3>
-                    </div>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3">${t.bio || 'Sin descripción adicional.'}</p>
-                    <div class="mt-auto w-full pt-8 border-t border-slate-100 flex gap-4">
-                        ${t.whatsapp_url ? `
-                            <a href="${t.whatsapp_url}" target="_blank" class="flex-grow py-3 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 bg-blue-600 text-white rounded-xl text-center no-underline hover:bg-blue-700 transition-all">
-                                Contactar <i class="fab fa-whatsapp ml-2"></i>
-                            </a>
-                        ` : ''}
-                        ${t.instagram_url ? `
-                            <a href="https://instagram.com/${t.instagram_url.replace('@','')}" target="_blank" class="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center hover:bg-slate-200 hover:text-blue-500 transition-all no-underline">
-                                <i class="fab fa-instagram text-xl"></i>
-                            </a>
-                        ` : ''}
+                <div class="item-card" style="padding: 40px; align-items: center; text-align: center;">
+                    <div style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 4px solid #f8fafc; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);"><img src="${t.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80'}" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <span style="background: #eff6ff; color: #3b82f6; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 50px; margin-bottom: 12px; display: inline-block; border: 1px solid #dbeafe;">${t.specialty}</span>
+                    <h3 style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin: 0 0 16px 0; text-transform: uppercase;">${t.full_name}</h3>
+                    <p style="font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 32px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${t.bio || 'Sin descripción.'}</p>
+                    <div style="margin-top: auto; width: 100%; display: flex; gap: 12px;">
+                        ${t.whatsapp_url ? `<a href="${t.whatsapp_url}" target="_blank" style="flex-grow: 1; background: #3b82f6; color: white; padding: 12px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; text-decoration: none; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); transition: all 0.3s;">Contactar</a>` : ''}
+                        ${t.instagram_url ? `<a href="https://instagram.com/${t.instagram_url.replace('@','')}" target="_blank" style="width: 44px; height: 44px; background: #f8fafc; color: #64748b; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid #f1f5f9; transition: all 0.3s;"><i class="fab fa-instagram text-xl"></i></a>` : ''}
                     </div>
                 </div>
             `).join('');
-
-            this.shadowRoot.innerHTML = `
-                <style>${COMMON_STYLE}</style>
-                <div class="widget-container">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
-                        ${gridHTML}
-                    </div>
-                </div>
-            `;
+            this.shadowRoot.innerHTML = `<style>${COMMON_STYLE}</style><div class="widget-container"><div class="grid-layout">${gridHTML}</div></div>`;
         }
     }
 
-    if (!customElements.get('wisbe-gym-recetas')) customElements.define('wisbe-gym-recetas', WisbeGymNutricion);
-    if (!customElements.get('wisbe-gym-rutinas')) customElements.define('wisbe-gym-rutinas', WisbeGymRutinas);
-    if (!customElements.get('wisbe-gym-staff')) customElements.define('wisbe-gym-staff', WisbeGymEntrenadores);
+    if (!customElements.get('wisbe-gymnutricion')) customElements.define('wisbe-gymnutricion', WisbeGymNutricion);
+    if (!customElements.get('wisbe-gymrutinas')) customElements.define('wisbe-gymrutinas', WisbeGymRutinas);
+    if (!customElements.get('wisbe-gymstaff')) customElements.define('wisbe-gymstaff', WisbeGymEntrenadores);
 
 })();
