@@ -165,12 +165,18 @@
 
         .close-btn {
             position: absolute; top: 1.5rem; right: 1.5rem;
-            width: 32px; height: 32px; border-radius: 50%;
-            background: #e2e8f0; color: #94a3b8; border: none;
+            width: 42px; height: 42px; border-radius: 50%;
+            background: #dbeafe; color: #1e40af; border: none;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; z-index: 100; font-size: 14px;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000; font-size: 18px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .close-btn:hover { background: #cbd5e1; color: #64748b; }
+        .close-btn:hover {
+            background: #bfdbfe;
+            color: #1e3a8a;
+            transform: scale(1.1) rotate(90deg);
+        }
 
         .macro-grid {
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;
@@ -409,7 +415,7 @@
         }
     }
 
-    customElements.define('wisbe-gym-recetas', WisbeGymRecetas);
-    customElements.define('wisbe-gym-rutinas', WisbeGymRutinas);
-    customElements.define('wisbe-gym-staff', WisbeGymStaff);
+    customElements.define('wisbe-gymnutricion', WisbeGymRecetas);
+    customElements.define('wisbe-gymrutinas', WisbeGymRutinas);
+    customElements.define('wisbe-gymstaff', WisbeGymStaff);
 })();
