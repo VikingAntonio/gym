@@ -43,7 +43,7 @@
 
         .grid {
             display: grid;
-            gap: 2.5rem; /* gap-10 */
+            gap: 2.5rem;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         }
 
@@ -52,19 +52,19 @@
             border-radius: 50px;
             border: 1px solid var(--slate-50);
             overflow: hidden;
-            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; flex-direction: column;
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+            box-shadow: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff;
             position: relative;
         }
 
         .card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px);
+            box-shadow: 12px 12px 24px #c2cbd9, -12px -12px 24px #ffffff;
         }
 
         .card-image {
-            height: 256px; /* h-64 */
+            height: 256px;
             position: relative;
             background: var(--slate-200);
             overflow: hidden;
@@ -73,12 +73,10 @@
         .card-image img {
             width: 100%; height: 100%; object-fit: cover;
             transition: transform 1s;
-            filter: grayscale(0.2);
         }
 
         .card:hover .card-image img {
-            transform: scale(1.25);
-            filter: grayscale(0);
+            transform: scale(1.1);
         }
 
         .badge {
@@ -88,7 +86,7 @@
             padding: 0.5rem 1rem; border-radius: 1rem;
             font-size: 10px; font-weight: 900;
             text-transform: uppercase; letter-spacing: 0.1em; color: var(--emerald-600);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .card-content { padding: 2.5rem; flex-grow: 1; display: flex; flex-direction: column; }
@@ -116,101 +114,101 @@
             font-size: 12px; font-weight: 900; text-transform: uppercase;
             letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s;
             border: none; text-align: center; background: var(--slate-900); color: white;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 4px 4px 8px #d1d9e6;
         }
 
         .btn:hover {
             background: var(--emerald-600);
-            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.2);
+            box-shadow: 6px 6px 12px rgba(16, 185, 129, 0.3);
         }
 
         /* Modal */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95);
-            backdrop-filter: blur(20px); z-index: 10000;
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px); z-index: 10000;
             display: none; align-items: center; justify-content: center; padding: 20px;
         }
 
         .modal-container {
-            background: white; width: 100%; max-width: 1150px; max-height: 95vh;
-            border-radius: 60px; overflow: hidden; display: flex; flex-direction: column;
-            position: relative; animation: modalIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: white; width: 100%; max-width: 1050px; height: auto; max-height: 90vh;
+            border-radius: 50px; overflow: hidden; display: flex; flex-direction: column;
+            position: relative; animation: modalIn 0.4s ease-out;
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
         }
 
         @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.9) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @media (min-width: 1280px) { .modal-container { flex-direction: row; } }
+        @media (min-width: 1024px) { .modal-container { flex-direction: row; } }
 
         .modal-image-side {
-            width: 100%; height: 320px; position: relative;
+            width: 100%; height: 300px; position: relative;
             flex-shrink: 0;
         }
-        @media (min-width: 1280px) { .modal-image-side { width: 42%; height: auto; } }
+        @media (min-width: 1024px) { .modal-image-side { width: 45%; height: auto; } }
 
         .modal-image-side img { width: 100%; height: 100%; object-fit: cover; }
 
         .modal-image-overlay {
             position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            padding: 3rem; display: flex; flex-direction: column; justify-content: flex-end;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent 60%);
+            padding: 2.5rem; display: flex; flex-direction: column; justify-content: flex-end;
         }
 
         .modal-content-side {
             flex-grow: 1; padding: 2rem; overflow-y: auto; background: white; position: relative;
             display: flex; flex-direction: column;
         }
-        @media (min-width: 1280px) { .modal-content-side { width: 58%; padding: 4rem; } }
+        @media (min-width: 1024px) { .modal-content-side { width: 55%; padding: 3rem; } }
 
         .close-btn {
-            position: absolute; top: 2rem; right: 2rem;
-            color: var(--slate-200); font-size: 2rem; transition: all 0.3s; z-index: 100;
-            cursor: pointer; background: none; border: none;
+            position: absolute; top: 1.5rem; right: 1.5rem;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #e2e8f0; color: #94a3b8; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; z-index: 100; font-size: 14px;
         }
-        .close-btn:hover { color: var(--emerald-500); }
+        .close-btn:hover { background: #cbd5e1; color: #64748b; }
 
         .macro-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 3rem;
-            width: 100%; padding-right: 3rem;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;
+            width: 100%;
         }
-        .macro-card { background: var(--slate-50); padding: 1.5rem; border-radius: 35px; text-align: center; border: 1px solid var(--slate-100); transition: all 0.3s; }
-        .macro-card:hover { background: var(--emerald-50); }
-        .macro-val { display: block; font-size: 1.875rem; font-weight: 900; color: var(--emerald-600); margin-bottom: 0.25rem; transition: transform 0.3s; }
-        .macro-card:hover .macro-val { transform: scale(1.1); }
+        .macro-card { background: var(--slate-50); padding: 1.25rem 0.5rem; border-radius: 24px; text-align: center; border: 1px solid var(--slate-100); }
+        .macro-val { display: block; font-size: 1.5rem; font-weight: 900; color: var(--emerald-600); margin-bottom: 0.25rem; }
         .macro-val.dark { color: var(--slate-800); }
         .macro-lbl { font-size: 8px; font-weight: 900; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.1em; }
 
         .section-title {
-            font-size: 1.25rem; font-weight: 900; color: var(--slate-800); text-transform: uppercase;
-            letter-spacing: -0.025em; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;
+            font-size: 1rem; font-weight: 900; color: var(--slate-800); text-transform: uppercase;
+            letter-spacing: -0.01em; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;
         }
         .section-num {
-            width: 2rem; height: 2rem; background: var(--emerald-100); color: var(--emerald-600);
-            border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 900;
+            width: 1.75rem; height: 1.75rem; background: var(--emerald-100); color: var(--emerald-600);
+            border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900;
         }
 
         .ingredients-list {
-            padding-left: 1.5rem; border-left: 2px solid var(--emerald-50); color: var(--slate-600);
-            font-style: italic; font-size: 14px; line-height: 2; margin-bottom: 3rem; white-space: pre-wrap;
+            padding: 1.25rem; background: white; border-radius: 1rem; color: var(--slate-600);
+            font-size: 13px; line-height: 1.6; margin-bottom: 2rem; white-space: pre-wrap;
+            border: 1px solid var(--slate-50);
         }
 
-        .bio-datos-grid { display: grid; gap: 1rem; margin-bottom: 3rem; }
+        .bio-datos-grid { display: grid; gap: 0.75rem; margin-bottom: 2rem; }
         .bio-item {
-            background: var(--slate-50); padding: 1rem; border-radius: 1rem;
+            background: var(--slate-50); padding: 0.75rem 1rem; border-radius: 12px;
             display: flex; justify-content: space-between; align-items: center;
-            font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;
+            font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;
             color: var(--slate-400); border: 1px solid var(--slate-100);
         }
         .bio-val { color: var(--slate-900); font-weight: 900; }
         .bio-val.emerald { color: var(--emerald-600); }
 
         .instructions-box {
-            background: var(--slate-50); padding: 2.5rem; border-radius: 40px;
-            border: 2px dashed var(--slate-200); border-width: 2px; color: var(--slate-600); font-size: 14px; line-height: 1.6;
+            background: var(--slate-50); padding: 2rem; border-radius: 30px;
+            border: 2px dashed var(--slate-200); color: var(--slate-600); font-size: 13px; line-height: 1.6;
             white-space: pre-wrap;
         }
 
@@ -247,7 +245,7 @@
         return data ? data.id : null;
     }
 
-    class WisbeGymNutricion extends HTMLElement {
+    class WisbeGymRecetas extends HTMLElement {
         constructor() { super(); this.attachShadow({ mode: 'open' }); }
         static get observedAttributes() { return ['domain']; }
         attributeChangedCallback() { this.render(); }
@@ -292,25 +290,23 @@
             root.innerHTML = `
                 <div class="modal-overlay" id="overlay" style="display:flex">
                     <div class="modal-container">
-                        <button class="close-btn" id="close-modal"><i class="fas fa-times-circle"></i></button>
+                        <button class="close-btn" id="close-modal"><i class="fas fa-times"></i></button>
                         <div class="modal-image-side">
                             <img src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800'}">
                             <div class="modal-image-overlay">
-                                <span style="background:var(--emerald-500); color:white; padding:0.5rem 1.25rem; border-radius:2rem; font-size:10px; font-weight:900; text-transform:uppercase; margin-bottom:1rem; width:fit-content; letter-spacing:0.2em; box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);">${r.category || 'Maestro'}</span>
-                                <h2 style="font-size:3rem; font-weight:900; color:white; margin:0; line-height:0.9; letter-spacing:-0.05em;">${r.title}</h2>
+                                <span style="background:var(--emerald-500); color:white; padding:0.4rem 1rem; border-radius:2rem; font-size:9px; font-weight:900; text-transform:uppercase; margin-bottom:0.75rem; width:fit-content; letter-spacing:0.15em;">${r.category || 'CENA'}</span>
+                                <h2 style="font-size:2.5rem; font-weight:900; color:white; margin:0; line-height:1; letter-spacing:-0.04em;">${r.title}</h2>
                             </div>
                         </div>
                         <div class="modal-content-side">
-                            <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3rem;">
-                                <div class="macro-grid">
-                                    <div class="macro-card"><span class="macro-val">${r.calories || 0}</span><span class="macro-lbl">Kcal</span></div>
-                                    <div class="macro-card"><span class="macro-val dark">${r.protein || 0}</span><span class="macro-lbl">Proteínas</span></div>
-                                    <div class="macro-card"><span class="macro-val dark">${r.carbs || 0}</span><span class="macro-lbl">Carbs</span></div>
-                                    <div class="macro-card"><span class="macro-val dark">${r.fats || 0}</span><span class="macro-lbl">Grasas</span></div>
-                                </div>
+                            <div class="macro-grid">
+                                <div class="macro-card"><span class="macro-val">${r.calories || 0}</span><span class="macro-lbl">Kcal</span></div>
+                                <div class="macro-card"><span class="macro-val dark">${r.protein || 0}</span><span class="macro-lbl">Proteínas</span></div>
+                                <div class="macro-card"><span class="macro-val dark">${r.carbs || 0}</span><span class="macro-lbl">Carbs</span></div>
+                                <div class="macro-card"><span class="macro-val dark">${r.fats || 0}</span><span class="macro-lbl">Grasas</span></div>
                             </div>
 
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 4rem;">
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 2.5rem;">
                                 <div>
                                     <h4 class="section-title"><div class="section-num">01</div> Ingredientes</h4>
                                     <div class="ingredients-list">${cleanData(r.ingredients).join('<br>')}</div>
@@ -413,7 +409,7 @@
         }
     }
 
-    customElements.define('wisbe-gymnutricion', WisbeGymNutricion);
-    customElements.define('wisbe-gymrutinas', WisbeGymRutinas);
-    customElements.define('wisbe-gymstaff', WisbeGymStaff);
+    customElements.define('wisbe-gym-recetas', WisbeGymRecetas);
+    customElements.define('wisbe-gym-rutinas', WisbeGymRutinas);
+    customElements.define('wisbe-gym-staff', WisbeGymStaff);
 })();
