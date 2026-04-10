@@ -341,8 +341,12 @@
             document.getElementById('health_conditions').value = r.health_conditions;
 
             daysContainer.innerHTML = '';
-            if (r.exercises && Array.isArray(r.exercises)) {
-                r.exercises.forEach(day => addDayUI(day));
+            let exercises = r.exercises;
+            if (typeof exercises === 'string') {
+                try { exercises = JSON.parse(exercises); } catch(e) {}
+            }
+            if (exercises && Array.isArray(exercises)) {
+                exercises.forEach(day => addDayUI(day));
             }
 
             document.getElementById('modal-title').innerText = 'Modificar Plan';

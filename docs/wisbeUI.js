@@ -4,7 +4,6 @@
         SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3Y210cXFieGRhbXhlYmtmc3FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MDUzNzksImV4cCI6MjA5MDA4MTM3OX0.4C5gGKxJrpF5BS8FfEAu8FLa9VudEHxCYxwwtb991Io'
     };
 
-    // Load Supabase and FontAwesome if not present
     if (!window.supabase) {
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
@@ -14,130 +13,232 @@
 
     const commonStyles = `
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
         :host {
             display: block;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             color: #0f172a;
+            --emerald-600: #059669;
+            --emerald-500: #10b981;
+            --emerald-100: #d1fae5;
+            --emerald-50: #ecfdf5;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-400: #94a3b8;
+            --slate-600: #475569;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --slate-950: #020617;
         }
+
         * { box-sizing: border-box; }
+
+        .widget-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
         .grid {
             display: grid;
-            gap: 2.5rem;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2.5rem; /* gap-10 */
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         }
+
         .card {
             background: white;
             border-radius: 50px;
-            border: 1px solid #f1f5f9;
+            border: 1px solid var(--slate-50);
             overflow: hidden;
             transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; flex-direction: column;
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+            position: relative;
         }
+
         .card:hover {
             transform: translateY(-12px);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-            border-color: #10b981;
         }
+
         .card-image {
-            height: 256px;
+            height: 256px; /* h-64 */
             position: relative;
-            background: #f1f5f9;
+            background: var(--slate-200);
             overflow: hidden;
         }
+
         .card-image img {
             width: 100%; height: 100%; object-fit: cover;
             transition: transform 1s;
+            filter: grayscale(0.2);
         }
-        .card:hover .card-image img { transform: scale(1.1); }
+
+        .card:hover .card-image img {
+            transform: scale(1.25);
+            filter: grayscale(0);
+        }
+
         .badge {
             position: absolute; top: 1.5rem; left: 1.5rem;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
             padding: 0.5rem 1rem; border-radius: 1rem;
             font-size: 10px; font-weight: 900;
-            text-transform: uppercase; letter-spacing: 0.1em; color: #059669;
+            text-transform: uppercase; letter-spacing: 0.1em; color: var(--emerald-600);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
+
         .card-content { padding: 2.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+
         .card-title {
-            font-size: 1.5rem; font-weight: 900; color: #1e293b;
+            font-size: 1.5rem; font-weight: 900; color: var(--slate-800);
             margin-bottom: 1.5rem; line-height: 1.2; letter-spacing: -0.025em;
+            display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
         }
+
         .card-stats {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 1.5rem 0; margin-bottom: 2rem;
-            border-top: 1px solid #f8fafc; border-bottom: 1px solid #f8fafc;
+            padding: 1.5rem 0; margin-bottom: 2.5rem;
+            border-top: 1px solid var(--slate-50); border-bottom: 1px solid var(--slate-50);
             font-size: 10px; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 0.1em; color: #94a3b8;
+            letter-spacing: 0.1em; color: var(--slate-400);
         }
-        .stat-val { font-size: 1.5rem; color: #059669; display: block; margin-bottom: 0.25rem; }
-        .stat-val.dark { color: #1e293b; }
+
+        .stat-item { text-align: center; }
+        .stat-val { font-size: 1.5rem; color: var(--emerald-600); display: block; margin-bottom: 0.25rem; font-weight: 900; }
+        .stat-val.dark { color: var(--slate-800); }
+
         .btn {
-            width: 100%; padding: 1.25rem; border-radius: 30px;
+            width: 100%; padding: 1.25rem; border-radius: 24px;
             font-size: 12px; font-weight: 900; text-transform: uppercase;
             letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s;
-            border: none; text-align: center; background: #0f172a; color: white;
+            border: none; text-align: center; background: var(--slate-900); color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
-        .btn:hover { background: #059669; box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.2); }
+
+        .btn:hover {
+            background: var(--emerald-600);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.2);
+        }
 
         /* Modal */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95);
+            position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95);
             backdrop-filter: blur(20px); z-index: 10000;
-            display: none; align-items: center; justify-content: center; padding: 1rem;
+            display: none; align-items: center; justify-content: center; padding: 20px;
         }
+
         .modal-container {
-            background: white; width: 100%; max-width: 1100px; max-height: 95vh;
+            background: white; width: 100%; max-width: 1150px; max-height: 95vh;
             border-radius: 60px; overflow: hidden; display: flex; flex-direction: column;
             position: relative; animation: modalIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+
         @keyframes modalIn {
             from { opacity: 0; transform: scale(0.9) translateY(20px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
-        @media (min-width: 1024px) { .modal-container { flex-direction: row; } }
-        .modal-image { width: 100%; height: 320px; position: relative; }
-        @media (min-width: 1024px) { .modal-image { width: 42%; height: auto; } }
-        .modal-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        @media (min-width: 1280px) { .modal-container { flex-direction: row; } }
+
+        .modal-image-side {
+            width: 100%; height: 320px; position: relative;
+            flex-shrink: 0;
+        }
+        @media (min-width: 1280px) { .modal-image-side { width: 42%; height: auto; } }
+
+        .modal-image-side img { width: 100%; height: 100%; object-fit: cover; }
+
         .modal-image-overlay {
             position: absolute; inset: 0;
             background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
             padding: 3rem; display: flex; flex-direction: column; justify-content: flex-end;
         }
-        .modal-content { flex-grow: 1; padding: 3rem; overflow-y: auto; background: white; position: relative; }
-        @media (min-width: 1024px) { .modal-content { width: 58%; padding: 4rem; } }
-        .close-btn {
-            position: absolute; top: 2rem; right: 2rem; width: 3rem; height: 3rem;
-            background: #f8fafc; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; color: #94a3b8; border: none;
-            font-size: 1.5rem; transition: all 0.3s; z-index: 10;
+
+        .modal-content-side {
+            flex-grow: 1; padding: 2rem; overflow-y: auto; background: white; position: relative;
+            display: flex; flex-direction: column;
         }
-        .close-btn:hover { background: #fee2e2; color: #ef4444; }
+        @media (min-width: 1280px) { .modal-content-side { width: 58%; padding: 4rem; } }
 
-        .macro-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 4rem; }
-        .macro-card { background: #f8fafc; padding: 1.5rem; border-radius: 35px; text-align: center; border: 1px solid #f1f5f9; }
-        .macro-val { display: block; font-size: 1.75rem; font-weight: 900; color: #059669; margin-bottom: 0.25rem; }
-        .macro-val.dark { color: #1e293b; }
-        .macro-lbl { font-size: 8px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
+        .close-btn {
+            position: absolute; top: 2rem; right: 2rem;
+            color: var(--slate-200); font-size: 2rem; transition: all 0.3s; z-index: 100;
+            cursor: pointer; background: none; border: none;
+        }
+        .close-btn:hover { color: var(--emerald-500); }
 
-        .section-title { font-size: 1.25rem; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: -0.025em; display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
-        .section-num { width: 2rem; height: 2rem; background: #ecfdf5; color: #059669; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
-        .ingredients-list { padding-left: 1.5rem; border-left: 2px solid #ecfdf5; color: #475569; font-style: italic; font-size: 14px; line-height: 1.8; margin-bottom: 4rem; }
-        .instructions-box { background: #f8fafc; padding: 2.5rem; border-radius: 40px; border: 2px dashed #e2e8f0; color: #475569; font-size: 14px; line-height: 1.6; }
+        .macro-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 3rem;
+            width: 100%; padding-right: 3rem;
+        }
+        .macro-card { background: var(--slate-50); padding: 1.5rem; border-radius: 35px; text-align: center; border: 1px solid var(--slate-100); transition: all 0.3s; }
+        .macro-card:hover { background: var(--emerald-50); }
+        .macro-val { display: block; font-size: 1.875rem; font-weight: 900; color: var(--emerald-600); margin-bottom: 0.25rem; transition: transform 0.3s; }
+        .macro-card:hover .macro-val { transform: scale(1.1); }
+        .macro-val.dark { color: var(--slate-800); }
+        .macro-lbl { font-size: 8px; font-weight: 900; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.1em; }
 
-        .loading { padding: 5rem; text-align: center; color: #94a3b8; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; font-size: 12px; }
+        .section-title {
+            font-size: 1.25rem; font-weight: 900; color: var(--slate-800); text-transform: uppercase;
+            letter-spacing: -0.025em; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;
+        }
+        .section-num {
+            width: 2rem; height: 2rem; background: var(--emerald-100); color: var(--emerald-600);
+            border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 900;
+        }
+
+        .ingredients-list {
+            padding-left: 1.5rem; border-left: 2px solid var(--emerald-50); color: var(--slate-600);
+            font-style: italic; font-size: 14px; line-height: 2; margin-bottom: 3rem; white-space: pre-wrap;
+        }
+
+        .bio-datos-grid { display: grid; gap: 1rem; margin-bottom: 3rem; }
+        .bio-item {
+            background: var(--slate-50); padding: 1rem; border-radius: 1rem;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--slate-400); border: 1px solid var(--slate-100);
+        }
+        .bio-val { color: var(--slate-900); font-weight: 900; }
+        .bio-val.emerald { color: var(--emerald-600); }
+
+        .instructions-box {
+            background: var(--slate-50); padding: 2.5rem; border-radius: 40px;
+            border: 2px dashed var(--slate-200); border-width: 2px; color: var(--slate-600); font-size: 14px; line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .loading { padding: 5rem; text-align: center; color: var(--slate-400); font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; font-size: 12px; }
     `;
 
     function cleanData(data) {
         if (!data) return [];
-        if (Array.isArray(data)) return data;
-        try {
-            const parsed = JSON.parse(data);
-            return Array.isArray(parsed) ? parsed : [parsed];
-        } catch (e) {
-            return data.split('\n').filter(x => x.trim());
+        if (typeof data === 'string') {
+            let trimmed = data.trim();
+            if ((trimmed.startsWith('[') && trimmed.endsWith(']')) || (trimmed.startsWith('"') && trimmed.endsWith('"'))) {
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    return cleanData(parsed);
+                } catch (e) {
+                    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                        trimmed = trimmed.substring(1, trimmed.length - 1);
+                    }
+                }
+            }
+            return trimmed.split('\n')
+                .map(x => x.trim().replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"'))
+                .filter(x => x && x !== 'null');
         }
+        if (Array.isArray(data)) {
+            return data.flatMap(item => cleanData(item));
+        }
+        return [String(data)];
     }
 
     async function getOwnerIdByDomain(supabase, domain) {
@@ -152,23 +253,24 @@
         attributeChangedCallback() { this.render(); }
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `<style>${commonStyles}</style><div class="loading">Sincronizando Nutrición...</div>`;
+            this.shadowRoot.innerHTML = `<style>${commonStyles}</style><div class="widget-container"><div class="loading">Sincronizando Nutrición...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const ownerId = await getOwnerIdByDomain(supabase, domain);
-            if (!ownerId) { this.shadowRoot.innerHTML = `<div class="loading">Dominio no configurado (${domain})</div>`; return; }
+            if (!ownerId) { this.shadowRoot.querySelector('.widget-container').innerHTML = `<div class="loading">Dominio no configurado (${domain})</div>`; return; }
 
             const { data: recipes } = await supabase.from('gym_recipes').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false });
-            if (!recipes || recipes.length === 0) { this.shadowRoot.innerHTML = `<div class="loading">Aún no hay recetas disponibles.</div>`; return; }
+            if (!recipes || recipes.length === 0) { this.shadowRoot.querySelector('.widget-container').innerHTML = `<div class="loading">Aún no hay recetas disponibles.</div>`; return; }
 
-            this.shadowRoot.querySelector('.loading').remove();
+            const container = this.shadowRoot.querySelector('.widget-container');
+            container.innerHTML = '';
             const grid = document.createElement('div'); grid.className = 'grid';
             recipes.forEach(r => {
                 const card = document.createElement('div'); card.className = 'card';
                 card.innerHTML = `
                     <div class="card-image">
-                        <img src="${r.image_url || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80'}">
-                        <div class="badge">${r.diet_type || 'Nutrición'}</div>
+                        <img src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600'}">
+                        <div class="badge">${r.category || 'Nutrición'}</div>
                     </div>
                     <div class="card-content">
                         <h3 class="card-title">${r.title}</h3>
@@ -182,7 +284,7 @@
                 card.querySelector('.btn').onclick = () => this.openModal(r);
                 grid.appendChild(card);
             });
-            this.shadowRoot.appendChild(grid);
+            container.appendChild(grid);
             this.shadowRoot.appendChild(Object.assign(document.createElement('div'), { id: 'modal-root' }));
         }
         openModal(r) {
@@ -190,25 +292,41 @@
             root.innerHTML = `
                 <div class="modal-overlay" id="overlay" style="display:flex">
                     <div class="modal-container">
-                        <button class="close-btn" id="close-modal">&times;</button>
-                        <div class="modal-image">
-                            <img src="${r.image_url || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80'}">
+                        <button class="close-btn" id="close-modal"><i class="fas fa-times-circle"></i></button>
+                        <div class="modal-image-side">
+                            <img src="${r.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800'}">
                             <div class="modal-image-overlay">
-                                <div style="background:#10b981; color:white; padding:0.5rem 1rem; border-radius:1rem; font-size:10px; font-weight:900; text-transform:uppercase; margin-bottom:1rem; width:fit-content;">${r.diet_type || 'Maestro'}</div>
-                                <h2 style="font-size:3rem; font-weight:900; color:white; margin:0; line-height:0.9;">${r.title}</h2>
+                                <span style="background:var(--emerald-500); color:white; padding:0.5rem 1.25rem; border-radius:2rem; font-size:10px; font-weight:900; text-transform:uppercase; margin-bottom:1rem; width:fit-content; letter-spacing:0.2em; box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);">${r.category || 'Maestro'}</span>
+                                <h2 style="font-size:3rem; font-weight:900; color:white; margin:0; line-height:0.9; letter-spacing:-0.05em;">${r.title}</h2>
                             </div>
                         </div>
-                        <div class="modal-content">
-                            <div class="macro-grid">
-                                <div class="macro-card"><span class="macro-val">${r.calories || 0}</span><span class="macro-lbl">Kcal</span></div>
-                                <div class="macro-card"><span class="macro-val dark">${r.protein || 0}</span><span class="macro-lbl">Proteinas</span></div>
-                                <div class="macro-card"><span class="macro-val dark">${r.carbs || 0}</span><span class="macro-lbl">Carbs</span></div>
-                                <div class="macro-card"><span class="macro-val dark">${r.fats || 0}</span><span class="macro-lbl">Grasas</span></div>
+                        <div class="modal-content-side">
+                            <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3rem;">
+                                <div class="macro-grid">
+                                    <div class="macro-card"><span class="macro-val">${r.calories || 0}</span><span class="macro-lbl">Kcal</span></div>
+                                    <div class="macro-card"><span class="macro-val dark">${r.protein || 0}</span><span class="macro-lbl">Proteínas</span></div>
+                                    <div class="macro-card"><span class="macro-val dark">${r.carbs || 0}</span><span class="macro-lbl">Carbs</span></div>
+                                    <div class="macro-card"><span class="macro-val dark">${r.fats || 0}</span><span class="macro-lbl">Grasas</span></div>
+                                </div>
                             </div>
-                            <div class="section-title"><div class="section-num">01</div>Ingredientes</div>
-                            <div class="ingredients-list">${cleanData(r.ingredients).join('<br>')}</div>
-                            <div class="section-title"><div class="section-num">02</div>Preparación</div>
-                            <div class="instructions-box">${cleanData(r.instructions).join('<br><br>')}</div>
+
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 4rem;">
+                                <div>
+                                    <h4 class="section-title"><div class="section-num">01</div> Ingredientes</h4>
+                                    <div class="ingredients-list">${cleanData(r.ingredients).join('<br>')}</div>
+                                </div>
+                                <div>
+                                    <h4 class="section-title"><div class="section-num">02</div> Bio-Datos</h4>
+                                    <div class="bio-datos-grid">
+                                        <div class="bio-item"><span>⏱ Tiempo</span> <span class="bio-val">${r.prep_time || '20 min'}</span></div>
+                                        <div class="bio-item"><span>🔪 Dificultad</span> <span class="bio-val emerald">${r.difficulty || 'Media'}</span></div>
+                                        <div class="bio-item"><span>🥗 Estilo</span> <span class="bio-val">${r.diet_type || 'Equilibrada'}</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 class="section-title"><div class="section-num">03</div> Preparación Master</h4>
+                            <div class="instructions-box">${cleanData(r.instructions).join('<br>')}</div>
                         </div>
                     </div>
                 </div>
@@ -224,29 +342,34 @@
         attributeChangedCallback() { this.render(); }
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `<style>${commonStyles}</style><div class="loading">Cargando Rutinas...</div>`;
+            this.shadowRoot.innerHTML = `<style>${commonStyles}</style><div class="widget-container"><div class="loading">Cargando Rutinas...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const ownerId = await getOwnerIdByDomain(supabase, domain);
             if (!ownerId) return;
             const { data } = await supabase.from('gym_routines').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false });
-            if (!data || data.length === 0) { this.shadowRoot.innerHTML = `<div class="loading">No hay rutinas publicadas</div>`; return; }
-            this.shadowRoot.querySelector('.loading').remove();
+            if (!data || data.length === 0) { this.shadowRoot.querySelector('.widget-container').innerHTML = `<div class="loading">No hay rutinas publicadas</div>`; return; }
+
+            const container = this.shadowRoot.querySelector('.widget-container');
+            container.innerHTML = '';
             const grid = document.createElement('div'); grid.className = 'grid';
             data.forEach(r => {
-                grid.innerHTML += `
-                    <div class="card" style="padding: 2.5rem; cursor:pointer">
-                        <div style="width:4rem; height:4rem; background:#eff6ff; color:#3b82f6; border-radius:1.25rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin-bottom:2rem; border:1px solid #dbeafe;"><i class="fas fa-dumbbell"></i></div>
-                        <h3 class="card-title" style="margin-bottom:0.5rem">${r.title}</h3>
-                        <div style="font-size:10px; font-weight:900; color:#94a3b8; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2rem;">
-                            <span style="background:#f8fafc; padding:0.25rem 0.5rem; border-radius:4px; border:1px solid #f1f5f9; margin-right:1rem">${r.difficulty_level}</span>
-                            <span>${r.plan_duration_weeks} Semanas</span>
-                        </div>
-                        <div style="margin-top:auto; padding-top:1.5rem; border-top:1px solid #f8fafc; color:#3b82f6; font-size:10px; font-weight:900; text-transform:uppercase;">Explorar Plan <i class="fas fa-chevron-right"></i></div>
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.padding = '2.5rem';
+                card.style.cursor = 'pointer';
+                card.innerHTML = `
+                    <div style="width:4rem; height:4rem; background:var(--emerald-50); color:var(--emerald-600); border-radius:1.25rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin-bottom:2rem; border:1px solid var(--emerald-100);"><i class="fas fa-dumbbell"></i></div>
+                    <h3 class="card-title" style="margin-bottom:0.5rem">${r.title}</h3>
+                    <div style="font-size:10px; font-weight:900; color:var(--slate-400); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2rem;">
+                        <span style="background:var(--slate-50); padding:0.25rem 0.5rem; border-radius:4px; border:1px solid var(--slate-100); margin-right:1rem">${r.difficulty_level}</span>
+                        <span>${r.plan_duration_weeks} Semanas</span>
                     </div>
+                    <div style="margin-top:auto; padding-top:1.5rem; border-top:1px solid var(--slate-50); color:var(--emerald-600); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.1em;">Explorar Plan <i class="fas fa-chevron-right" style="margin-left:0.5rem"></i></div>
                 `;
+                grid.appendChild(card);
             });
-            this.shadowRoot.appendChild(grid);
+            container.appendChild(grid);
         }
     }
 
@@ -256,31 +379,37 @@
         attributeChangedCallback() { this.render(); }
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `<style>${commonStyles}</style><div class="loading">Cargando Staff...</div>`;
+            this.shadowRoot.innerHTML = `<style>${commonStyles}</style><div class="widget-container"><div class="loading">Cargando Staff...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const ownerId = await getOwnerIdByDomain(supabase, domain);
             if (!ownerId) return;
             const { data } = await supabase.from('gym_trainers').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false });
-            if (!data || data.length === 0) { this.shadowRoot.innerHTML = `<div class="loading">No hay staff registrado</div>`; return; }
-            this.shadowRoot.querySelector('.loading').remove();
+            if (!data || data.length === 0) { this.shadowRoot.querySelector('.widget-container').innerHTML = `<div class="loading">No hay staff registrado</div>`; return; }
+
+            const container = this.shadowRoot.querySelector('.widget-container');
+            container.innerHTML = '';
             const grid = document.createElement('div'); grid.className = 'grid';
             data.forEach(t => {
-                grid.innerHTML += `
-                    <div class="card" style="align-items:center; text-align:center; padding:2.5rem">
-                        <div style="width:7rem; height:7rem; border-radius:50%; border:4px solid #f8fafc; overflow:hidden; margin-bottom:2rem; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)">
-                            <img src="${t.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80'}" style="width:100%; height:100%; object-fit:cover">
-                        </div>
-                        <div style="margin-bottom:1.5rem">
-                            <span style="background:#eff6ff; color:#3b82f6; padding:0.25rem 1rem; border-radius:1rem; font-size:10px; font-weight:900; text-transform:uppercase; border:1px solid #dbeafe;">${t.specialty}</span>
-                            <h3 class="card-title" style="margin-top:0.5rem">${t.full_name}</h3>
-                        </div>
-                        <p style="color:#64748b; font-size:14px; line-height:1.6; margin-bottom:2rem; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden">${t.bio || 'Sin descripción.'}</p>
-                        <div style="margin-top:auto; width:100%">${t.whatsapp_url ? `<a href="${t.whatsapp_url}" target="_blank" class="btn" style="text-decoration:none; background:#3b82f6; display:flex; align-items:center; justify-content:center; gap:0.5rem"><i class="fab fa-whatsapp"></i> Contactar</a>` : ''}</div>
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.alignItems = 'center';
+                card.style.textAlign = 'center';
+                card.style.padding = '3rem';
+                card.innerHTML = `
+                    <div style="width:7rem; height:7rem; border-radius:50%; border:4px solid var(--slate-50); overflow:hidden; margin-bottom:2rem; box-shadow:0 10px 20px rgba(0,0,0,0.05)">
+                        <img src="${t.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80'}" style="width:100%; height:100%; object-fit:cover">
                     </div>
+                    <div style="margin-bottom:1.5rem">
+                        <span style="background:var(--emerald-50); color:var(--emerald-600); padding:0.25rem 1rem; border-radius:1rem; font-size:10px; font-weight:900; text-transform:uppercase; border:1px solid var(--emerald-100); letter-spacing:0.1em;">${t.specialty}</span>
+                        <h3 class="card-title" style="margin-top:1.5rem; margin-bottom:0">${t.full_name}</h3>
+                    </div>
+                    <p style="color:var(--slate-600); font-size:14px; line-height:1.6; margin-bottom:2.5rem; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden">${t.bio || 'Sin descripción.'}</p>
+                    <div style="margin-top:auto; width:100%">${t.whatsapp_url ? `<a href="${t.whatsapp_url}" target="_blank" class="btn" style="text-decoration:none; display:flex; align-items:center; justify-content:center; gap:0.75rem"><i class="fab fa-whatsapp"></i> Contactar</a>` : ''}</div>
                 `;
+                grid.appendChild(card);
             });
-            this.shadowRoot.appendChild(grid);
+            container.appendChild(grid);
         }
     }
 
