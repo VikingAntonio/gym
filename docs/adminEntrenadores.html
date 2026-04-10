@@ -179,6 +179,7 @@
             document.getElementById('user-domain').innerText = domainText;
 
             if (domain) {
+                document.getElementById('script-code').innerText = `<script src="https://wisbe.xyz/wisbeUI.js"></script>`;
                 document.getElementById('widget-code').innerText = `<wisbe-gymstaff domain="${domain}"></wisbe-gymstaff>`;
             } else {
                 document.getElementById('widget-code').innerText = 'ERROR: CONFIGURA TU DOMINIO';
