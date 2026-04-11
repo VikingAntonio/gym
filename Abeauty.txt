@@ -1,0 +1,143 @@
+-- ######################################################
+-- # MÓDULO BEAUTY - WISBE (Abeauty.txt) #
+-- ######################################################
+
+-- 1. TABLA DE SERVICIOS
+CREATE TABLE IF NOT EXISTS public.beauty_services (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_id UUID REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2),
+    duration_minutes INTEGER DEFAULT 30,
+    image_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. TABLA DE CONFIGURACIÓN
+CREATE TABLE IF NOT EXISTS public.beauty_settings (
+    owner_id UUID PRIMARY KEY REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
+    slots_per_hour INTEGER DEFAULT 1,
+    business_hours JSONB DEFAULT '{
+        "monday": {"open": "09:00", "close": "18:00", "active": true},
+        "tuesday": {"open": "09:00", "close": "18:00", "active": true},
+        "wednesday": {"open": "09:00", "close": "18:00", "active": true},
+        "thursday": {"open": "09:00", "close": "18:00", "active": true},
+        "friday": {"open": "09:00", "close": "18:00", "active": true},
+        "saturday": {"open": "09:00", "close": "14:00", "active": true},
+        "sunday": {"open": "09:00", "close": "14:00", "active": false}
+    }'::jsonb,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. TABLA DE CITAS
+CREATE TABLE IF NOT EXISTS public.beauty_appointments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_id UUID REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
+    service_id UUID REFERENCES public.beauty_services(id) ON DELETE SET NULL,
+    customer_name TEXT NOT NULL,
+    customer_email TEXT,
+    customer_phone TEXT,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    status TEXT DEFAULT 'pending', -- pending, confirmed, cancelled, completed
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. HABILITAR RLS
+ALTER TABLE public.beauty_services ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.beauty_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.beauty_appointments ENABLE ROW LEVEL SECURITY;
+
+-- 5. POLÍTICAS DE SEGURIDAD
+
+DO $$
+BEGIN
+    -- Limpieza de políticas previas
+    DROP POLICY IF EXISTS "Admins full services" ON public.beauty_services;
+    DROP POLICY IF EXISTS "Owners manage services" ON public.beauty_services;
+    DROP POLICY IF EXISTS "Public view services" ON public.beauty_services;
+
+    DROP POLICY IF EXISTS "Admins full settings" ON public.beauty_settings;
+    DROP POLICY IF EXISTS "Owners manage settings" ON public.beauty_settings;
+    DROP POLICY IF EXISTS "Public view settings" ON public.beauty_settings;
+
+    DROP POLICY IF EXISTS "Admins full appointments" ON public.beauty_appointments;
+    DROP POLICY IF EXISTS "Owners manage appointments" ON public.beauty_appointments;
+    DROP POLICY IF EXISTS "Public insert appointments" ON public.beauty_appointments;
+    DROP POLICY IF EXISTS "Public view own appointments" ON public.beauty_appointments;
+END $$;
+
+-- Servicios
+CREATE POLICY "Admins full services" ON public.beauty_services FOR ALL TO authenticated USING (public.is_admin());
+CREATE POLICY "Owners manage services" ON public.beauty_services FOR ALL TO authenticated USING (auth.uid() = owner_id);
+CREATE POLICY "Public view services" ON public.beauty_services FOR SELECT TO anon, authenticated USING (true);
+
+-- Configuración
+CREATE POLICY "Admins full settings" ON public.beauty_settings FOR ALL TO authenticated USING (public.is_admin());
+CREATE POLICY "Owners manage settings" ON public.beauty_settings FOR ALL TO authenticated USING (auth.uid() = owner_id);
+CREATE POLICY "Public view settings" ON public.beauty_settings FOR SELECT TO anon, authenticated USING (true);
+
+-- Citas (SEGURIZADO: Público solo inserta, no lee datos de otros)
+CREATE POLICY "Admins full appointments" ON public.beauty_appointments FOR ALL TO authenticated USING (public.is_admin());
+CREATE POLICY "Owners manage appointments" ON public.beauty_appointments FOR ALL TO authenticated USING (
+    auth.uid() = owner_id OR EXISTS (SELECT 1 FROM public.wisbe_users u WHERE u.id = auth.uid() AND u.owner_id = public.beauty_appointments.owner_id)
+);
+CREATE POLICY "Public insert appointments" ON public.beauty_appointments FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+-- 6. FUNCIÓN RPC PARA CONSULTAR DISPONIBILIDAD (Sin exponer datos sensibles y manejando duraciones)
+CREATE OR REPLACE FUNCTION public.check_beauty_availability(
+    p_owner_id UUID,
+    p_date DATE
+) RETURNS TABLE (
+    slot_time TIME,
+    is_available BOOLEAN
+) AS $$
+DECLARE
+    v_slots_per_hour INTEGER;
+    v_business_hours JSONB;
+    v_day_name TEXT;
+    v_open_time TIME;
+    v_close_time TIME;
+    v_current_time TIME;
+    v_is_active BOOLEAN;
+BEGIN
+    -- Obtener configuración
+    SELECT slots_per_hour, business_hours INTO v_slots_per_hour, v_business_hours
+    FROM public.beauty_settings WHERE owner_id = p_owner_id;
+
+    IF NOT FOUND THEN
+        v_slots_per_hour := 1;
+        v_business_hours := '{}'::jsonb;
+    END IF;
+
+    -- Obtener día de la semana en inglés (coincide con llaves del JSON)
+    v_day_name := trim(lower(to_char(p_date, 'day')));
+
+    -- Extraer horario del JSON
+    v_is_active := (v_business_hours->v_day_name->>'active')::BOOLEAN;
+    v_open_time := (v_business_hours->v_day_name->>'open')::TIME;
+    v_close_time := (v_business_hours->v_day_name->>'close')::TIME;
+
+    IF v_is_active AND v_open_time IS NOT NULL THEN
+        v_current_time := v_open_time;
+        WHILE v_current_time < v_close_time LOOP
+            slot_time := v_current_time;
+
+            -- Bloque inteligente: Una cita ocupa slots según su duración
+            -- Un slot está disponible si el número de citas activas en ese momento es menor a slots_per_hour
+            SELECT (count(*) < v_slots_per_hour) INTO is_available
+            FROM public.beauty_appointments a
+            LEFT JOIN public.beauty_services s ON a.service_id = s.id
+            WHERE a.owner_id = p_owner_id
+              AND a.appointment_date = p_date
+              AND v_current_time >= a.appointment_time
+              AND v_current_time < (a.appointment_time + (COALESCE(s.duration_minutes, 30) || ' minutes')::interval)
+              AND a.status != 'cancelled';
+
+            RETURN NEXT;
+            v_current_time := v_current_time + interval '30 minutes';
+        END LOOP;
+    END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
