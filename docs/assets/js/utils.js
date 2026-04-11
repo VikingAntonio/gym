@@ -61,6 +61,30 @@ export function showPopup(title, message, type = 'success') {
 }
 
 /**
+ * Muestra una notificación rápida tipo toast
+ */
+export function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    const textColor = type === 'success' ? 'text-emerald-500' : 'text-red-500';
+
+    toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-fade-in border border-slate-800`;
+    toast.innerHTML = `
+        <i class="fas ${icon} ${textColor} text-lg"></i>
+        <span class="text-xs font-black uppercase tracking-widest">${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, 20px)';
+        toast.style.transition = 'all 0.5s ease';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+
+/**
  * Muestra un popup de confirmación
  */
 export function showConfirm(title, message) {

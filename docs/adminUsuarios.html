@@ -136,8 +136,9 @@
                         document.getElementById('th-business')?.classList.remove('hidden');
                         document.getElementById('business-group')?.classList.remove('hidden');
                         document.getElementById('owner-group')?.classList.remove('hidden');
-                        renderAdminSidebar(() => loadUsers());
+                        // renderAdminSidebar disabled for adminUsuarios.html per user request
                         loadOwners();
+                        loadUsers(); // Cargar usuarios explícitamente al ser admin
                     }
                 }
 
@@ -214,12 +215,8 @@
             try {
                 let query = supabase.from('wisbe_users').select('*');
 
-                const selectedOwnerId = Auth.getSelectedOwnerId();
                 if (isAdmin) {
-                    if (selectedOwnerId) {
-                        query = query.eq('owner_id', selectedOwnerId);
-                    }
-                    // Si es admin y no hay owner seleccionado, NO filtramos para ver TODO
+                    // Admins always see all users on this page, ignoring any sidebar selection
                 } else if (currentUser?.id) {
                     query = query.eq('owner_id', currentUser.id);
                 }
@@ -310,12 +307,6 @@
             document.getElementById('modal-title').innerText = 'Nuevo Registro';
             document.getElementById('password-group').classList.remove('hidden');
             document.getElementById('email').disabled = false;
-
-            // Auto-select owner if sidebar has one
-            const selectedOwnerId = Auth.getSelectedOwnerId();
-            if (selectedOwnerId) {
-                document.getElementById('owner_id_select').value = selectedOwnerId;
-            }
 
             modal.style.display = 'flex';
         };
