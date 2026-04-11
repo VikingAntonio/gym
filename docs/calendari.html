@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Citas - Wisbe Beauty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/styleGYM.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .widget-wrapper {
+            width: 100%;
+            max-width: 1100px;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            margin: auto;
+        }
+        @media (max-width: 640px) {
+            .widget-wrapper {
+                padding: 20px;
+                border-radius: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-wrapper animate-fade">
+        <header class="text-center mb-12">
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase mb-2">Reserva tu Cita</h1>
+            <p class="text-slate-400 text-sm font-medium">Selecciona un servicio y elige el horario que mejor te convenga.</p>
+        </header>
+
+        <!-- El Widget se inyectará aquí -->
+        <div id="widget-container"></div>
+    </div>
+
+    <script src="./wisbeBeauty.js"></script>
+    <script type="module">
+        import { Auth } from './assets/js/utils.js';
+
+        // Determinar el dominio desde el usuario logueado o parámetro URL
+        const params = new URLSearchParams(window.location.search);
+        let domain = params.get('domain');
+
+        if (!domain) {
+            const user = Auth.getUser();
+            if (user && user.domain) {
+                domain = user.domain;
+            }
+        }
+
+        if (domain) {
+            const container = document.getElementById('widget-container');
+            container.innerHTML = `<wisbe-beauty-citas domain="${domain}"></wisbe-beauty-citas>`;
+        } else {
+            document.getElementById('widget-container').innerHTML = `
+                <div class="text-center py-20">
+                    <i class="fas fa-exclamation-triangle text-4xl text-orange-400 mb-6"></i>
+                    <h2 class="text-xl font-black text-slate-900 uppercase">Error de Configuración</h2>
+                    <p class="text-slate-500 mt-2">No se ha especificado un dominio para cargar el calendario.</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

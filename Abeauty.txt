@@ -111,11 +111,19 @@ BEGIN
         v_business_hours := '{}'::jsonb;
     END IF;
 
-    -- Obtener día de la semana en inglés (coincide con llaves del JSON)
-    v_day_name := trim(lower(to_char(p_date, 'day')));
+    -- Obtener día de la semana de forma independiente al idioma
+    v_day_name := CASE extract(dow from p_date)
+        WHEN 0 THEN 'sunday'
+        WHEN 1 THEN 'monday'
+        WHEN 2 THEN 'tuesday'
+        WHEN 3 THEN 'wednesday'
+        WHEN 4 THEN 'thursday'
+        WHEN 5 THEN 'friday'
+        WHEN 6 THEN 'saturday'
+    END;
 
     -- Extraer horario del JSON
-    v_is_active := (v_business_hours->v_day_name->>'active')::BOOLEAN;
+    v_is_active := COALESCE((v_business_hours->v_day_name->>'active')::BOOLEAN, false);
     v_open_time := (v_business_hours->v_day_name->>'open')::TIME;
     v_close_time := (v_business_hours->v_day_name->>'close')::TIME;
 
