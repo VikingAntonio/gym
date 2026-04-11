@@ -21,7 +21,9 @@
             color: #0f172a;
             --pink-600: #db2777;
             --pink-500: #ec4899;
+            --pink-100: #fce7f3;
             --pink-50: #fdf2f8;
+            --slate-50: #f8fafc;
             --slate-100: #f1f5f9;
             --slate-200: #e2e8f0;
             --slate-400: #94a3b8;
@@ -29,66 +31,93 @@
             --slate-900: #0f172a;
         }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
 
-        .step-header { margin-bottom: 2rem; }
-        .step-title { font-size: 1.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.025em; }
+        .step-header { margin-bottom: 3rem; text-align: center; }
+        .step-title { font-size: 2rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.04em; color: var(--slate-900); }
+        .step-subtitle { font-size: 0.875rem; color: var(--slate-400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; }
 
-        .services-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        .services-grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
         .service-card {
-            background: white; border-radius: 32px; border: 1px solid var(--slate-100); overflow: hidden;
-            transition: all 0.3s; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            background: white; border-radius: 40px; border: 1px solid var(--slate-100); overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; position: relative;
         }
-        .service-card:hover { transform: translateY(-4px); border-color: var(--pink-500); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        .service-img { height: 160px; width: 100%; object-fit: cover; }
-        .service-info { padding: 1.5rem; }
-        .service-name { font-weight: 800; margin-bottom: 0.5rem; }
-        .service-meta { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 900; color: var(--slate-400); text-transform: uppercase; }
+        .service-card:hover { transform: translateY(-10px); border-color: var(--pink-200); box-shadow: 0 30px 60px -12px rgba(236, 72, 153, 0.15); }
+        .service-img-wrapper { height: 200px; width: 100%; overflow: hidden; position: relative; }
+        .service-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s; }
+        .service-card:hover .service-img { transform: scale(1.1); }
 
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; margin-top: 1rem; }
+        .service-badge {
+            position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(8px); padding: 0.4rem 1rem; border-radius: 1rem;
+            font-size: 10px; font-weight: 900; color: var(--pink-600);
+        }
+
+        .service-info { padding: 2rem; }
+        .service-name { font-size: 1.25rem; font-weight: 900; margin-bottom: 1rem; color: var(--slate-900); }
+        .service-meta { display: flex; align-items: center; gap: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: 900; color: var(--slate-400); text-transform: uppercase; }
+        .meta-item i { color: var(--pink-500); }
+
+        /* Calendar */
+        .calendar-wrapper { background: var(--slate-50); padding: 3rem; border-radius: 50px; border: 1px solid var(--slate-100); }
+        .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.75rem; }
+
         .day-btn {
-            padding: 1rem 0.5rem; border-radius: 1rem; border: 1px solid var(--slate-200); background: white;
-            text-align: center; cursor: pointer; transition: all 0.2s;
+            aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 24px; border: 1px solid transparent; background: white;
+            cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
         }
-        .day-btn:hover:not(:disabled) { border-color: var(--pink-500); background: var(--pink-50); }
-        .day-btn.selected { background: var(--pink-600); color: white; border-color: var(--pink-600); }
-        .day-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        .day-name { font-size: 10px; font-weight: 900; uppercase; display: block; margin-bottom: 4px; color: inherit; }
-        .day-num { font-weight: 800; font-size: 1.1rem; }
+        .day-btn:hover:not(:disabled) { background: var(--pink-50); border-color: var(--pink-100); transform: scale(1.05); }
+        .day-btn.selected { background: var(--pink-600); color: white; box-shadow: 0 10px 20px -5px rgba(219, 39, 119, 0.4); }
+        .day-btn:disabled { opacity: 0.2; cursor: not-allowed; background: transparent; border: 1px dashed var(--slate-200); box-shadow: none; }
 
-        .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem; margin-top: 2rem; }
+        .day-name { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; opacity: 0.6; }
+        .day-num { font-weight: 900; font-size: 1.25rem; }
+
+        .slots-section { margin-top: 4rem; }
+        .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1rem; }
         .slot-btn {
-            padding: 0.75rem; border-radius: 0.75rem; border: 1px solid var(--slate-200); background: white;
-            font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; text-align: center;
+            padding: 1rem; border-radius: 1.25rem; border: 1px solid var(--slate-200); background: white;
+            font-weight: 900; font-size: 0.875rem; cursor: pointer; transition: all 0.3s; text-align: center;
+            color: var(--slate-600);
         }
-        .slot-btn:hover:not(:disabled) { border-color: var(--pink-500); color: var(--pink-600); }
-        .slot-btn.selected { background: var(--pink-600); color: white; border-color: var(--pink-600); }
-        .slot-btn:disabled { opacity: 0.3; background: var(--slate-100); cursor: not-allowed; }
+        .slot-btn:hover:not(:disabled) { border-color: var(--pink-500); color: var(--pink-600); background: var(--pink-50); }
+        .slot-btn.selected { background: var(--pink-600); color: white; border-color: var(--pink-600); box-shadow: 0 8px 16px -4px rgba(219, 39, 119, 0.3); }
+        .slot-btn:disabled { opacity: 0.3; background: var(--slate-100); cursor: not-allowed; border-color: transparent; }
 
-        .form-container { max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+        .form-container { max-width: 550px; margin: 0 auto; background: white; padding: 3rem; border-radius: 50px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05); border: 1px solid var(--slate-100); }
+        .input-group { margin-bottom: 1.5rem; }
+        .label { font-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block; }
         .input {
-            width: 100%; padding: 1rem 1.5rem; border-radius: 1rem; border: 1px solid var(--slate-200);
-            font-family: inherit; font-size: 0.9rem; outline: none; transition: all 0.2s;
+            width: 100%; padding: 1.25rem 1.5rem; border-radius: 1.25rem; border: 1px solid var(--slate-200);
+            font-family: inherit; font-size: 0.95rem; font-weight: 600; outline: none; transition: all 0.3s;
+            background: var(--slate-50);
         }
-        .input:focus { border-color: var(--pink-500); box-shadow: 0 0 0 4px var(--pink-50); }
+        .input:focus { border-color: var(--pink-500); background: white; box-shadow: 0 0 0 5px var(--pink-50); }
 
         .btn {
-            width: 100%; padding: 1.25rem; border-radius: 1rem; border: none; background: var(--pink-600);
-            color: white; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;
-            cursor: pointer; transition: all 0.3s;
+            width: 100%; padding: 1.5rem; border-radius: 1.25rem; border: none; background: var(--pink-600);
+            color: white; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.8rem;
+            cursor: pointer; transition: all 0.4s; box-shadow: 0 10px 20px -5px rgba(219, 39, 119, 0.3);
         }
-        .btn:hover { background: var(--pink-500); transform: scale(1.02); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn:hover:not(:disabled) { background: var(--pink-500); transform: translateY(-2px); box-shadow: 0 15px 30px -8px rgba(236, 72, 153, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
-        .back-btn { margin-bottom: 2rem; font-size: 0.75rem; font-weight: 900; color: var(--slate-400); cursor: pointer; text-transform: uppercase; }
+        .back-btn { margin-bottom: 2.5rem; font-size: 0.7rem; font-weight: 900; color: var(--slate-400); cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.3s; }
         .back-btn:hover { color: var(--pink-600); }
 
-        .loading { padding: 4rem; text-align: center; font-weight: 900; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.1em; }
+        .loading { padding: 6rem; text-align: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--pink-50); border-top-color: var(--pink-500); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .success-box {
-            text-align: center; padding: 4rem; background: var(--pink-50); border-radius: 40px; border: 2px dashed var(--pink-200);
+            text-align: center; padding: 5rem; background: white; border-radius: 60px; border: 1px solid var(--slate-100);
+            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.05);
         }
+        .success-icon { width: 100px; height: 100px; background: var(--pink-50); color: var(--pink-500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 2.5rem; border: 4px solid white; box-shadow: 0 10px 20px rgba(236, 72, 153, 0.1); }
     `;
 
     class WisbeBeautyCitas extends HTMLElement {
@@ -123,14 +152,14 @@
 
             const { data: user } = await this.supabase.from('wisbe_users').select('id').ilike('domain', domain).maybeSingle();
             if (!user) {
-                this.renderError('Dominio no configurado');
+                this.renderError('Establecimiento no encontrado');
                 return;
             }
 
             this.state.owner_id = user.id;
 
             const [servicesRes, settingsRes] = await Promise.all([
-                this.supabase.from('beauty_services').select('*').eq('owner_id', user.id),
+                this.supabase.from('beauty_services').select('*').eq('owner_id', user.id).order('name'),
                 this.supabase.from('beauty_settings').select('*').eq('owner_id', user.id).maybeSingle()
             ]);
 
@@ -142,7 +171,7 @@
 
         render() {
             if (this.state.loading) {
-                this.shadowRoot.innerHTML = `<style>${styles}</style><div class="loading">Sincronizando Agenda...</div>`;
+                this.shadowRoot.innerHTML = `<style>${styles}</style><div class="loading"><div class="spinner"></div><div style="font-weight:900; color:var(--slate-400); text-transform:uppercase; letter-spacing:0.2em; font-size:10px">Preparando Agenda Profesional...</div></div>`;
                 return;
             }
 
@@ -158,18 +187,22 @@
 
         renderServices() {
             return `
-                <div class="step-header">
-                    <h2 class="step-title">Selecciona un Servicio</h2>
+                <div class="step-header animate-fade">
+                    <span class="step-subtitle">Paso 01</span>
+                    <h2 class="step-title">Selecciona tu experiencia</h2>
                 </div>
                 <div class="services-grid">
                     ${this.state.services.map(s => `
-                        <div class="service-card" data-id="${s.id}">
-                            <img src="${s.image_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80'}" class="service-img">
+                        <div class="service-card animate-fade" data-id="${s.id}">
+                            <div class="service-img-wrapper">
+                                <img src="${s.image_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80'}" class="service-img">
+                                <div class="service-badge">$${s.price}</div>
+                            </div>
                             <div class="service-info">
                                 <div class="service-name">${s.name}</div>
                                 <div class="service-meta">
-                                    <span>${s.duration_minutes} MIN</span>
-                                    <span style="color:var(--pink-600)">$${s.price}</span>
+                                    <span class="meta-item"><i class="far fa-clock"></i> ${s.duration_minutes} MIN</span>
+                                    <span class="meta-item"><i class="fas fa-magic"></i> Premium</span>
                                 </div>
                             </div>
                         </div>
@@ -199,53 +232,79 @@
 
             return `
                 <div class="back-btn" id="go-back"> <i class="fas fa-arrow-left"></i> Volver a servicios</div>
-                <div class="step-header">
-                    <h2 class="step-title">Fecha y Hora</h2>
-                    <p style="color:var(--slate-400); font-size:0.8rem; font-weight:bold; margin-top:0.5rem">Selecciona el día de tu cita</p>
-                </div>
-                <div class="calendar-grid">
-                    ${days.map(d => `
-                        <button class="day-btn ${this.state.selectedDate === d.date ? 'selected' : ''}"
-                                data-date="${d.date}"
-                                ${!d.active ? 'disabled' : ''}>
-                            <span class="day-name">${d.dayName}</span>
-                            <span class="day-num">${d.dayNum}</span>
-                        </button>
-                    `).join('')}
+                <div class="step-header animate-fade">
+                    <span class="step-subtitle">Paso 02</span>
+                    <h2 class="step-title">Fecha y Horario</h2>
+                    <p style="color:var(--pink-600); font-size:0.7rem; font-weight:900; text-transform:uppercase; margin-top:1rem; letter-spacing:0.1em">Servicio: ${this.state.selectedService.name}</p>
                 </div>
 
-                ${this.state.selectedDate ? `
-                    <div class="slots-grid">
-                        ${this.state.availableSlots.length > 0 ?
-                            this.state.availableSlots.map(s => `
-                                <button class="slot-btn ${this.state.selectedTime === s.slot_time ? 'selected' : ''}"
-                                        data-time="${s.slot_time}"
-                                        ${!s.is_available ? 'disabled' : ''}>
-                                    ${s.slot_time.substring(0,5)}
-                                </button>
-                            `).join('') :
-                            '<div style="grid-column: 1/-1; text-align:center; padding: 2rem; color: var(--slate-400); font-weight:bold">No hay horarios disponibles para este día</div>'
-                        }
+                <div class="calendar-wrapper animate-fade">
+                    <div class="calendar-grid">
+                        ${days.map(d => `
+                            <button class="day-btn ${this.state.selectedDate === d.date ? 'selected' : ''}"
+                                    data-date="${d.date}"
+                                    ${!d.active ? 'disabled' : ''}>
+                                <span class="day-name">${d.dayName}</span>
+                                <span class="day-num">${d.dayNum}</span>
+                            </button>
+                        `).join('')}
                     </div>
-                    <div style="margin-top: 3rem">
-                        <button class="btn" id="go-to-form" ${!this.state.selectedTime ? 'disabled' : ''}>Continuar</button>
-                    </div>
-                ` : ''}
+
+                    ${this.state.selectedDate ? `
+                        <div class="slots-section animate-fade">
+                            <div class="flex items-center gap-4 mb-8">
+                                <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Horarios disponibles</span>
+                                <div class="h-px bg-slate-200 flex-grow"></div>
+                            </div>
+                            <div class="slots-grid">
+                                ${this.state.availableSlots.length > 0 ?
+                                    this.state.availableSlots.map(s => `
+                                        <button class="slot-btn ${this.state.selectedTime === s.slot_time ? 'selected' : ''}"
+                                                data-time="${s.slot_time}"
+                                                ${!s.is_available ? 'disabled' : ''}>
+                                            ${s.slot_time.substring(0,5)}
+                                        </button>
+                                    `).join('') :
+                                    '<div style="grid-column: 1/-1; text-align:center; padding: 2rem; color: var(--slate-400); font-weight:bold">No hay horarios disponibles para el servicio solicitado.</div>'
+                                }
+                            </div>
+                            <div style="margin-top: 4rem; text-align:center">
+                                <button class="btn" style="max-width:300px" id="go-to-form" ${!this.state.selectedTime ? 'disabled' : ''}>Continuar Reserva</button>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
             `;
         }
 
         renderForm() {
             return `
                 <div class="back-btn" id="go-back"> <i class="fas fa-arrow-left"></i> Volver al calendario</div>
-                <div class="step-header">
-                    <h2 class="step-title">Tus Datos</h2>
-                    <p style="color:var(--slate-400); font-size:0.8rem; font-weight:bold; margin-top:0.5rem">Confirmación de cita: ${this.state.selectedService.name} - ${this.state.selectedDate} ${this.state.selectedTime}</p>
+                <div class="step-header animate-fade">
+                    <span class="step-subtitle">Paso 03</span>
+                    <h2 class="step-title">Datos de Contacto</h2>
+                    <div style="margin-top:1.5rem; background:var(--pink-50); padding:1rem; border-radius:1rem; display:inline-block">
+                        <p style="color:var(--pink-600); font-size:0.75rem; font-weight:900; text-transform:uppercase; letter-spacing:0.05em">
+                            <i class="far fa-calendar-alt mr-2"></i> ${this.state.selectedDate} @ ${this.state.selectedTime.substring(0,5)}
+                        </p>
+                    </div>
                 </div>
-                <form class="form-container" id="appointment-form">
-                    <input type="text" id="cust-name" placeholder="Nombre completo" required class="input">
-                    <input type="email" id="cust-email" placeholder="Correo electrónico" required class="input">
-                    <input type="tel" id="cust-phone" placeholder="Teléfono de contacto" required class="input">
-                    <button type="submit" class="btn">Confirmar Reserva</button>
+                <form class="form-container animate-fade" id="appointment-form">
+                    <div class="input-group">
+                        <label class="label">Nombre Completo</label>
+                        <input type="text" id="cust-name" placeholder="Tu nombre..." required class="input">
+                    </div>
+                    <div class="input-group">
+                        <label class="label">Correo Electrónico</label>
+                        <input type="email" id="cust-email" placeholder="ejemplo@correo.com" required class="input">
+                    </div>
+                    <div class="input-group">
+                        <label class="label">Teléfono / WhatsApp</label>
+                        <input type="tel" id="cust-phone" placeholder="+00 000 000 000" required class="input">
+                    </div>
+                    <div style="margin-top:2rem">
+                        <button type="submit" class="btn">Confirmar Cita Profesional</button>
+                    </div>
                 </form>
             `;
         }
@@ -253,10 +312,10 @@
         renderSuccess() {
             return `
                 <div class="success-box animate-fade">
-                    <div style="font-size: 4rem; color: var(--pink-500); margin-bottom: 2rem;"><i class="fas fa-check-circle"></i></div>
-                    <h2 class="step-title" style="margin-bottom: 1rem">¡Cita Agendada!</h2>
-                    <p style="color: var(--slate-600); font-weight: 500; line-height: 1.6">Tu solicitud ha sido recibida correctamente. Nos pondremos en contacto contigo pronto para confirmar los detalles.</p>
-                    <button class="btn" style="margin-top: 3rem; width: auto; padding: 1rem 3rem" id="restart">Volver al inicio</button>
+                    <div class="success-icon"><i class="fas fa-check"></i></div>
+                    <h2 class="step-title" style="margin-bottom: 1rem">¡Cita Reservada!</h2>
+                    <p style="color: var(--slate-500); font-weight: 600; font-size: 1.125rem; margin-bottom: 3rem">Hemos recibido tu solicitud. Te enviaremos una confirmación pronto.</p>
+                    <button class="btn" style="width: auto; padding: 1.25rem 4rem" id="restart">Finalizar</button>
                 </div>
             `;
         }
@@ -326,7 +385,7 @@
                     if (error) {
                         alert('Error al reservar: ' + error.message);
                         btn.disabled = false;
-                        btn.innerText = 'Confirmar Reserva';
+                        btn.innerText = 'Confirmar Cita';
                     } else {
                         this.state.step = 'success';
                         this.render();
@@ -348,6 +407,7 @@
 
         async calculateSlots() {
             // SEGURIZADO: Usamos el RPC para no exponer datos de otros clientes
+            // La lógica del RPC en Abeauty.txt ya maneja la duración de los servicios
             const { data, error } = await this.supabase.rpc('check_beauty_availability', {
                 p_owner_id: this.state.owner_id,
                 p_date: this.state.selectedDate
@@ -357,12 +417,35 @@
                 console.error("RPC Error:", error);
                 this.state.availableSlots = [];
             } else {
-                this.state.availableSlots = data || [];
+                // Filtrado adicional: Si el servicio seleccionado dura más de 30 min,
+                // debemos asegurar que los slots consecutivos también estén disponibles.
+                const duration = this.state.selectedService.duration_minutes || 30;
+                const slotsNeeded = Math.ceil(duration / 30);
+
+                if (slotsNeeded <= 1) {
+                    this.state.availableSlots = data || [];
+                } else {
+                    const refined = (data || []).map((slot, index, arr) => {
+                        if (!slot.is_available) return slot;
+
+                        // Verificar slots consecutivos
+                        let canFit = true;
+                        for (let j = 0; j < slotsNeeded; j++) {
+                            const futureSlot = arr[index + j];
+                            if (!futureSlot || !futureSlot.is_available) {
+                                canFit = false;
+                                break;
+                            }
+                        }
+                        return { ...slot, is_available: canFit };
+                    });
+                    this.state.availableSlots = refined;
+                }
             }
         }
 
         renderError(msg) {
-            this.shadowRoot.innerHTML = `<style>${styles}</style><div class="loading" style="color:var(--pink-600)">${msg}</div>`;
+            this.shadowRoot.innerHTML = `<style>${styles}</style><div class="loading" style="color:var(--pink-600); font-weight:900; text-transform:uppercase">${msg}</div>`;
         }
     }
 
