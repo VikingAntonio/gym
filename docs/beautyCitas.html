@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Citas - Wisbe Beauty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/styleGYM.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Administrador de Citas</h1>
+                <p class="text-slate-500 font-medium mt-1">Configura tus servicios, horarios y gestiona las solicitudes de tus clientes.</p>
+            </div>
+            <div class="flex gap-4">
+                <button id="btn-config" class="btn bg-white border border-slate-200 px-6 py-3 uppercase tracking-widest text-xs font-black">
+                    <i class="fas fa-cog mr-2"></i> Configuración
+                </button>
+                <button id="btn-nuevo-servicio" class="btn btn-primary px-6 py-3 uppercase tracking-widest text-xs font-black shadow-lg shadow-blue-600/20">
+                    <i class="fas fa-plus mr-2"></i> Nuevo Servicio
+                </button>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="flex space-x-8 mb-10 border-b border-slate-200">
+            <button class="tab-btn active border-b-2 border-blue-600 pb-4 text-sm font-black uppercase tracking-widest text-blue-600" data-tab="appointments">Citas Próximas</button>
+            <button class="tab-btn pb-4 text-sm font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors" data-tab="services">Servicios</button>
+        </div>
+
+        <!-- Appointments Tab -->
+        <div id="tab-appointments" class="tab-content animate-fade">
+            <div class="card bg-white border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Servicio</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha y Hora</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Estado</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-list" class="divide-y divide-slate-100">
+                            <tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 font-medium italic">Cargando citas...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Tab -->
+        <div id="tab-services" class="tab-content hidden animate-fade">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="services-grid">
+                <!-- Services here -->
+            </div>
+        </div>
+
+        <!-- Service Modal -->
+        <div id="modal-servicio" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+            <div class="card bg-white w-full max-w-lg p-10 shadow-2xl animate-fade">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 id="modal-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase">Servicio Beauty</h2>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="service-form" class="space-y-6">
+                    <input type="hidden" id="service-id">
+
+                    <div id="drop-zone" class="w-full h-48 border-2 border-dashed border-slate-200 rounded-[32px] flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all group relative overflow-hidden">
+                        <img id="img-preview" class="absolute inset-0 w-full h-full object-cover hidden">
+                        <div id="drop-content" class="text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-slate-300 mb-4 group-hover:text-blue-500 transition-colors"></i>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subir Imagen del Servicio</p>
+                        </div>
+                        <input type="file" id="file-input" class="hidden" accept="image/*">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre del Servicio</label>
+                        <input type="text" id="name" required class="input" placeholder="Ej: Corte de Cabello">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Precio ($)</label>
+                            <input type="number" id="price" required class="input" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Duración (min)</label>
+                            <input type="number" id="duration" required class="input" placeholder="30">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Descripción</label>
+                        <textarea id="description" class="input min-h-[100px] py-4" placeholder="Detalles del servicio..."></textarea>
+                    </div>
+
+                    <button type="submit" id="submit-service" class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                        Guardar Servicio
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Config Modal -->
+        <div id="modal-config" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+            <div class="card bg-white w-full max-w-2xl p-10 shadow-2xl animate-fade max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight uppercase">Configuración de Agenda</h2>
+                    <button id="close-config" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="config-form" class="space-y-8">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Citas simultáneas por hora</label>
+                        <input type="number" id="slots_per_hour" required class="input" value="1">
+                        <p class="text-[10px] text-slate-400 mt-2 uppercase font-bold">Define cuántas personas pueden agendar en el mismo bloque horario.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-4">Horarios de Atención</label>
+                        <div id="business-hours-container" class="space-y-3">
+                            <!-- Days here -->
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                        Actualizar Configuración
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, Auth, renderNavbar, showPopup, showConfirm, uploadToCloudinary, setupDragAndDrop, renderAdminSidebar } from './assets/js/utils.js';
+
+        let currentUser = null;
+        let selectedOwnerId = null;
+        let currentImageUrl = '';
+
+        async function init() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'beauty']);
+            selectedOwnerId = Auth.getSelectedOwnerId() || currentUser.id;
+
+            if (currentUser.role === 'gym-admin') {
+                renderAdminSidebar((id) => {
+                    selectedOwnerId = id || currentUser.id;
+                    loadData();
+                });
+            }
+
+            loadData();
+            setupTabs();
+            setupForms();
+        }
+
+        function setupTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('active', 'border-blue-600', 'text-blue-600');
+                        b.classList.add('text-slate-400');
+                    });
+                    btn.classList.add('active', 'border-blue-600', 'text-blue-600');
+                    btn.classList.remove('text-slate-400');
+
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                    document.getElementById(`tab-${btn.dataset.tab}`).classList.remove('hidden');
+                };
+            });
+        }
+
+        async function loadData() {
+            loadAppointments();
+            loadServices();
+        }
+
+        async function loadAppointments() {
+            const list = document.getElementById('appointments-list');
+            list.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 font-medium italic">Cargando...</td></tr>';
+
+            const { data, error } = await supabase
+                .from('beauty_appointments')
+                .select('*, beauty_services(name)')
+                .eq('owner_id', selectedOwnerId)
+                .order('appointment_date', { ascending: true })
+                .order('appointment_time', { ascending: true });
+
+            if (error) return console.error(error);
+
+            if (!data || data.length === 0) {
+                list.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 font-medium italic">No hay citas registradas.</td></tr>';
+                return;
+            }
+
+            list.innerHTML = data.map(app => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-5">
+                        <span class="block text-sm font-bold text-slate-800">${app.customer_name}</span>
+                        <span class="block text-[10px] text-slate-400 uppercase font-black">${app.customer_phone || ''}</span>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="px-3 py-1 bg-pink-50 text-pink-600 text-[10px] font-black uppercase rounded-full border border-pink-100">
+                            ${app.beauty_services?.name || 'Servicio eliminado'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="block text-sm font-mono text-slate-600">${app.appointment_date}</span>
+                        <span class="block text-xs font-bold text-slate-400">${app.appointment_time.substring(0,5)} HS</span>
+                    </td>
+                    <td class="px-6 py-5">
+                        <select onchange="updateStatus('${app.id}', this.value)" class="bg-transparent text-[10px] font-black uppercase tracking-widest cursor-pointer outline-none ${getStatusColor(app.status)}">
+                            <option value="pending" ${app.status === 'pending' ? 'selected' : ''}>Pendiente</option>
+                            <option value="confirmed" ${app.status === 'confirmed' ? 'selected' : ''}>Confirmada</option>
+                            <option value="completed" ${app.status === 'completed' ? 'selected' : ''}>Completada</option>
+                            <option value="cancelled" ${app.status === 'cancelled' ? 'selected' : ''}>Cancelada</option>
+                        </select>
+                    </td>
+                    <td class="px-6 py-5 text-right">
+                        <button onclick="deleteAppointment('${app.id}')" class="text-slate-300 hover:text-red-500 transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusColor(status) {
+            if (status === 'confirmed') return 'text-blue-600';
+            if (status === 'completed') return 'text-emerald-600';
+            if (status === 'cancelled') return 'text-red-500';
+            return 'text-orange-500';
+        }
+
+        window.updateStatus = async (id, status) => {
+            const { error } = await supabase.from('beauty_appointments').update({ status }).eq('id', id);
+            if (error) showPopup('Error', error.message, 'error');
+            else loadAppointments();
+        };
+
+        window.deleteAppointment = async (id) => {
+            if (await showConfirm('Eliminar Cita', '¿Estás seguro de eliminar esta cita de la agenda?')) {
+                const { error } = await supabase.from('beauty_appointments').delete().eq('id', id);
+                if (error) showPopup('Error', error.message, 'error');
+                else loadAppointments();
+            }
+        };
+
+        async function loadServices() {
+            const grid = document.getElementById('services-grid');
+            grid.innerHTML = '';
+
+            const { data, error } = await supabase
+                .from('beauty_services')
+                .select('*')
+                .eq('owner_id', selectedOwnerId)
+                .order('created_at', { ascending: false });
+
+            if (error) return console.error(error);
+
+            data.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'card group overflow-hidden';
+                card.innerHTML = `
+                    <div class="h-48 relative overflow-hidden">
+                        <img src="${s.image_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80'}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+                            <div>
+                                <span class="text-[10px] font-black text-white/80 uppercase tracking-widest">${s.duration_minutes} min</span>
+                                <h3 class="text-xl font-bold text-white tracking-tight">${s.name}</h3>
+                            </div>
+                            <span class="text-white font-black text-xl">$${s.price}</span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex justify-between items-center bg-white">
+                        <button onclick="editService('${s.id}')" class="text-slate-400 hover:text-blue-600 font-black text-[10px] uppercase tracking-widest flex items-center">
+                            <i class="fas fa-edit mr-2"></i> Editar
+                        </button>
+                        <button onclick="deleteService('${s.id}')" class="text-slate-400 hover:text-red-500 font-black text-[10px] uppercase tracking-widest flex items-center">
+                            <i class="fas fa-trash mr-2"></i> Borrar
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        window.editService = async (id) => {
+            const { data, error } = await supabase.from('beauty_services').select('*').eq('id', id).single();
+            if (error) return;
+
+            document.getElementById('service-id').value = data.id;
+            document.getElementById('name').value = data.name;
+            document.getElementById('price').value = data.price;
+            document.getElementById('duration').value = data.duration_minutes;
+            document.getElementById('description').value = data.description || '';
+            currentImageUrl = data.image_url;
+
+            if (currentImageUrl) {
+                document.getElementById('img-preview').src = currentImageUrl;
+                document.getElementById('img-preview').classList.remove('hidden');
+                document.getElementById('drop-content').classList.add('hidden');
+            }
+
+            document.getElementById('modal-title').innerText = 'Editar Servicio';
+            document.getElementById('modal-servicio').style.display = 'flex';
+        };
+
+        window.deleteService = async (id) => {
+            if (await showConfirm('Eliminar Servicio', 'Se borrará permanentemente. Las citas asociadas quedarán sin referencia.')) {
+                const { error } = await supabase.from('beauty_services').delete().eq('id', id);
+                if (error) showPopup('Error', error.message, 'error');
+                else loadServices();
+            }
+        };
+
+        function setupForms() {
+            const serviceModal = document.getElementById('modal-servicio');
+            const serviceForm = document.getElementById('service-form');
+            const configModal = document.getElementById('modal-config');
+            const configForm = document.getElementById('config-form');
+
+            document.getElementById('btn-nuevo-servicio').onclick = () => {
+                serviceForm.reset();
+                document.getElementById('service-id').value = '';
+                document.getElementById('modal-title').innerText = 'Nuevo Servicio';
+                document.getElementById('img-preview').classList.add('hidden');
+                document.getElementById('drop-content').classList.remove('hidden');
+                currentImageUrl = '';
+                serviceModal.style.display = 'flex';
+            };
+
+            document.getElementById('close-modal').onclick = () => serviceModal.style.display = 'none';
+            document.getElementById('close-config').onclick = () => configModal.style.display = 'none';
+
+            setupDragAndDrop(document.getElementById('drop-zone'), document.getElementById('file-input'), async (file) => {
+                try {
+                    document.getElementById('drop-content').innerHTML = '<i class="fas fa-sync fa-spin text-4xl text-blue-500"></i>';
+                    const url = await uploadToCloudinary(file);
+                    currentImageUrl = url;
+                    document.getElementById('img-preview').src = url;
+                    document.getElementById('img-preview').classList.remove('hidden');
+                    document.getElementById('drop-content').classList.add('hidden');
+                } catch (err) {
+                    showPopup('Error', 'Fallo al subir imagen', 'error');
+                    document.getElementById('drop-content').innerHTML = '<i class="fas fa-cloud-upload-alt text-4xl text-slate-300"></i>';
+                }
+            });
+
+            serviceForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('service-id').value;
+                const serviceData = {
+                    name: document.getElementById('name').value,
+                    price: document.getElementById('price').value,
+                    duration_minutes: document.getElementById('duration').value,
+                    description: document.getElementById('description').value,
+                    image_url: currentImageUrl,
+                    owner_id: selectedOwnerId
+                };
+
+                const { error } = id
+                    ? await supabase.from('beauty_services').update(serviceData).eq('id', id)
+                    : await supabase.from('beauty_services').insert(serviceData);
+
+                if (error) showPopup('Error', error.message, 'error');
+                else {
+                    showPopup('Éxito', 'Servicio guardado correctamente');
+                    serviceModal.style.display = 'none';
+                    loadServices();
+                }
+            };
+
+            document.getElementById('btn-config').onclick = async () => {
+                const { data, error } = await supabase.from('beauty_settings').select('*').eq('owner_id', selectedOwnerId).maybeSingle();
+
+                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                const daysEs = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+                let settings = data;
+                if (!settings) {
+                    settings = {
+                        slots_per_hour: 1,
+                        business_hours: {}
+                    };
+                    days.forEach(d => settings.business_hours[d] = { open: "09:00", close: "18:00", active: true });
+                }
+
+                document.getElementById('slots_per_hour').value = settings.slots_per_hour;
+
+                const container = document.getElementById('business-hours-container');
+                container.innerHTML = days.map((d, i) => {
+                    const h = settings.business_hours[d] || { open: "09:00", close: "18:00", active: true };
+                    return `
+                        <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                            <div class="w-24">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" name="active_${d}" class="mr-2" ${h.active ? 'checked' : ''}>
+                                    <span class="text-xs font-black uppercase text-slate-600">${daysEs[i]}</span>
+                                </label>
+                            </div>
+                            <input type="time" name="open_${d}" value="${h.open}" class="input py-2 text-xs">
+                            <span class="text-slate-300 font-black">/</span>
+                            <input type="time" name="close_${d}" value="${h.close}" class="input py-2 text-xs">
+                        </div>
+                    `;
+                }).join('');
+
+                configModal.style.display = 'flex';
+            };
+
+            configForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                const business_hours = {};
+
+                days.forEach(d => {
+                    business_hours[d] = {
+                        active: configForm.querySelector(`[name="active_${d}"]`).checked,
+                        open: configForm.querySelector(`[name="open_${d}"]`).value,
+                        close: configForm.querySelector(`[name="close_${d}"]`).value
+                    };
+                });
+
+                const settingsData = {
+                    owner_id: selectedOwnerId,
+                    slots_per_hour: document.getElementById('slots_per_hour').value,
+                    business_hours: business_hours
+                };
+
+                const { error } = await supabase.from('beauty_settings').upsert(settingsData);
+                if (error) showPopup('Error', error.message, 'error');
+                else {
+                    showPopup('Éxito', 'Configuración actualizada');
+                    configModal.style.display = 'none';
+                }
+            };
+        }
+
+        init();
+    </script>
+</body>
+</html>
