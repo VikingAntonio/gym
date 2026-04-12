@@ -648,25 +648,33 @@
                             ${this.renderPortfolio(portfolio)}
                         </div>
 
-                        ${ba.length >= 2 ? `
+                        ${ba.length > 0 ? `
                             <hr>
                             <h6 class="fw-bold text-start mb-3">Trabajos Realizados</h6>
-                            <div class="before-after-container">
-                                <div class="ba-image ba-before" style="background-image: url('${ba[0]}')"></div>
-                                <div class="ba-image ba-after" id="baAfterImg" style="background-image: url('${ba[1]}'); width: 50%;"></div>
-                                <input type="range" min="0" max="100" value="50" class="ba-slider" id="baSlider">
+                            <div class="ba-list" style="display: flex; flex-direction: column; gap: 20px;">
+                                ${this.renderBAPairs(ba)}
                             </div>
                         ` : ''}
                     </div>
                 </div>
             `;
+        }
 
-            const slider = this.shadowRoot.getElementById('baSlider');
-            if (slider) {
-                slider.oninput = (e) => {
-                    this.shadowRoot.getElementById('baAfterImg').style.width = e.target.value + "%";
-                };
+        renderBAPairs(ba) {
+            // Compatibility: if ba is [url, url], convert to [{before, after}]
+            let pairs = ba;
+            if (ba.length === 2 && typeof ba[0] === 'string') {
+                pairs = [{before: ba[0], after: ba[1]}];
             }
+
+            return pairs.map((pair, idx) => `
+                <div class="before-after-container">
+                    <div class="ba-image ba-before" style="background-image: url('${pair.before}')"></div>
+                    <div class="ba-image ba-after" id="ba-after-${idx}" style="background-image: url('${pair.after}'); width: 50%;"></div>
+                    <input type="range" min="0" max="100" value="50" class="ba-slider"
+                        oninput="this.parentNode.querySelector('.ba-after').style.width = this.value + '%' ">
+                </div>
+            `).join('');
         }
 
         renderSocials(sm) {
