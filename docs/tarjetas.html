@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería de Tarjetas - Wisbe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/styleGYM.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Tarjetas Digitales</h1>
+                <p class="text-slate-500 font-medium mt-1">Directorio de profesionales e independientes.</p>
+            </div>
+            <a href="cards.html" class="btn btn-primary px-6 py-3 uppercase tracking-widest text-xs font-black shadow-lg shadow-blue-600/20">
+                <i class="fas fa-plus mr-2"></i> Mi Tarjeta
+            </a>
+        </header>
+
+        <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 animate-fade">
+            <!-- Cargando -->
+            <div class="card col-span-full flex flex-col items-center justify-center py-20 text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                <span class="text-sm font-black uppercase tracking-widest">Sincronizando tarjetas...</span>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, renderNavbar, Auth } from './assets/js/utils.js';
+
+        async function initPage() {
+            renderNavbar();
+            await loadCards();
+        }
+
+        async function loadCards() {
+            const { data, error } = await supabase
+                .from('wisbe_cards')
+                .select(`
+                    id,
+                    header_config,
+                    updated_at,
+                    wisbe_users (
+                        username,
+                        full_name
+                    )
+                `)
+                .order('updated_at', { ascending: false });
+
+            if (error) return console.error(error);
+            renderCards(data || []);
+        }
+
+        function renderCards(cards) {
+            const grid = document.getElementById('cards-grid');
+            if (cards.length === 0) {
+                grid.innerHTML = '<div class="card col-span-full py-20 text-center text-slate-400">Aún no hay tarjetas públicas creadas.</div>';
+                return;
+            }
+
+            grid.innerHTML = cards.map(c => {
+                const hc = c.header_config || {};
+                const user = c.wisbe_users || {};
+                const name = hc.name || user.full_name || 'Usuario Wisbe';
+                const username = user.username || 'usuario';
+                const profileImg = hc.profile_url || 'https://via.placeholder.com/150';
+
+                return `
+                    <a href="cards.html?u=${username}" class="card group hover:border-blue-500 transition-all p-0 overflow-hidden flex flex-col">
+                        <div class="h-40 overflow-hidden bg-slate-100 relative">
+                            <div class="absolute inset-0" style="background: ${hc.header_color || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}"></div>
+                            <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg">
+                                <img src="${profileImg}" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="p-8 pt-12 text-center flex flex-col flex-grow">
+                            <h3 class="text-lg font-bold text-slate-900 mb-1 truncate">${name}</h3>
+                            <p class="text-xs text-blue-500 font-bold uppercase tracking-wider mb-4">${hc.title || 'Profesional'}</p>
+                            <p class="text-[10px] text-slate-400 font-medium mb-6 line-clamp-2">${hc.bio || ''}</p>
+                            <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-center text-emerald-500 text-[10px] font-black uppercase tracking-widest">
+                                Ver Tarjeta <i class="fas fa-chevron-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        initPage();
+    </script>
+</body>
+</html>
