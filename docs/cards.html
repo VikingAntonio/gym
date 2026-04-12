@@ -12,6 +12,109 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
+        /* Neomorphic and Modern UI Fixes */
+        :root {
+            --neo-shadow: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff;
+            --neo-inset: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
+            --emerald-600: #059669;
+        }
+
+        body { background-color: #f0f4f8; }
+
+        .neo-card {
+            background: #f0f4f8;
+            border-radius: 50px;
+            box-shadow: var(--neo-shadow);
+            border: 1px solid rgba(255,255,255,0.5);
+            padding: 40px;
+        }
+
+        .neo-input {
+            background: #f0f4f8;
+            border: none;
+            border-radius: 20px;
+            box-shadow: var(--neo-inset);
+            padding: 15px 25px;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .neo-input:focus {
+            box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;
+        }
+
+        .neo-btn {
+            background: #f0f4f8;
+            border: none;
+            border-radius: 25px;
+            box-shadow: var(--neo-shadow);
+            padding: 15px 30px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #1e293b;
+        }
+
+        .neo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 10px 10px 20px #c2cbd9, -10px -10px 20px #ffffff;
+        }
+
+        .neo-btn:active {
+            transform: translateY(0);
+            box-shadow: var(--neo-inset);
+        }
+
+        .neo-btn-primary {
+            background: #1e293b;
+            color: white;
+            box-shadow: 8px 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .neo-btn-share {
+            background: #059669;
+            color: white;
+            box-shadow: 8px 8px 16px rgba(5, 150, 105, 0.2);
+        }
+
+        /* Upload Zones */
+        .upload-zone-small {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            box-shadow: var(--neo-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f0f4f8;
+            color: #94a3b8;
+        }
+
+        .upload-zone-small:hover { color: #3b82f6; }
+
+        .profile-drop-zone {
+            width: 120px;
+            height: 120px;
+            border-radius: 30px;
+            box-shadow: var(--neo-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            background: #f0f4f8;
+            position: relative;
+        }
+
+        .profile-drop-zone img { width: 100%; height: 100%; object-fit: cover; }
+
         /* Isolation for the Poppins Card Preview */
         .card-preview-wrapper {
             font-family: 'Poppins', sans-serif;
@@ -50,7 +153,6 @@
             position: absolute;
             bottom: -50px;
             overflow: hidden;
-            cursor: pointer;
         }
 
         .profile-img-container img {
@@ -144,24 +246,6 @@
             transform: scale(1.2);
         }
 
-        .qr-section {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-        }
-
-        #qrcode {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        #qrcode img, #qrcode canvas {
-            background: white;
-            padding: 5px;
-            border-radius: 5px;
-        }
-
         hr.card-hr {
             margin: 1.5rem 0;
             color: inherit;
@@ -171,7 +255,7 @@
         }
 
         .drag-over {
-            border-color: var(--primary) !important;
+            border: 2px dashed #3b82f6 !important;
             background-color: #eff6ff !important;
         }
     </style>
@@ -202,129 +286,141 @@
 
     <!-- Modal Compartir -->
     <div id="shareModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[500] hidden items-center justify-center p-4 animate-fade-in">
-        <div class="bg-white rounded-[40px] p-10 max-w-md w-full text-center shadow-2xl border border-white/20 relative">
-            <button onclick="closeShareModal()" class="absolute top-6 right-6 w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-200 transition-all">
+        <div class="bg-white rounded-[50px] p-12 max-w-2xl w-full text-center shadow-2xl border border-white/20 relative">
+            <button onclick="closeShareModal()" class="absolute top-8 right-8 w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-200 transition-all">
                 <i class="fas fa-times"></i>
             </button>
-            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-[24px] flex items-center justify-center mx-auto mb-6 text-3xl">
+            <div class="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-[32px] flex items-center justify-center mx-auto mb-8 text-4xl">
                 <i class="fas fa-share-alt"></i>
             </div>
-            <h3 class="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight">Compartir Tarjeta</h3>
-            <p class="text-slate-500 font-medium mb-8 text-sm">Escanea el código o copia el enlace directo.</p>
+            <h3 class="text-3xl font-black text-slate-900 mb-2 uppercase tracking-tight">Compartir Tarjeta</h3>
+            <p class="text-slate-500 font-medium mb-10">Escanea el código o copia el enlace directo personalizado.</p>
 
-            <div class="bg-slate-50 p-8 rounded-[32px] border border-slate-100 mb-8">
-                <div id="share-qrcode" class="flex justify-center mb-6"></div>
-                <button id="downloadShareQR" class="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">
-                    <i class="fas fa-download mr-1"></i> Descargar QR PNG
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <div class="bg-slate-900 rounded-2xl p-5 relative group border border-slate-800 shadow-2xl overflow-hidden">
-                    <code id="share-link-code" class="text-blue-400 font-mono text-[10px] block overflow-x-auto whitespace-nowrap text-left pr-10">https://wisbe.xyz/username</code>
-                    <button onclick="copyToClipboard('share-link-code')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-110">
-                        <i class="fas fa-copy"></i>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                <div class="bg-slate-50 p-8 rounded-[40px] border border-slate-100">
+                    <div id="share-qrcode" class="flex justify-center mb-6"></div>
+                    <button id="downloadShareQR" class="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">
+                        <i class="fas fa-download mr-1"></i> Descargar QR PNG
                     </button>
                 </div>
 
-                <button onclick="nativeShare()" class="w-full py-4 bg-slate-100 text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-all">
-                    Otras opciones de envío
-                </button>
+                <div class="space-y-6">
+                    <div class="bg-slate-900 rounded-3xl p-6 relative group border border-slate-800 shadow-2xl overflow-hidden">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 block text-left">Tu Link Directo</label>
+                        <code id="share-link-code" class="text-emerald-400 font-mono text-sm block overflow-x-auto whitespace-nowrap text-left pr-10 pb-2">https://wisbe.xyz/username</code>
+                        <button onclick="copyToClipboard('share-link-code')" class="absolute right-6 bottom-8 text-slate-500 hover:text-white transition-all scale-125">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="nativeShare()" class="w-full py-5 bg-slate-100 text-slate-900 rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all">
+                        <i class="fas fa-mobile-alt mr-2"></i> Otras opciones
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <main class="container mx-auto px-4 pb-20">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12" id="editorGrid">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16" id="editorGrid">
             <!-- Left Side: Controls -->
-            <div id="editorColumn" class="space-y-8 animate-fade">
-                <div class="card bg-white border-slate-200 p-10 space-y-8">
-                    <h4 class="text-2xl font-black text-slate-900 tracking-tight uppercase">Personaliza tu Tarjeta</h4>
+            <div id="editorColumn" class="space-y-12 animate-fade">
+                <div class="neo-card space-y-10">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Editor Pro</h4>
+                        <div class="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center"><i class="fas fa-magic"></i></div>
+                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="md:col-span-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre / Empresa</label>
-                            <input type="text" id="inputName" class="input" placeholder="Juan Pérez">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Nombre / Empresa</label>
+                            <input type="text" id="inputName" class="neo-input" placeholder="Tu Nombre">
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Título / Profesión</label>
-                            <input type="text" id="inputTitle" class="input" placeholder="Desarrollador Web">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Título / Profesión</label>
+                            <input type="text" id="inputTitle" class="neo-input" placeholder="Tu Profesión">
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Bio Corta</label>
-                            <textarea id="inputBio" class="input resize-none" rows="2" placeholder="Crea experiencias digitales únicas..."></textarea>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Bio Profesional</label>
+                            <textarea id="inputBio" class="neo-input resize-none" rows="3" placeholder="Cuéntale al mundo quién eres..."></textarea>
                         </div>
 
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Imagen de Perfil</label>
-                            <div id="drop-profile" class="h-24 rounded-2xl border-2 border-dashed border-slate-100 flex items-center justify-center cursor-pointer hover:border-blue-400 overflow-hidden bg-slate-50 transition-all">
-                                <i class="fas fa-user-circle text-slate-300 text-2xl"></i>
+                        <div class="flex flex-col items-center md:items-start gap-4">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-2">Foto de Perfil</label>
+                            <div id="drop-profile" class="profile-drop-zone">
+                                <i class="fas fa-user-circle text-slate-300 text-4xl" id="profile-placeholder"></i>
                             </div>
                         </div>
 
-                        <div class="space-y-3">
-                            <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Imagen de Fondo (Header)</label>
-                                <div id="drop-header" class="h-12 rounded-xl border-2 border-dashed border-slate-100 flex items-center justify-center cursor-pointer hover:border-blue-400 overflow-hidden bg-slate-50 transition-all">
-                                    <i class="fas fa-image text-slate-300"></i>
+                        <div class="space-y-6">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-2">Estilo Cabecera</label>
+                            <div class="flex items-center gap-4">
+                                <input type="color" id="inputHeaderColor" class="w-20 h-14 rounded-2xl cursor-pointer border-none p-1 bg-white shadow-md" value="#667eea">
+                                <div id="drop-header" class="upload-zone-small">
+                                    <i class="fas fa-image" id="header-placeholder"></i>
                                 </div>
                             </div>
-                            <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">O Color Sólido</label>
-                                <input type="color" id="inputHeaderColor" class="w-full h-8 rounded-lg cursor-pointer border-none p-1 bg-slate-100" value="#667eea">
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-slate-200"></div>
+
+                    <div class="space-y-6">
+                        <h6 class="text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2">Presencia Social</h6>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="relative">
+                                <i class="fab fa-facebook absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="inputFB" class="neo-input pl-14" placeholder="Facebook">
+                            </div>
+                            <div class="relative">
+                                <i class="fab fa-instagram absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="inputIG" class="neo-input pl-14" placeholder="Instagram">
+                            </div>
+                            <div class="relative">
+                                <i class="fab fa-linkedin absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="inputLI" class="neo-input pl-14" placeholder="LinkedIn">
+                            </div>
+                            <div class="relative">
+                                <i class="fab fa-whatsapp absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="inputWA" class="neo-input pl-14" placeholder="WhatsApp">
                             </div>
                         </div>
                     </div>
 
-                    <div class="h-px bg-slate-100"></div>
+                    <div class="h-px bg-slate-200"></div>
 
-                    <h6 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Redes Sociales</h6>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="relative group">
-                            <i class="fab fa-facebook absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="inputFB" class="input pl-12" placeholder="URL Facebook">
-                        </div>
-                        <div class="relative group">
-                            <i class="fab fa-instagram absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="inputIG" class="input pl-12" placeholder="URL Instagram">
-                        </div>
-                        <div class="relative group">
-                            <i class="fab fa-linkedin absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="inputLI" class="input pl-12" placeholder="URL LinkedIn">
-                        </div>
-                        <div class="relative group">
-                            <i class="fab fa-whatsapp absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="inputWA" class="input pl-12" placeholder="WhatsApp Number">
+                    <div class="space-y-6">
+                        <h6 class="text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2">Portfolio Visual</h6>
+                        <div id="portfolioUploadZone" class="neo-card p-10 text-center cursor-pointer border-2 border-dashed border-slate-200 flex flex-col items-center justify-center min-h-[160px] hover:border-emerald-400 transition-all bg-white/50">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-slate-300 mb-4"></i>
+                            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Suelta tus trabajos aquí</p>
+                            <input type="file" id="portfolioInput" multiple accept="image/*,video/*" class="hidden">
                         </div>
                     </div>
 
-                    <div class="h-px bg-slate-100"></div>
+                    <div class="h-px bg-slate-200"></div>
 
-                    <h6 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Portfolio (Arrastra imágenes/videos)</h6>
-                    <div id="portfolioUploadZone" class="border-2 border-dashed border-slate-200 rounded-[32px] p-8 text-center cursor-pointer hover:border-blue-400 transition-all bg-slate-50 flex flex-col items-center justify-center min-h-[160px]">
-                        <i class="fas fa-images text-3xl text-slate-300 mb-4"></i>
-                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Haz clic o arrastra archivos aquí</p>
-                        <input type="file" id="portfolioInput" multiple accept="image/*,video/*" class="hidden">
+                    <div class="space-y-6">
+                        <h6 class="text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2">Casos Antes y Después</h6>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                            <div id="baPairsContainer" class="contents">
+                                <!-- Dynamic Pairs -->
+                            </div>
+                            <button id="addBAPairBtn" class="min-h-[160px] rounded-[40px] border-2 border-dashed border-slate-200 text-slate-300 hover:text-emerald-500 hover:border-emerald-400 transition-all flex flex-col items-center justify-center group bg-white/30">
+                                <i class="fas fa-plus-circle text-4xl mb-3 group-hover:scale-110 transition-transform"></i>
+                                <span class="text-[10px] font-black uppercase tracking-widest">Añadir Caso</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="h-px bg-slate-100"></div>
-
-                    <h6 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Antes y Después</h6>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-                        <div id="baPairsContainer" class="contents">
-                            <!-- Dynamic Pairs -->
-                        </div>
-                        <button id="addBAPairBtn" class="min-h-[160px] border-2 border-dashed border-slate-200 rounded-[32px] p-6 text-slate-400 hover:text-blue-600 hover:border-blue-400 transition-all flex flex-col items-center justify-center group bg-slate-50/50">
-                            <i class="fas fa-plus-circle text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[10px] font-black uppercase tracking-widest">Agregar</span>
+                    <div class="pt-10 flex flex-col gap-4">
+                        <button class="w-full neo-btn neo-btn-primary py-5" id="saveCardBtn">
+                            <i class="fas fa-save mr-2"></i>Guardar Cambios
                         </button>
-                    </div>
-
-                    <div class="pt-6">
-                        <button class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30" id="saveCardBtn">
-                            <i class="fas fa-save mr-2"></i>Guardar Configuración
+                        <button class="w-full neo-btn neo-btn-share py-5" onclick="openShareModal()">
+                            <i class="fas fa-share-alt mr-2"></i>Compartir Tarjeta
                         </button>
                     </div>
                 </div>
@@ -395,7 +491,7 @@
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">1. Script Global</label>
                                 <div class="bg-slate-900 rounded-2xl p-6 relative group border border-slate-800 shadow-2xl">
-                                    <code id="script-code" class="text-blue-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">&lt;script src="https://wisbe.xyz/wisbeUI.js"&gt;&lt;/script&gt;</code>
+                                    <code id="script-code" class="text-blue-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">&lt;script src="https://wisbe.xyz/wisbeCards.js"&gt;&lt;/script&gt;</code>
                                     <button onclick="copyToClipboard('script-code')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-125">
                                         <i class="fas fa-copy"></i>
                                     </button>
@@ -428,13 +524,7 @@
                         </div>
                         <h5 class="font-black text-slate-900 text-2xl mb-3 tracking-tight uppercase relative z-10">Tu Link Wisbe</h5>
                         <p id="display-custom-url" class="text-blue-600 font-mono font-black text-xl mb-6 relative z-10 tracking-tight uppercase">Cargando...</p>
-
-                        <div class="flex flex-col gap-3 w-full max-w-xs relative z-10">
-                            <button onclick="openShareModal()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
-                                <i class="fas fa-share-alt mr-2"></i>Compartir Tarjeta
-                            </button>
-                            <p class="text-[10px] text-slate-400 leading-relaxed uppercase tracking-widest font-black px-4 py-2 bg-slate-100 rounded-lg">Ideal para Biografía de Instagram</p>
-                        </div>
+                        <p class="text-[10px] text-slate-400 leading-relaxed uppercase tracking-widest font-black px-4 py-2 bg-slate-100 rounded-lg">Ideal para Biografía de Instagram</p>
                     </div>
                 </div>
             </div>
@@ -601,27 +691,29 @@
         function initDragAndDrop() {
             const portfolioPreview = document.getElementById('portfolioPreview');
             const uploadZone = document.getElementById('portfolioUploadZone');
-            const fileInput = document.getElementById('portfolioInput');
 
             new Sortable(portfolioPreview, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
-                onEnd: function() {
-                    updatePortfolioArray();
-                }
+                onEnd: function() { updatePortfolioArray(); }
             });
 
             const setupGenericUpload = (dropArea, fileInputId, onComplete) => {
-                const input = document.getElementById(fileInputId) || document.createElement('input');
-                if (!document.getElementById(fileInputId)) {
+                let input = document.getElementById(fileInputId);
+                if (!input) {
+                    input = document.createElement('input');
                     input.type = 'file';
                     input.id = fileInputId;
                     input.className = 'hidden';
-                    input.accept = 'image/*';
+                    input.accept = (fileInputId === 'portfolioInput') ? 'image/*,video/*' : 'image/*';
+                    if (fileInputId === 'portfolioInput') input.multiple = true;
                     document.body.appendChild(input);
                 }
 
-                dropArea.onclick = () => input.click();
+                dropArea.onclick = (e) => {
+                    if (e.target.closest('button')) return;
+                    input.click();
+                };
 
                 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                     dropArea.addEventListener(eventName, e => {
@@ -631,24 +723,20 @@
                 });
 
                 ['dragenter', 'dragover'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, () => dropArea.classList.add('drag-over', 'border-blue-400', 'bg-blue-50'), false);
+                    dropArea.addEventListener(eventName, () => dropArea.classList.add('drag-over'), false);
                 });
 
                 ['dragleave', 'drop'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-over', 'border-blue-400', 'bg-blue-50'), false);
+                    dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-over'), false);
                 });
 
                 dropArea.addEventListener('drop', async (e) => {
                     const files = e.dataTransfer.files;
-                    if (files.length) {
-                        onComplete(files);
-                    }
+                    if (files.length) onComplete(files);
                 }, false);
 
                 input.onchange = () => {
-                    if (input.files.length) {
-                        onComplete(input.files);
-                    }
+                    if (input.files.length) onComplete(input.files);
                 };
             };
 
@@ -659,13 +747,15 @@
             setupGenericUpload(document.getElementById('drop-profile'), 'profileInput', async (files) => {
                 const dropArea = document.getElementById('drop-profile');
                 const previewImg = document.getElementById('profileImg');
-                dropArea.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-500"></i>';
+                const placeholder = document.getElementById('profile-placeholder');
+                if (placeholder) placeholder.classList.add('hidden');
+                dropArea.innerHTML = '<i class="fas fa-spinner fa-spin text-emerald-500"></i>';
                 try {
                     const url = await uploadToCloudinary(files[0]);
                     dropArea.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
                     previewImg.src = url;
                 } catch (err) {
-                    dropArea.innerHTML = '<i class="fas fa-user-circle text-slate-300 text-2xl"></i>';
+                    dropArea.innerHTML = '<i class="fas fa-user-circle text-slate-300 text-4xl"></i>';
                     showPopup('Error', 'Fallo al subir perfil', 'error');
                 }
             });
@@ -674,14 +764,14 @@
             setupGenericUpload(document.getElementById('drop-header'), 'headerBgInput', async (files) => {
                 const dropArea = document.getElementById('drop-header');
                 const previewHeader = document.getElementById('headerDesign');
-                dropArea.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-500"></i>';
+                dropArea.innerHTML = '<i class="fas fa-spinner fa-spin text-emerald-500 text-xs"></i>';
                 try {
                     const url = await uploadToCloudinary(files[0]);
-                    dropArea.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
+                    dropArea.innerHTML = `<img src="${url}" class="w-full h-full object-cover rounded-lg">`;
                     previewHeader.style.background = `url('${url}')`;
                     previewHeader.style.backgroundSize = 'cover';
                     previewHeader.style.backgroundPosition = 'center';
-                    window.currentHeaderImageUrl = url; // Temp storage for saving
+                    window.currentHeaderImageUrl = url;
                 } catch (err) {
                     dropArea.innerHTML = '<i class="fas fa-image text-slate-300"></i>';
                     showPopup('Error', 'Fallo al subir fondo', 'error');
@@ -749,25 +839,26 @@
             const container = document.getElementById('baPairsContainer');
             const pairId = Date.now() + Math.random().toString(16).slice(2);
             const div = document.createElement('div');
-            div.className = 'bg-white p-6 rounded-[32px] border border-slate-100 space-y-4 relative group shadow-sm';
+            div.className = 'neo-card p-6 space-y-4 relative group';
             div.id = `pair-${pairId}`;
+            div.style.borderRadius = '35px';
 
             div.innerHTML = `
-                <button class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" onclick="removeBAPair('${pairId}')">
+                <button class="absolute -top-3 -right-3 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-20" onclick="removeBAPair('${pairId}')">
                     <i class="fas fa-times"></i>
                 </button>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
-                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest block">Antes</label>
-                        <div id="drop-before-${pairId}" class="aspect-square rounded-2xl border-2 border-dashed border-slate-100 flex items-center justify-center cursor-pointer hover:border-blue-400 overflow-hidden bg-slate-50 transition-all">
-                            ${beforeUrl ? `<img src="${beforeUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-upload text-slate-300"></i>'}
+                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest block ml-1">Antes</label>
+                        <div id="drop-before-${pairId}" class="aspect-square rounded-[20px] shadow-inner flex items-center justify-center cursor-pointer hover:shadow-md overflow-hidden bg-slate-50 transition-all border border-slate-100">
+                            ${beforeUrl ? `<img src="${beforeUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-upload text-slate-200"></i>'}
                             <input type="file" id="input-before-${pairId}" class="hidden" accept="image/*">
                         </div>
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest block">Después</label>
-                        <div id="drop-after-${pairId}" class="aspect-square rounded-2xl border-2 border-dashed border-slate-100 flex items-center justify-center cursor-pointer hover:border-blue-400 overflow-hidden bg-slate-50 transition-all">
-                            ${afterUrl ? `<img src="${afterUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-upload text-slate-300"></i>'}
+                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest block ml-1">Después</label>
+                        <div id="drop-after-${pairId}" class="aspect-square rounded-[20px] shadow-inner flex items-center justify-center cursor-pointer hover:shadow-md overflow-hidden bg-slate-50 transition-all border border-slate-100">
+                            ${afterUrl ? `<img src="${afterUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-upload text-slate-200"></i>'}
                             <input type="file" id="input-after-${pairId}" class="hidden" accept="image/*">
                         </div>
                     </div>
@@ -908,8 +999,8 @@
                 document.getElementById('headerDesign').style.background = '#667eea';
 
                 // Reset drop areas
-                document.getElementById('drop-profile').innerHTML = '<i class="fas fa-user-circle text-slate-300 text-2xl"></i>';
-                document.getElementById('drop-header').innerHTML = '<i class="fas fa-image text-slate-300"></i>';
+                document.getElementById('drop-profile').innerHTML = '<i class="fas fa-user-circle text-slate-300 text-4xl" id="profile-placeholder"></i>';
+                document.getElementById('drop-header').innerHTML = '<i class="fas fa-image" id="header-placeholder"></i>';
                 window.currentHeaderImageUrl = null;
 
                 if (data) {

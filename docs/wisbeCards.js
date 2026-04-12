@@ -16,8 +16,9 @@
         static get observedAttributes() { return ['domain', 'username', 'user_id']; }
         attributeChangedCallback() { this.render(); }
         async render() {
+            const urlParams = new URLSearchParams(window.location.search);
             const domain = this.getAttribute('domain');
-            const username = this.getAttribute('username');
+            const username = this.getAttribute('username') || urlParams.get('u');
             const attrUserId = this.getAttribute('user_id');
 
             this.shadowRoot.innerHTML = `
