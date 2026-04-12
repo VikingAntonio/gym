@@ -200,6 +200,40 @@
         </div>
     </header>
 
+    <!-- Modal Compartir -->
+    <div id="shareModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[500] hidden items-center justify-center p-4 animate-fade-in">
+        <div class="bg-white rounded-[40px] p-10 max-w-md w-full text-center shadow-2xl border border-white/20 relative">
+            <button onclick="closeShareModal()" class="absolute top-6 right-6 w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-200 transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-[24px] flex items-center justify-center mx-auto mb-6 text-3xl">
+                <i class="fas fa-share-alt"></i>
+            </div>
+            <h3 class="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight">Compartir Tarjeta</h3>
+            <p class="text-slate-500 font-medium mb-8 text-sm">Escanea el código o copia el enlace directo.</p>
+
+            <div class="bg-slate-50 p-8 rounded-[32px] border border-slate-100 mb-8">
+                <div id="share-qrcode" class="flex justify-center mb-6"></div>
+                <button id="downloadShareQR" class="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">
+                    <i class="fas fa-download mr-1"></i> Descargar QR PNG
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-slate-900 rounded-2xl p-5 relative group border border-slate-800 shadow-2xl overflow-hidden">
+                    <code id="share-link-code" class="text-blue-400 font-mono text-[10px] block overflow-x-auto whitespace-nowrap text-left pr-10">https://wisbe.xyz/username</code>
+                    <button onclick="copyToClipboard('share-link-code')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-110">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+
+                <button onclick="nativeShare()" class="w-full py-4 bg-slate-100 text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-all">
+                    Otras opciones de envío
+                </button>
+            </div>
+        </div>
+    </div>
+
     <main class="container mx-auto px-4 pb-20">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12" id="editorGrid">
             <!-- Left Side: Controls -->
@@ -262,17 +296,14 @@
 
                     <div class="h-px bg-slate-100"></div>
 
-                    <h6 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Antes y Después</h6>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Imagen Antes</label>
-                            <input type="file" id="beforeInput" accept="image/*" class="input py-2 text-xs">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Imagen Después</label>
-                            <input type="file" id="afterInput" accept="image/*" class="input py-2 text-xs">
-                        </div>
+                    <h6 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Antes y Después (Comparativos)</h6>
+                    <div id="baPairsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Dynamic Pairs -->
                     </div>
+                    <button id="addBAPairBtn" class="w-full border-2 border-dashed border-slate-200 rounded-[32px] p-6 text-slate-400 hover:text-blue-600 hover:border-blue-400 transition-all flex flex-col items-center justify-center group bg-slate-50/50">
+                        <i class="fas fa-plus-circle text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Agregar Comparativo Antes/Después</span>
+                    </button>
 
                     <div class="pt-6">
                         <button class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30" id="saveCardBtn">
@@ -319,17 +350,8 @@
                                 <hr class="card-hr">
 
                                 <h6 class="font-bold text-left mb-4 text-white uppercase text-xs tracking-widest">Trabajos Realizados</h6>
-                                <div class="before-after-container" id="baContainer" style="display: none;">
-                                    <div class="ba-image ba-before" id="baBeforeImg"></div>
-                                    <div class="ba-image ba-after" id="baAfterImg"></div>
-                                    <input type="range" min="0" max="100" value="50" class="ba-slider" id="baSlider">
-                                </div>
-
-                                <div class="qr-section mt-8" id="qrSection">
-                                    <div id="qrcode" class="mb-6"></div>
-                                    <button class="w-full py-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/10" id="downloadQR">
-                                        <i class="fas fa-download mr-2"></i>Descargar QR .PNG
-                                    </button>
+                                <div id="baPreviewList" class="space-y-6">
+                                    <!-- Multiple BA Sliders here -->
                                 </div>
                             </div>
                         </div>
@@ -389,7 +411,13 @@
                         </div>
                         <h5 class="font-black text-slate-900 text-2xl mb-3 tracking-tight uppercase relative z-10">Tu Link Wisbe</h5>
                         <p id="display-custom-url" class="text-blue-600 font-mono font-black text-xl mb-6 relative z-10 tracking-tight uppercase">Cargando...</p>
-                        <p class="text-[10px] text-slate-400 max-w-xs leading-relaxed uppercase tracking-widest font-black relative z-10 px-4 py-2 bg-slate-100 rounded-lg">Ideal para Biografía de Instagram</p>
+
+                        <div class="flex flex-col gap-3 w-full max-w-xs relative z-10">
+                            <button onclick="openShareModal()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
+                                <i class="fas fa-share-alt mr-2"></i>Compartir Tarjeta
+                            </button>
+                            <p class="text-[10px] text-slate-400 leading-relaxed uppercase tracking-widest font-black px-4 py-2 bg-slate-100 rounded-lg">Ideal para Biografía de Instagram</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -411,6 +439,7 @@
         let currentUser = null;
         let isAdmin = false;
         let portfolioData = [];
+        let baPairsData = []; // [{before: 'url', after: 'url'}]
         let isPublicView = false;
         let targetUserId = null;
         let targetUsername = null;
@@ -460,8 +489,7 @@
 
                 initDragAndDrop();
                 initRealTimePreview();
-                initQR();
-                initBeforeAfter();
+                initBAPairs();
                 initSocials();
                 initProfileUpload();
                 initHeaderColor();
@@ -487,6 +515,63 @@
             const customUrl = `${window.location.origin}${window.location.pathname}?u=${username}`;
             document.getElementById('custom-link').innerText = customUrl;
             document.getElementById('display-custom-url').innerText = `wisbe.xyz/${username}`;
+
+            // Update Share Modal Link
+            document.getElementById('share-link-code').innerText = customUrl;
+        }
+
+        window.openShareModal = () => {
+            const modal = document.getElementById('shareModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            initShareQR();
+        };
+
+        window.closeShareModal = () => {
+            const modal = document.getElementById('shareModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.nativeShare = async () => {
+            const url = document.getElementById('share-link-code').innerText;
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Mi Tarjeta Digital Wisbe',
+                        text: 'Mira mi perfil profesional en Wisbe',
+                        url: url
+                    });
+                } catch (err) { console.log('Share cancelled or failed'); }
+            } else {
+                copyToClipboard('share-link-code');
+                showToast('Link copiado al portapapeles');
+            }
+        };
+
+        function initShareQR() {
+            const qrContainer = document.getElementById("share-qrcode");
+            const downloadBtn = document.getElementById("downloadShareQR");
+            qrContainer.innerHTML = '';
+
+            const url = document.getElementById('share-link-code').innerText;
+            const qrcode = new QRCode(qrContainer, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            downloadBtn.onclick = () => {
+                const qrImg = qrContainer.querySelector('img');
+                const canvas = qrContainer.querySelector('canvas');
+                const link = document.createElement('a');
+                link.download = 'mi-tarjeta-wisbe-qr.png';
+                link.href = qrImg ? qrImg.src : canvas.toDataURL("image/png");
+                link.click();
+            };
         }
 
         window.copyToClipboard = (id) => {
@@ -575,37 +660,109 @@
             });
         }
 
-        function initBeforeAfter() {
-            const beforeInput = document.getElementById('beforeInput');
-            const afterInput = document.getElementById('afterInput');
-            const baSlider = document.getElementById('baSlider');
-            const baAfterImg = document.getElementById('baAfterImg');
-            const baContainer = document.getElementById('baContainer');
+        function initBAPairs() {
+            const addBtn = document.getElementById('addBAPairBtn');
+            addBtn.onclick = () => addBAPair();
+        }
 
-            beforeInput.onchange = async () => {
-                if (beforeInput.files.length) {
-                    const url = await uploadToCloudinary(beforeInput.files[0]);
-                    document.getElementById('baBeforeImg').style.backgroundImage = `url(${url})`;
-                    checkBAVisibility();
-                }
+        function addBAPair(beforeUrl = '', afterUrl = '') {
+            const container = document.getElementById('baPairsContainer');
+            const pairId = Date.now() + Math.random().toString(16).slice(2);
+            const div = document.createElement('div');
+            div.className = 'bg-white p-6 rounded-[32px] border border-slate-100 space-y-4 relative group shadow-sm';
+            div.id = `pair-${pairId}`;
+
+            div.innerHTML = `
+                <button class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" onclick="removeBAPair('${pairId}')">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest block">Antes</label>
+                        <div id="drop-before-${pairId}" class="aspect-square rounded-2xl border-2 border-dashed border-slate-100 flex items-center justify-center cursor-pointer hover:border-blue-400 overflow-hidden bg-slate-50 transition-all">
+                            ${beforeUrl ? `<img src="${beforeUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-upload text-slate-300"></i>'}
+                            <input type="file" id="input-before-${pairId}" class="hidden" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest block">Después</label>
+                        <div id="drop-after-${pairId}" class="aspect-square rounded-2xl border-2 border-dashed border-slate-100 flex items-center justify-center cursor-pointer hover:border-blue-400 overflow-hidden bg-slate-50 transition-all">
+                            ${afterUrl ? `<img src="${afterUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-upload text-slate-300"></i>'}
+                            <input type="file" id="input-after-${pairId}" class="hidden" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+
+            const dropBefore = div.querySelector(`#drop-before-${pairId}`);
+            const inputBefore = div.querySelector(`#input-before-${pairId}`);
+            const dropAfter = div.querySelector(`#drop-after-${pairId}`);
+            const inputAfter = div.querySelector(`#input-after-${pairId}`);
+
+            const setupUpload = (drop, input, type) => {
+                drop.onclick = () => input.click();
+                input.onchange = async () => {
+                    if (input.files.length) {
+                        drop.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-500"></i>';
+                        const url = await uploadToCloudinary(input.files[0]);
+                        drop.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
+                        updateBAPairsArray();
+                    }
+                };
+                drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('border-blue-400', 'bg-blue-50'); };
+                drop.ondragleave = () => { drop.classList.remove('border-blue-400', 'bg-blue-50'); };
+                drop.ondrop = async (e) => {
+                    e.preventDefault();
+                    drop.classList.remove('border-blue-400', 'bg-blue-50');
+                    if (e.dataTransfer.files.length) {
+                        drop.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-500"></i>';
+                        const url = await uploadToCloudinary(e.dataTransfer.files[0]);
+                        drop.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
+                        updateBAPairsArray();
+                    }
+                };
             };
 
-            afterInput.onchange = async () => {
-                if (afterInput.files.length) {
-                    const url = await uploadToCloudinary(afterInput.files[0]);
-                    document.getElementById('baAfterImg').style.backgroundImage = `url(${url})`;
-                    checkBAVisibility();
-                }
-            };
+            setupUpload(dropBefore, inputBefore, 'before');
+            setupUpload(dropAfter, inputAfter, 'after');
 
-            baSlider.oninput = (e) => { baAfterImg.style.width = e.target.value + "%"; };
+            updateBAPairsArray();
+        }
 
-            function checkBAVisibility() {
-                if (document.getElementById('baBeforeImg').style.backgroundImage &&
-                    document.getElementById('baAfterImg').style.backgroundImage) {
-                    baContainer.style.display = 'block';
-                }
-            }
+        window.removeBAPair = (id) => {
+            document.getElementById(`pair-${id}`).remove();
+            updateBAPairsArray();
+        };
+
+        function updateBAPairsArray() {
+            const container = document.getElementById('baPairsContainer');
+            const pairs = container.querySelectorAll('[id^="pair-"]');
+            baPairsData = Array.from(pairs).map(p => {
+                const bImg = p.querySelector('[id^="drop-before-"] img');
+                const aImg = p.querySelector('[id^="drop-after-"] img');
+                return {
+                    before: bImg ? bImg.src : null,
+                    after: aImg ? aImg.src : null
+                };
+            }).filter(p => p.before && p.after);
+
+            renderBAPreview();
+        }
+
+        function renderBAPreview() {
+            const previewList = document.getElementById('baPreviewList');
+            previewList.innerHTML = '';
+            baPairsData.forEach((pair, idx) => {
+                const container = document.createElement('div');
+                container.className = 'before-after-container';
+                container.innerHTML = `
+                    <div class="ba-image ba-before" style="background-image: url('${pair.before}')"></div>
+                    <div class="ba-image ba-after" id="preview-after-${idx}" style="background-image: url('${pair.after}'); width: 50%;"></div>
+                    <input type="range" min="0" max="100" value="50" class="ba-slider" oninput="document.getElementById('preview-after-${idx}').style.width = this.value + '%'">
+                `;
+                previewList.appendChild(container);
+            });
         }
 
         function initSocials() {
@@ -660,9 +817,8 @@
                 // Clear current
                 document.getElementById('portfolioPreview').innerHTML = '';
                 document.getElementById('socialContainer').innerHTML = '';
-                document.getElementById('baBeforeImg').style.backgroundImage = '';
-                document.getElementById('baAfterImg').style.backgroundImage = '';
-                document.getElementById('baContainer').style.display = 'none';
+                document.getElementById('baPairsContainer').innerHTML = '';
+                document.getElementById('baPreviewList').innerHTML = '';
                 document.getElementById('inputFB').value = '';
                 document.getElementById('inputIG').value = '';
                 document.getElementById('inputLI').value = '';
@@ -710,13 +866,15 @@
                         }
                     });
 
-                    if (data.before_after && data.before_after.length === 2) {
-                        document.getElementById('baBeforeImg').style.backgroundImage = `url(${data.before_after[0]})`;
-                        document.getElementById('baAfterImg').style.backgroundImage = `url(${data.before_after[1]})`;
-                        document.getElementById('baContainer').style.display = 'block';
+                    if (data.before_after) {
+                        // Compatibility check: old format was array of urls [before, after]
+                        if (data.before_after.length > 0 && typeof data.before_after[0] === 'string') {
+                            addBAPair(data.before_after[0], data.before_after[1]);
+                        } else {
+                            data.before_after.forEach(pair => addBAPair(pair.before, pair.after));
+                        }
                     }
                 }
-                initQR();
             } catch (err) { console.error("Error loading config:", err); }
         }
 
@@ -743,10 +901,7 @@
                     linkedin: document.getElementById('inputLI').value,
                     whatsapp: document.getElementById('inputWA').value
                 },
-                before_after: [
-                    document.getElementById('baBeforeImg').style.backgroundImage.replace(/url\(['"]?(.*?)['"]?\)/, '$1'),
-                    document.getElementById('baAfterImg').style.backgroundImage.replace(/url\(['"]?(.*?)['"]?\)/, '$1')
-                ].filter(url => url && url !== 'none' && !url.startsWith('url')),
+                before_after: baPairsData,
                 updated_at: new Date()
             };
 
@@ -754,7 +909,6 @@
                 const { error } = await supabase.from('wisbe_cards').upsert(config, { onConflict: 'user_id' });
                 if (error) throw error;
                 showPopup('Éxito', "¡Tarjeta guardada con éxito!");
-                initQR();
                 updateWidgetCode(activeUserId);
             } catch (err) { showPopup('Error', err.message, 'error'); }
             finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save mr-2"></i>Guardar Configuración'; }
@@ -768,29 +922,6 @@
             });
         }
 
-        function initQR() {
-            const qrContainer = document.getElementById("qrcode");
-            const downloadBtn = document.getElementById("downloadQR");
-            function updateQR() {
-                qrContainer.innerHTML = '';
-                const activeUserId = targetUserId || Auth.getSelectedOwnerId() || currentUser.id;
-
-                supabase.from('wisbe_users').select('username').eq('id', activeUserId).maybeSingle().then(({data}) => {
-                    const username = data?.username || activeUserId;
-                    const url = `${window.location.origin}${window.location.pathname}?u=${username}`;
-                    new QRCode(qrContainer, { text: url, width: 150, height: 150, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
-                });
-            }
-            downloadBtn.onclick = () => {
-                const qrImg = qrContainer.querySelector('img');
-                const canvas = qrContainer.querySelector('canvas');
-                const link = document.createElement('a');
-                link.download = 'mi-tarjeta-qr.png';
-                link.href = qrImg ? qrImg.src : canvas.toDataURL("image/png");
-                link.click();
-            };
-            updateQR();
-        }
 
         initPage();
     </script>

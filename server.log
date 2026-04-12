@@ -1,7 +1,0 @@
-127.0.0.1 - - [11/Apr/2026 10:21:12] "GET /beautyCitas.html HTTP/1.1" 200 -
-127.0.0.1 - - [11/Apr/2026 10:21:12] "GET /assets/css/styleGYM.css HTTP/1.1" 200 -
-127.0.0.1 - - [11/Apr/2026 10:21:13] "GET /assets/js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [11/Apr/2026 10:21:13] "GET /assets/js/config.js HTTP/1.1" 200 -
-127.0.0.1 - - [11/Apr/2026 10:21:13] "GET /login.html HTTP/1.1" 200 -
-127.0.0.1 - - [11/Apr/2026 10:21:16] "GET /calendari.html?domain=test.com HTTP/1.1" 200 -
-127.0.0.1 - - [11/Apr/2026 10:21:16] "GET /wisbeBeauty.js HTTP/1.1" 200 -
