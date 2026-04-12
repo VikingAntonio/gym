@@ -1,0 +1,45 @@
+-- SCHEMA PARA TARJETAS DIGITALES (WISBE)
+-- TABLA: wisbe_cards
+
+CREATE TABLE IF NOT EXISTS public.wisbe_cards (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL UNIQUE REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
+    header_config JSONB DEFAULT '{}'::jsonb,
+    portfolio JSONB DEFAULT '[]'::jsonb,
+    social_media JSONB DEFAULT '{}'::jsonb,
+    before_after JSONB DEFAULT '[]'::jsonb,
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- HABILITAR RLS
+ALTER TABLE public.wisbe_cards ENABLE ROW LEVEL SECURITY;
+
+-- ELIMINAR POLÍTICAS EXISTENTES PARA EVITAR DUPLICADOS
+DO $$
+BEGIN
+    DROP POLICY IF EXISTS "Admins have full access on cards" ON public.wisbe_cards;
+    DROP POLICY IF EXISTS "Public access to view cards" ON public.wisbe_cards;
+    DROP POLICY IF EXISTS "Users can manage their own card" ON public.wisbe_cards;
+EXCEPTION
+    WHEN undefined_object THEN null;
+END $$;
+
+-- POLÍTICA: ADMINISTRADORES (Acceso Total)
+CREATE POLICY "Admins have full access on cards" ON public.wisbe_cards
+    FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+-- POLÍTICA: ACCESO PÚBLICO (Cualquiera puede ver las tarjetas)
+CREATE POLICY "Public access to view cards" ON public.wisbe_cards
+    FOR SELECT
+    TO anon, authenticated
+    USING (true);
+
+-- POLÍTICA: DUEÑOS / INDEPENDIENTES (Gestionar propia tarjeta)
+CREATE POLICY "Users can manage their own card" ON public.wisbe_cards
+    FOR ALL
+    TO authenticated
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);

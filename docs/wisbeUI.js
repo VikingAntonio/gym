@@ -424,3 +424,270 @@
     customElements.define('wisbe-gym-rutinas', WisbeGymRutinas);
     customElements.define('wisbe-gym-staff', WisbeGymStaff);
 })();
+
+    class WisbeCards extends HTMLElement {
+        constructor() { super(); this.attachShadow({ mode: 'open' }); }
+        static get observedAttributes() { return ['domain', 'username', 'user_id']; }
+        attributeChangedCallback() { this.render(); }
+        async render() {
+            const domain = this.getAttribute('domain');
+            const username = this.getAttribute('username');
+            const attrUserId = this.getAttribute('user_id');
+
+            this.shadowRoot.innerHTML = `
+                <style>
+                    @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
+                    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+                    :host {
+                        display: block;
+                        font-family: 'Poppins', sans-serif;
+                        --bs-primary: #0d6efd;
+                        --bs-body-bg: #212529;
+                        --bs-body-color: #dee2e6;
+                    }
+
+                    .card-preview-container {
+                        max-width: 450px;
+                        margin: 20px auto;
+                        background: var(--bs-body-bg);
+                        border-radius: 30px;
+                        overflow: hidden;
+                        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        color: var(--bs-body-color);
+                    }
+
+                    .card-header-design {
+                        height: 200px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        position: relative;
+                        display: flex;
+                        align-items: flex-end;
+                        justify-content: center;
+                        padding-bottom: 50px;
+                    }
+
+                    .profile-img-container {
+                        width: 100px;
+                        height: 100px;
+                        border-radius: 50%;
+                        border: 5px solid var(--bs-body-bg);
+                        background: #eee;
+                        position: absolute;
+                        bottom: -50px;
+                        overflow: hidden;
+                    }
+
+                    .profile-img-container img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+
+                    .card-body-content {
+                        padding: 60px 20px 20px;
+                        text-align: center;
+                    }
+
+                    .portfolio-grid {
+                        display: grid;
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 10px;
+                        margin-top: 20px;
+                    }
+
+                    .portfolio-item {
+                        aspect-ratio: 1/1;
+                        background: rgba(255, 255, 255, 0.05);
+                        border-radius: 10px;
+                        overflow: hidden;
+                        position: relative;
+                    }
+
+                    .portfolio-item img, .portfolio-item video {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+
+                    .before-after-container {
+                        position: relative;
+                        width: 100%;
+                        aspect-ratio: 16/9;
+                        overflow: hidden;
+                        border-radius: 15px;
+                        margin-top: 20px;
+                    }
+
+                    .ba-image {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-size: cover;
+                        background-position: center;
+                    }
+
+                    .ba-before {
+                        z-index: 1;
+                    }
+
+                    .ba-after {
+                        z-index: 2;
+                        width: 50%;
+                        border-right: 2px solid white;
+                    }
+
+                    .ba-slider {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        z-index: 3;
+                        cursor: ew-resize;
+                        opacity: 0;
+                    }
+
+                    .social-icons-container {
+                        display: flex;
+                        justify-content: center;
+                        gap: 15px;
+                        margin-top: 20px;
+                    }
+
+                    .social-icon {
+                        font-size: 1.5rem;
+                        color: var(--bs-primary);
+                        transition: transform 0.2s;
+                        text-decoration: none;
+                    }
+
+                    .social-icon:hover {
+                        transform: scale(1.2);
+                    }
+
+                    hr {
+                        margin: 1.5rem 0;
+                        color: inherit;
+                        border: 0;
+                        border-top: 1px solid;
+                        opacity: .1;
+                    }
+
+                    .text-primary { color: var(--bs-primary) !important; }
+                    .small { font-size: .875em; }
+                    .text-muted { color: #6c757d !important; }
+                    .fw-bold { font-weight: 700 !important; }
+                    .text-start { text-align: left !important; }
+                    .mb-1 { margin-bottom: .25rem !important; }
+                    .mb-3 { margin-bottom: 1rem !important; }
+                    .mb-4 { margin-bottom: 1.5rem !important; }
+
+                    .loading { padding: 5rem; text-align: center; color: #6c757d; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; font-size: 12px; }
+                </style>
+                <div class="widget-container"><div class="loading">Sincronizando Tarjeta...</div></div>
+            `;
+
+            while (!window.supabase) await new Promise(r => setTimeout(r, 100));
+            const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+
+            let userId = attrUserId;
+            if (!userId && domain) {
+                const { data } = await supabase.from('wisbe_users').select('id').ilike('domain', domain.trim()).maybeSingle();
+                userId = data?.id;
+            } else if (!userId && username) {
+                const { data } = await supabase.from('wisbe_users').select('id').ilike('username', username.trim()).maybeSingle();
+                userId = data?.id;
+            }
+
+            if (!userId) {
+                this.shadowRoot.querySelector('.widget-container').innerHTML = `<div class="loading">Tarjeta no encontrada</div>`;
+                return;
+            }
+
+            const { data: card, error } = await supabase.from('wisbe_cards').select('*').eq('user_id', userId).maybeSingle();
+            if (!card) {
+                this.shadowRoot.querySelector('.widget-container').innerHTML = `<div class="loading">Esta tarjeta aún no ha sido configurada</div>`;
+                return;
+            }
+
+            this.renderCard(card);
+        }
+
+        renderCard(data) {
+            const container = this.shadowRoot.querySelector('.widget-container');
+            const hc = data.header_config || {};
+            const sm = data.social_media || {};
+            const portfolio = data.portfolio || [];
+            const ba = data.before_after || [];
+
+            container.innerHTML = `
+                <div class="card-preview-container">
+                    <div class="card-header-design" style="background: ${hc.header_color || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}">
+                        <div class="profile-img-container">
+                            <img src="${hc.profile_url || 'https://via.placeholder.com/150'}" alt="Perfil">
+                        </div>
+                    </div>
+
+                    <div class="card-body-content">
+                        <h3 class="fw-bold mb-1">${hc.name || 'Tu Nombre'}</h3>
+                        <p class="text-primary mb-3">${hc.title || 'Tu Profesión'}</p>
+                        <p class="small text-muted mb-4">${hc.bio || ''}</p>
+
+                        <div class="social-icons-container">
+                            ${this.renderSocials(sm)}
+                        </div>
+
+                        <hr>
+
+                        <h6 class="fw-bold text-start mb-3">Mi Portfolio</h6>
+                        <div class="portfolio-grid">
+                            ${this.renderPortfolio(portfolio)}
+                        </div>
+
+                        ${ba.length >= 2 ? `
+                            <hr>
+                            <h6 class="fw-bold text-start mb-3">Trabajos Realizados</h6>
+                            <div class="before-after-container">
+                                <div class="ba-image ba-before" style="background-image: url('${ba[0]}')"></div>
+                                <div class="ba-image ba-after" id="baAfterImg" style="background-image: url('${ba[1]}'); width: 50%;"></div>
+                                <input type="range" min="0" max="100" value="50" class="ba-slider" id="baSlider">
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            const slider = this.shadowRoot.getElementById('baSlider');
+            if (slider) {
+                slider.oninput = (e) => {
+                    this.shadowRoot.getElementById('baAfterImg').style.width = e.target.value + "%";
+                };
+            }
+        }
+
+        renderSocials(sm) {
+            const map = { facebook: 'bi-facebook', instagram: 'bi-instagram', linkedin: 'bi-linkedin', whatsapp: 'bi-whatsapp' };
+            return Object.entries(sm).map(([key, val]) => {
+                if (!val) return '';
+                let href = val.startsWith('http') ? val : (key === 'whatsapp' ? `https://wa.me/${val.replace(/\D/g,'')}` : `https://${val}`);
+                return `<a href="${href}" target="_blank" class="social-icon"><i class="bi ${map[key] || 'bi-link'}"></i></a>`;
+            }).join('');
+        }
+
+        renderPortfolio(portfolio) {
+            return portfolio.map(item => {
+                const url = typeof item === 'string' ? item : item.url;
+                const type = typeof item === 'string' ? 'image' : item.resource_type;
+                if (type === 'video') {
+                    return `<div class="portfolio-item"><video src="${url}" muted loop playsinline onmouseenter="this.play()" onmouseleave="this.pause()"></video></div>`;
+                }
+                return `<div class="portfolio-item"><img src="${url}"></div>`;
+            }).join('');
+        }
+    }
+
+    customElements.define('wisbe-cards', WisbeCards);
