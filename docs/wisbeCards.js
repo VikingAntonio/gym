@@ -103,41 +103,72 @@
                     .before-after-container {
                         position: relative;
                         width: 100%;
-                        aspect-ratio: 16/9;
+                        aspect-ratio: 1/1;
                         overflow: hidden;
-                        border-radius: 15px;
+                        border-radius: 20px;
                         margin-top: 20px;
+                        user-select: none;
                     }
 
-                    .ba-image {
+                    /* Slider Core */
+                    .comparison-slider .ba-before,
+                    .comparison-slider .ba-after {
+                        width: 100%;
+                        height: 100%;
                         position: absolute;
                         top: 0;
                         left: 0;
-                        width: 100%;
+                        background-size: cover;
+                        background-position: center;
+                    }
+
+                    .comparison-slider .ba-after {
+                        width: 50%;
+                        z-index: 2;
+                        overflow: hidden;
+                        border-right: 3px solid white;
+                    }
+
+                    .ba-after-inner {
+                        width: 100%; /* Dynamically set in JS to match slider width */
                         height: 100%;
                         background-size: cover;
                         background-position: center;
                     }
 
-                    .ba-before {
-                        z-index: 1;
-                    }
-
-                    .ba-after {
-                        z-index: 2;
-                        width: 50%;
-                        border-right: 2px solid white;
-                    }
-
-                    .ba-slider {
+                    .ba-handle {
                         position: absolute;
                         top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        z-index: 3;
+                        bottom: 0;
+                        left: 50%;
+                        width: 4px;
+                        background: white;
+                        z-index: 10;
+                        transform: translateX(-50%);
                         cursor: ew-resize;
-                        opacity: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .ba-handle::after {
+                        content: '';
+                        width: 36px;
+                        height: 36px;
+                        background: white;
+                        border-radius: 50%;
+                        box-shadow: 0 0 15px rgba(0,0,0,0.3);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m18 8 4 4-4 4M6 8l-4 4 4 4'/%3E%3C/svg%3E");
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        background-size: 20px;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
                     }
 
                     .social-icons-container {
@@ -259,14 +290,63 @@
                 pairs = [{before: ba[0], after: ba[1]}];
             }
 
+            setTimeout(() => this.initComparisonSliders(), 100);
+
             return pairs.map((pair, idx) => `
-                <div class="before-after-container">
-                    <div class="ba-image ba-before" style="background-image: url('${pair.before}')"></div>
-                    <div class="ba-image ba-after" id="ba-after-${idx}" style="background-image: url('${pair.after}'); width: 50%;"></div>
-                    <input type="range" min="0" max="100" value="50" class="ba-slider"
-                        oninput="this.parentNode.querySelector('.ba-after').style.width = this.value + '%' ">
+                <div class="before-after-container comparison-slider">
+                    <div class="ba-before" style="background-image: url('${pair.after}')"></div>
+                    <div class="ba-after" style="width: 50%;">
+                        <div class="ba-after-inner" style="background-image: url('${pair.before}')"></div>
+                    </div>
+                    <div class="ba-handle"></div>
                 </div>
             `).join('');
+        }
+
+        initComparisonSliders() {
+            const sliders = this.shadowRoot.querySelectorAll('.comparison-slider');
+            sliders.forEach(slider => {
+                const after = slider.querySelector('.ba-after');
+                const inner = slider.querySelector('.ba-after-inner');
+                const handle = slider.querySelector('.ba-handle');
+                let isDragging = false;
+
+                const updateSizing = () => {
+                    inner.style.width = slider.offsetWidth + 'px';
+                };
+
+                window.addEventListener('resize', updateSizing);
+                updateSizing();
+
+                const move = (e) => {
+                    if (!isDragging) return;
+                    const rect = slider.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    let x = clientX - rect.left;
+
+                    if (x < 0) x = 0;
+                    if (x > rect.width) x = rect.width;
+
+                    const percent = (x / rect.width) * 100;
+                    after.style.width = `${percent}%`;
+                    handle.style.left = `${percent}%`;
+                };
+
+                const start = (e) => {
+                    isDragging = true;
+                    if (!e.touches) e.preventDefault();
+                };
+                const end = () => isDragging = false;
+
+                handle.addEventListener('mousedown', start);
+                handle.addEventListener('touchstart', start, { passive: false });
+
+                window.addEventListener('mousemove', move);
+                window.addEventListener('touchmove', move, { passive: false });
+
+                window.addEventListener('mouseup', end);
+                window.addEventListener('touchend', end);
+            });
         }
 
         renderSocials(sm) {
