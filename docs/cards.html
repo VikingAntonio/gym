@@ -1,30 +1,23 @@
 <!DOCTYPE html>
-<html data-bs-theme="dark" lang="es">
-
+<html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>Tarjeta Digital - Wisbe</title>
-
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome (for compatibility with project style) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Tarjeta Digital - Wisbe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./assets/css/styleGYM.css">
-    <link rel="stylesheet" href="./assets/css/pastel-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for the Card Design -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        body {
+        /* Isolation for the Poppins Card Preview */
+        .card-preview-wrapper {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--bs-body-bg);
-            color: var(--bs-body-color);
+            --bs-primary: #0d6efd;
+            --bs-body-bg: #212529;
+            --bs-body-color: #dee2e6;
         }
 
         .card-preview-container {
@@ -35,6 +28,7 @@
             overflow: hidden;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--bs-body-color);
         }
 
         .card-header-design {
@@ -143,6 +137,7 @@
             font-size: 1.5rem;
             color: var(--bs-primary);
             transition: transform 0.2s;
+            text-decoration: none;
         }
 
         .social-icon:hover {
@@ -161,163 +156,181 @@
             justify-content: center;
             margin-bottom: 15px;
         }
+        #qrcode img, #qrcode canvas {
+            background: white;
+            padding: 5px;
+            border-radius: 5px;
+        }
 
-        .admin-controls {
-            padding: 20px;
-            background: var(--bs-tertiary-bg);
-            border-radius: 20px;
-            margin-bottom: 30px;
+        hr.card-hr {
+            margin: 1.5rem 0;
+            color: inherit;
+            border: 0;
+            border-top: 1px solid;
+            opacity: .1;
         }
 
         .drag-over {
-            border: 2px dashed var(--bs-primary) !important;
-            background: rgba(var(--bs-primary-rgb), 0.1) !important;
-        }
-
-        /* Widget Section Override for Dark Theme */
-        .widget-card {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: white !important;
+            border-color: var(--primary) !important;
+            background-color: #eff6ff !important;
         }
     </style>
 </head>
-
-<body>
+<body class="bg-slate-50 min-h-screen">
     <nav id="main-nav"></nav>
 
-    <main class="container py-5">
-        <div class="row" id="editorGrid">
+    <header class="container mx-auto px-4 pt-10 pb-6 border-b border-slate-200 bg-white shadow-sm mb-12">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl font-black">T</div>
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Tarjeta Digital</h1>
+                    <p class="text-slate-500 font-medium">Editor de perfil y herramientas de contacto</p>
+                </div>
+            </div>
+            <div id="user-badge" class="flex items-center bg-slate-50 border border-slate-200 px-5 py-3 rounded-2xl">
+                <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 mr-4">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <span id="header-user-name" class="block text-sm font-bold text-slate-900 uppercase">Usuario</span>
+                    <span id="user-role-label" class="block text-[10px] text-slate-400 font-black tracking-widest uppercase">Cargando...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 pb-20">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12" id="editorGrid">
             <!-- Left Side: Controls -->
-            <div class="col-lg-6" id="editorColumn">
-                <div class="admin-controls">
-                    <h4 class="fw-bold mb-4">Personaliza tu Tarjeta</h4>
+            <div id="editorColumn" class="space-y-8 animate-fade">
+                <div class="card bg-white border-slate-200 p-10 space-y-8">
+                    <h4 class="text-2xl font-black text-slate-900 tracking-tight uppercase">Personaliza tu Tarjeta</h4>
 
-                    <div class="mb-3">
-                        <label class="form-label">Nombre / Empresa</label>
-                        <input type="text" id="inputName" class="form-control" placeholder="Juan Pérez">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Título / Profesión</label>
-                        <input type="text" id="inputTitle" class="form-control" placeholder="Desarrollador Web">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Bio Corta</label>
-                        <textarea id="inputBio" class="form-control" rows="2" placeholder="Crea experiencias digitales únicas..."></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Color del Header</label>
-                        <input type="color" id="inputHeaderColor" class="form-control form-control-color w-100" value="#667eea">
-                    </div>
-
-                    <hr>
-
-                    <h6 class="fw-bold mb-3">Redes Sociales</h6>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="bi bi-facebook"></i></span>
-                                <input type="text" id="inputFB" class="form-control" placeholder="URL Facebook">
-                            </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre / Empresa</label>
+                            <input type="text" id="inputName" class="input" placeholder="Juan Pérez">
                         </div>
-                        <div class="col-6">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="bi bi-instagram"></i></span>
-                                <input type="text" id="inputIG" class="form-control" placeholder="URL Instagram">
-                            </div>
+
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Título / Profesión</label>
+                            <input type="text" id="inputTitle" class="input" placeholder="Desarrollador Web">
                         </div>
-                        <div class="col-6">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="bi bi-linkedin"></i></span>
-                                <input type="text" id="inputLI" class="form-control" placeholder="URL LinkedIn">
-                            </div>
+
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Bio Corta</label>
+                            <textarea id="inputBio" class="input resize-none" rows="3" placeholder="Crea experiencias digitales únicas..."></textarea>
                         </div>
-                        <div class="col-6">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="bi bi-whatsapp"></i></span>
-                                <input type="text" id="inputWA" class="form-control" placeholder="WhatsApp Number">
-                            </div>
+
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Color del Header</label>
+                            <input type="color" id="inputHeaderColor" class="w-full h-12 rounded-xl cursor-pointer border-none p-1 bg-slate-100" value="#667eea">
                         </div>
                     </div>
 
-                    <hr>
+                    <div class="h-px bg-slate-100"></div>
 
-                    <h6 class="fw-bold mb-3">Portfolio (Arrastra imágenes/videos)</h6>
-                    <div class="mb-3">
-                        <div class="upload-area p-4 border-2 border-dashed rounded-3 text-center" id="portfolioUploadZone" style="cursor:pointer">
-                            <i class="bi bi-images fs-2 text-muted"></i>
-                            <p class="mb-0">Haz clic o arrastra archivos aquí</p>
-                            <input type="file" id="portfolioInput" multiple accept="image/*,video/*" class="d-none">
+                    <h6 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Redes Sociales</h6>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="relative group">
+                            <i class="fab fa-facebook absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="inputFB" class="input pl-12" placeholder="URL Facebook">
+                        </div>
+                        <div class="relative group">
+                            <i class="fab fa-instagram absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="inputIG" class="input pl-12" placeholder="URL Instagram">
+                        </div>
+                        <div class="relative group">
+                            <i class="fab fa-linkedin absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="inputLI" class="input pl-12" placeholder="URL LinkedIn">
+                        </div>
+                        <div class="relative group">
+                            <i class="fab fa-whatsapp absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="inputWA" class="input pl-12" placeholder="WhatsApp Number">
                         </div>
                     </div>
 
-                    <hr>
+                    <div class="h-px bg-slate-100"></div>
 
-                    <h6 class="fw-bold mb-3">Antes y Después</h6>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <label class="small">Imagen Antes</label>
-                            <input type="file" id="beforeInput" accept="image/*" class="form-control form-control-sm">
+                    <h6 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Portfolio (Arrastra imágenes/videos)</h6>
+                    <div id="portfolioUploadZone" class="border-2 border-dashed border-slate-200 rounded-[32px] p-8 text-center cursor-pointer hover:border-blue-400 transition-all bg-slate-50 flex flex-col items-center justify-center min-h-[160px]">
+                        <i class="fas fa-images text-3xl text-slate-300 mb-4"></i>
+                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Haz clic o arrastra archivos aquí</p>
+                        <input type="file" id="portfolioInput" multiple accept="image/*,video/*" class="hidden">
+                    </div>
+
+                    <div class="h-px bg-slate-100"></div>
+
+                    <h6 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Antes y Después</h6>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Imagen Antes</label>
+                            <input type="file" id="beforeInput" accept="image/*" class="input py-2 text-xs">
                         </div>
-                        <div class="col-6">
-                            <label class="small">Imagen Después</label>
-                            <input type="file" id="afterInput" accept="image/*" class="form-control form-control-sm">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Imagen Después</label>
+                            <input type="file" id="afterInput" accept="image/*" class="input py-2 text-xs">
                         </div>
                     </div>
 
-                    <div class="d-grid mt-4">
-                        <button class="btn btn-primary btn-lg fw-bold" id="saveCardBtn">
-                            <i class="bi bi-save me-2"></i>Guardar Configuración
+                    <div class="pt-6">
+                        <button class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30" id="saveCardBtn">
+                            <i class="fas fa-save mr-2"></i>Guardar Configuración
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- Right Side: Preview -->
-            <div class="col-lg-6" id="previewColumn">
-                <div class="sticky-top" style="top: 100px;">
-                    <h5 class="text-center text-muted mb-3" id="previewTitleHeader">Vista Previa Real</h5>
-                    <div class="card-preview-container" id="cardToExport">
-                        <div class="card-header-design" id="headerDesign">
-                            <div class="profile-img-container" id="profileBtn">
-                                <img src="https://via.placeholder.com/150" id="profileImg" alt="Perfil">
-                                <input type="file" id="profileInput" accept="image/*" class="d-none">
-                            </div>
-                        </div>
+            <div id="previewColumn" class="relative">
+                <div class="sticky top-32">
+                    <div class="flex items-center justify-center gap-4 mb-6">
+                        <div class="h-px bg-slate-200 flex-grow"></div>
+                        <h5 class="text-xs font-black text-slate-400 uppercase tracking-widest" id="previewTitleHeader">Vista Previa Real</h5>
+                        <div class="h-px bg-slate-200 flex-grow"></div>
+                    </div>
 
-                        <div class="card-body-content">
-                            <h3 class="fw-bold mb-1" id="previewName">Tu Nombre</h3>
-                            <p class="text-primary mb-3" id="previewTitle">Tu Profesión</p>
-                            <p class="small text-muted mb-4" id="previewBio">Tu biografía aparecerá aquí. Cuéntale al mundo lo que haces.</p>
-
-                            <div class="social-icons-container" id="socialContainer">
-                                <!-- Icons added dynamically -->
+                    <div class="card-preview-wrapper" id="cardToExport">
+                        <div class="card-preview-container">
+                            <div class="card-header-design" id="headerDesign">
+                                <div class="profile-img-container" id="profileBtn">
+                                    <img src="https://via.placeholder.com/150" id="profileImg" alt="Perfil">
+                                    <input type="file" id="profileInput" accept="image/*" class="hidden">
+                                </div>
                             </div>
 
-                            <hr class="my-4 opacity-10">
+                            <div class="card-body-content">
+                                <h3 class="font-bold text-2xl mb-1 text-white" id="previewName">Tu Nombre</h3>
+                                <p class="text-blue-400 mb-4" id="previewTitle">Tu Profesión</p>
+                                <p class="text-sm text-slate-400 mb-6" id="previewBio">Tu biografía aparecerá aquí. Cuéntale al mundo lo que haces.</p>
 
-                            <h6 class="fw-bold text-start mb-3">Mi Portfolio</h6>
-                            <div class="portfolio-grid" id="portfolioPreview">
-                                <!-- Portfolio items -->
-                            </div>
+                                <div class="social-icons-container" id="socialContainer">
+                                    <!-- Icons added dynamically -->
+                                </div>
 
-                            <hr class="my-4 opacity-10">
+                                <hr class="card-hr">
 
-                            <h6 class="fw-bold text-start mb-3">Trabajos Realizados</h6>
-                            <div class="before-after-container" id="baContainer" style="display: none;">
-                                <div class="ba-image ba-before" id="baBeforeImg"></div>
-                                <div class="ba-image ba-after" id="baAfterImg"></div>
-                                <input type="range" min="0" max="100" value="50" class="ba-slider" id="baSlider">
-                            </div>
+                                <h6 class="font-bold text-left mb-4 text-white uppercase text-xs tracking-widest">Mi Portfolio</h6>
+                                <div class="portfolio-grid" id="portfolioPreview">
+                                    <!-- Portfolio items -->
+                                </div>
 
-                            <div class="qr-section" id="qrSection">
-                                <div id="qrcode"></div>
-                                <button class="btn btn-sm btn-outline-light w-100" id="downloadQR">
-                                    <i class="bi bi-download me-2"></i>Descargar QR .PNG
-                                </button>
+                                <hr class="card-hr">
+
+                                <h6 class="font-bold text-left mb-4 text-white uppercase text-xs tracking-widest">Trabajos Realizados</h6>
+                                <div class="before-after-container" id="baContainer" style="display: none;">
+                                    <div class="ba-image ba-before" id="baBeforeImg"></div>
+                                    <div class="ba-image ba-after" id="baAfterImg"></div>
+                                    <input type="range" min="0" max="100" value="50" class="ba-slider" id="baSlider">
+                                </div>
+
+                                <div class="qr-section mt-8" id="qrSection">
+                                    <div id="qrcode" class="mb-6"></div>
+                                    <button class="w-full py-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/10" id="downloadQR">
+                                        <i class="fas fa-download mr-2"></i>Descargar QR .PNG
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -328,70 +341,67 @@
         <!-- Widget Section -->
         <section class="mt-20" id="widgetSection">
             <div class="flex items-center justify-between mb-10">
-                <h2 class="text-2xl font-black text-white uppercase tracking-tight">Integración de Widget</h2>
-                <div class="h-px bg-slate-800 flex-grow ml-10"></div>
+                <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Integración de Widget</h2>
+                <div class="h-px bg-slate-200 flex-grow ml-10"></div>
             </div>
 
-            <div class="bg-dark p-8 md:p-14 rounded-[40px] shadow-sm border border-slate-800 widget-card">
-                <div class="row g-5">
-                    <div class="col-lg-7">
-                        <div class="inline-block px-4 py-1.5 bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-full mb-6">Instrucciones</div>
-                        <h4 class="text-2xl font-bold text-white mb-4 tracking-tight">Copia y pega el código</h4>
-                        <p class="text-slate-400 text-sm mb-12 leading-relaxed font-medium">Inserta tu tarjeta digital en cualquier sitio web utilizando estos fragmentos de código.</p>
+            <div class="bg-white p-8 md:p-14 rounded-[40px] shadow-sm border border-slate-200">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                    <div class="animate-fade">
+                        <div class="inline-block px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full mb-6">Instrucciones</div>
+                        <h4 class="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Copia y pega el código</h4>
+                        <p class="text-slate-500 text-sm mb-12 leading-relaxed font-medium">Inserta tu tarjeta digital en cualquier sitio web utilizando estos fragmentos de código.</p>
 
-                        <div class="space-y-4">
-                            <div class="mb-4">
-                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">1. Script Global</label>
-                                <div class="bg-black/40 rounded-2xl p-4 relative group border border-white/5">
+                        <div class="space-y-10">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">1. Script Global</label>
+                                <div class="bg-slate-900 rounded-2xl p-6 relative group border border-slate-800 shadow-2xl">
                                     <code id="script-code" class="text-blue-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">&lt;script src="https://wisbe.xyz/wisbeUI.js"&gt;&lt;/script&gt;</code>
-                                    <button onclick="copyToClipboard('script-code')" class="btn btn-link text-slate-500 hover:text-white position-absolute end-0 top-50 translate-middle-y">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">2. Contenedor de Módulo</label>
-                                <div class="bg-black/40 rounded-2xl p-4 relative group border border-white/5">
-                                    <code id="widget-code" class="text-emerald-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">&lt;wisbe-cards domain="mi-dominio.com"&gt;&lt;/wisbe-cards&gt;</code>
-                                    <button onclick="copyToClipboard('widget-code')" class="btn btn-link text-slate-500 hover:text-white position-absolute end-0 top-50 translate-middle-y">
+                                    <button onclick="copyToClipboard('script-code')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-125">
                                         <i class="fas fa-copy"></i>
                                     </button>
                                 </div>
                             </div>
                             <div>
-                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">3. Link Directo (Custom URL)</label>
-                                <div class="bg-black/40 rounded-2xl p-4 relative group border border-white/5">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">2. Contenedor de Módulo</label>
+                                <div class="bg-slate-900 rounded-2xl p-6 relative group border border-slate-800 shadow-2xl">
+                                    <code id="widget-code" class="text-emerald-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">&lt;wisbe-cards domain="mi-dominio.com"&gt;&lt;/wisbe-cards&gt;</code>
+                                    <button onclick="copyToClipboard('widget-code')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-125">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">3. Link Directo (Custom URL)</label>
+                                <div class="bg-slate-900 rounded-2xl p-6 relative group border border-slate-800 shadow-2xl">
                                     <code id="custom-link" class="text-orange-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">https://wisbe.xyz/cards.html?u=usuario</code>
-                                    <button onclick="copyToClipboard('custom-link')" class="btn btn-link text-slate-500 hover:text-white position-absolute end-0 top-50 translate-middle-y">
+                                    <button onclick="copyToClipboard('custom-link')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-125">
                                         <i class="fas fa-copy"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-5">
-                        <div class="bg-black/20 rounded-[40px] p-8 h-100 flex flex-col items-center justify-center text-center border border-dashed border-slate-700 relative group overflow-hidden">
-                            <div class="w-20 h-20 bg-white/5 rounded-[32px] flex items-center justify-center text-blue-500 text-3xl mb-6 border border-white/10">
-                                <i class="fas fa-link"></i>
-                            </div>
-                            <h5 class="font-black text-white text-xl mb-2 tracking-tight uppercase">Tu Link Wisbe</h5>
-                            <p id="display-custom-url" class="text-blue-500 font-mono font-black text-lg mb-4 tracking-tight uppercase truncate w-100">Cargando...</p>
-                            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-black px-4 py-2 bg-white/5 rounded-lg">Ideal para Biografía de Instagram</p>
+                    <div class="bg-slate-50 rounded-[40px] p-12 flex flex-col items-center justify-center text-center border border-dashed border-slate-300 relative group overflow-hidden">
+                        <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-40 transition-opacity"></div>
+                        <div class="w-24 h-24 bg-white rounded-[32px] shadow-sm flex items-center justify-center text-blue-600 text-4xl mb-8 relative z-10 border border-slate-100">
+                            <i class="fas fa-globe"></i>
                         </div>
+                        <h5 class="font-black text-slate-900 text-2xl mb-3 tracking-tight uppercase relative z-10">Tu Link Wisbe</h5>
+                        <p id="display-custom-url" class="text-blue-600 font-mono font-black text-xl mb-6 relative z-10 tracking-tight uppercase">Cargando...</p>
+                        <p class="text-[10px] text-slate-400 max-w-xs leading-relaxed uppercase tracking-widest font-black relative z-10 px-4 py-2 bg-slate-100 rounded-lg">Ideal para Biografía de Instagram</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Public View Container -->
-        <div id="publicViewContainer" style="display: none;">
-            <div id="renderedCard"></div>
+        <div id="publicViewContainer" class="hidden">
+            <div id="renderedCard" class="flex justify-center items-center py-12"></div>
         </div>
     </main>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -412,21 +422,22 @@
             targetUsername = urlParams.get('u');
             isPublicView = !!(targetUserId || targetUsername);
 
-            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'freelance']);
-            if (!currentUser && !isPublicView) return;
-
-            isAdmin = currentUser?.role === 'gym-admin';
+            if (!isPublicView) {
+                currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'freelance']);
+                if (!currentUser) return;
+                isAdmin = currentUser.role === 'gym-admin';
+            }
 
             if (isPublicView) {
-                document.getElementById('editorGrid').style.display = 'none';
-                document.getElementById('widgetSection').style.display = 'none';
-                document.getElementById('publicViewContainer').style.display = 'block';
+                document.getElementById('editorGrid').classList.add('hidden');
+                document.getElementById('widgetSection').classList.add('hidden');
+                document.getElementById('publicViewContainer').classList.remove('hidden');
+                document.querySelector('header').classList.add('hidden');
 
                 const cardElement = document.createElement('wisbe-cards');
-                if (targetUserId) cardElement.setAttribute('user_id', targetUserId); // Not supported yet in widget but we can fix it
+                if (targetUserId) cardElement.setAttribute('user_id', targetUserId);
                 if (targetUsername) cardElement.setAttribute('username', targetUsername);
 
-                // If we only have user_id, we should actually fetch the username to use the widget
                 if (targetUserId && !targetUsername) {
                     const { data } = await supabase.from('wisbe_users').select('username').eq('id', targetUserId).maybeSingle();
                     if (data?.username) cardElement.setAttribute('username', data.username);
@@ -434,10 +445,16 @@
 
                 document.getElementById('renderedCard').appendChild(cardElement);
             } else {
+                if (currentUser) {
+                    document.getElementById('header-user-name').innerText = currentUser.full_name || currentUser.username;
+                    document.getElementById('user-role-label').innerText = currentUser.role.replace('gym-', '');
+                }
+
                 if (isAdmin) {
                     renderAdminSidebar(id => {
-                        loadCardConfig(id || currentUser.id);
-                        updateWidgetCode();
+                        const activeId = id || currentUser.id;
+                        loadCardConfig(activeId);
+                        updateWidgetCode(activeId);
                     });
                 }
 
@@ -451,20 +468,15 @@
 
                 const initialId = targetUserId || Auth.getSelectedOwnerId() || currentUser.id;
                 loadCardConfig(initialId);
-                updateWidgetCode();
+                updateWidgetCode(initialId);
 
                 document.getElementById('saveCardBtn').onclick = saveCardConfig;
             }
         }
 
-        async function updateWidgetCode() {
-            const selectedOwnerId = Auth.getSelectedOwnerId();
-            let user = currentUser;
-
-            if (isAdmin && selectedOwnerId) {
-                const { data } = await supabase.from('wisbe_users').select('*').eq('id', selectedOwnerId).maybeSingle();
-                user = data;
-            }
+        async function updateWidgetCode(userId) {
+            const activeId = userId || targetUserId || Auth.getSelectedOwnerId() || currentUser.id;
+            const { data: user } = await supabase.from('wisbe_users').select('*').eq('id', activeId).maybeSingle();
 
             if (!user) return;
 
@@ -538,8 +550,8 @@
                 : `<img src="${url}">`;
 
             div.innerHTML = mediaHtml + `
-                <button class="btn btn-sm btn-danger position-absolute top-0 end-0 p-1" style="z-index:10" onclick="this.parentElement.remove(); window.updatePortfolioArray();">
-                    <i class="bi bi-x"></i>
+                <button class="w-6 h-6 bg-red-500 text-white rounded-lg absolute top-2 right-2 flex items-center justify-center text-[10px] hover:bg-red-600 transition-colors z-10" onclick="this.parentElement.remove(); window.updatePortfolioArray();">
+                    <i class="fas fa-times"></i>
                 </button>
             `;
 
@@ -597,21 +609,22 @@
         }
 
         function initSocials() {
-            const ids = ['inputFB', 'inputIG', 'inputLI', 'inputWA'];
-            ids.forEach(id => document.getElementById(id).addEventListener('input', updateSocialIcons));
+            ['inputFB', 'inputIG', 'inputLI', 'inputWA'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateSocialIcons);
+            });
 
             function updateSocialIcons() {
                 const container = document.getElementById('socialContainer');
                 container.innerHTML = '';
-                const map = { inputFB: 'bi-facebook', inputIG: 'bi-instagram', inputLI: 'bi-linkedin', inputWA: 'bi-whatsapp' };
-                ids.forEach(id => {
+                const map = { inputFB: 'fa-facebook-f', inputIG: 'fa-instagram', inputLI: 'fa-linkedin-in', inputWA: 'fa-whatsapp' };
+                ['inputFB', 'inputIG', 'inputLI', 'inputWA'].forEach(id => {
                     const val = document.getElementById(id).value;
                     if (val) {
                         const a = document.createElement('a');
                         a.href = val.startsWith('http') ? val : (id === 'inputWA' ? `https://wa.me/${val.replace(/\D/g,'')}` : `https://${val}`);
                         a.target = '_blank';
                         a.className = 'social-icon';
-                        a.innerHTML = `<i class="bi ${map[id]}"></i>`;
+                        a.innerHTML = `<i class="fab ${map[id]}"></i>`;
                         container.appendChild(a);
                     }
                 });
@@ -687,12 +700,12 @@
                     document.getElementById('inputWA').value = sm.whatsapp || '';
 
                     const container = document.getElementById('socialContainer');
-                    const items = [{v:sm.facebook,i:'bi-facebook'},{v:sm.instagram,i:'bi-instagram'},{v:sm.linkedin,i:'bi-linkedin'},{v:sm.whatsapp,i:'bi-whatsapp',w:true}];
+                    const items = [{v:sm.facebook,i:'fa-facebook-f'},{v:sm.instagram,i:'fa-instagram'},{v:sm.linkedin,i:'fa-linkedin-in'},{v:sm.whatsapp,i:'fa-whatsapp',w:true}];
                     items.forEach(s => {
                         if (s.v) {
                             const a = document.createElement('a');
                             a.href = s.v.startsWith('http') ? s.v : (s.w ? `https://wa.me/${s.v.replace(/\D/g,'')}` : `https://${s.v}`);
-                            a.target = '_blank'; a.className = 'social-icon'; a.innerHTML = `<i class="bi ${s.i}"></i>`;
+                            a.target = '_blank'; a.className = 'social-icon'; a.innerHTML = `<i class="fab ${s.i}"></i>`;
                             container.appendChild(a);
                         }
                     });
@@ -703,13 +716,14 @@
                         document.getElementById('baContainer').style.display = 'block';
                     }
                 }
+                initQR();
             } catch (err) { console.error("Error loading config:", err); }
         }
 
         async function saveCardConfig() {
             const btn = document.getElementById('saveCardBtn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Guardando...';
 
             const activeUserId = targetUserId || Auth.getSelectedOwnerId() || currentUser.id;
 
@@ -741,9 +755,9 @@
                 if (error) throw error;
                 showPopup('Éxito', "¡Tarjeta guardada con éxito!");
                 initQR();
-                updateWidgetCode();
+                updateWidgetCode(activeUserId);
             } catch (err) { showPopup('Error', err.message, 'error'); }
-            finally { btn.disabled = false; btn.innerHTML = '<i class="bi bi-save me-2"></i>Guardar Configuración'; }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save mr-2"></i>Guardar Configuración'; }
         }
 
         function initRealTimePreview() {
@@ -761,7 +775,6 @@
                 qrContainer.innerHTML = '';
                 const activeUserId = targetUserId || Auth.getSelectedOwnerId() || currentUser.id;
 
-                // Fetch username for better URL
                 supabase.from('wisbe_users').select('username').eq('id', activeUserId).maybeSingle().then(({data}) => {
                     const username = data?.username || activeUserId;
                     const url = `${window.location.origin}${window.location.pathname}?u=${username}`;
@@ -783,5 +796,4 @@
     </script>
     <script src="https://wisbe.xyz/wisbeUI.js"></script>
 </body>
-
 </html>
