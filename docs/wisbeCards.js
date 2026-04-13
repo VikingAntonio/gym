@@ -110,8 +110,9 @@
                     .ba-list {
                         display: grid;
                         grid-template-columns: repeat(2, 1fr);
-                        gap: 12px;
-                        margin-top: 15px;
+                        gap: 20px;
+                        margin-top: 25px;
+                        padding: 0 10px;
                     }
 
                     .before-after-container {

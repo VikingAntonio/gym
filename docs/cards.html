@@ -210,8 +210,9 @@
         #baPreviewList {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 15px;
+            gap: 20px;
+            margin-top: 25px;
+            padding: 0 10px;
         }
 
         .ba-before, .ba-after {
@@ -387,12 +388,12 @@
             <div id="editorColumn" class="space-y-12 animate-fade">
                 <div class="neo-card space-y-12">
                     <!-- Top Media Controls -->
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-10 items-center bg-white/40 p-12 rounded-[60px] border border-white shadow-sm w-full">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-white/40 p-8 rounded-[60px] border border-white shadow-sm w-full">
                         <!-- Profile section -->
-                        <div class="md:col-span-4 flex flex-col items-center gap-4">
+                        <div class="md:col-span-4 flex flex-col items-center gap-3">
                             <label class="text-[12px] font-black text-slate-500 uppercase tracking-widest">Foto de Perfil</label>
-                            <div id="drop-profile" class="profile-drop-zone w-48 h-48 border-[12px] border-white shadow-2xl hover:scale-105 transition-all duration-500 flex items-center justify-center bg-slate-50">
-                                <i class="fas fa-image text-slate-300 text-7xl" id="profile-placeholder"></i>
+                            <div id="drop-profile" class="profile-drop-zone w-40 h-40 border-[8px] border-white shadow-2xl hover:scale-105 transition-all duration-500 flex items-center justify-center bg-slate-50">
+                                <i class="fas fa-image text-slate-300 text-6xl" id="profile-placeholder"></i>
                             </div>
                             <span class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Subir Foto</span>
                         </div>
@@ -400,24 +401,16 @@
                         <!-- Header Style section -->
                         <div class="md:col-span-8 flex flex-col gap-6">
                             <label class="text-[12px] font-black text-slate-500 uppercase tracking-widest ml-4">Diseño de Cabecera</label>
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="grid grid-cols-2 gap-6">
                                 <!-- Color Picker Card -->
-                                <div class="bg-white/90 p-10 rounded-[50px] border border-white shadow-sm flex items-center gap-8 px-10 hover:shadow-md transition-all group">
-                                    <input type="color" id="inputHeaderColor" class="w-28 h-28 rounded-[38px] cursor-pointer border-none p-2 bg-white shadow-lg group-hover:scale-110 transition-transform" value="#667eea">
-                                    <div class="flex flex-col">
-                                        <span class="text-sm text-slate-900 font-black uppercase tracking-tight">Color Fondo</span>
-                                        <span class="text-[11px] text-slate-400 font-bold uppercase">Click para cambiar</span>
-                                    </div>
+                                <div class="bg-white/90 p-4 rounded-[40px] border border-white shadow-sm flex items-center justify-center hover:shadow-md transition-all group h-32">
+                                    <input type="color" id="inputHeaderColor" class="w-full h-full rounded-[30px] cursor-pointer border-none p-1 bg-white shadow-inner group-hover:scale-[1.02] transition-transform" value="#667eea">
                                 </div>
 
                                 <!-- Header Image Card -->
-                                <div id="drop-header" class="bg-white/90 p-10 rounded-[50px] border border-white shadow-sm flex items-center gap-8 px-10 hover:shadow-md transition-all cursor-pointer group">
-                                    <div class="w-28 h-28 rounded-[38px] border-4 border-dashed border-slate-100 flex items-center justify-center bg-slate-50 shadow-inner group-hover:border-emerald-300 transition-colors">
-                                        <i class="fas fa-image text-slate-300 text-5xl" id="header-placeholder"></i>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-sm text-slate-900 font-black uppercase tracking-tight">Imagen Fondo</span>
-                                        <span class="text-[11px] text-slate-400 font-bold uppercase">Sube tu banner</span>
+                                <div id="drop-header" class="bg-white/90 p-4 rounded-[40px] border border-white shadow-sm flex items-center justify-center hover:shadow-md transition-all cursor-pointer group h-32">
+                                    <div class="w-full h-full rounded-[30px] border-2 border-dashed border-slate-200 flex items-center justify-center bg-slate-50 shadow-inner group-hover:border-emerald-300 transition-colors overflow-hidden">
+                                        <i class="fas fa-image text-slate-300 text-4xl" id="header-placeholder"></i>
                                     </div>
                                 </div>
                             </div>
