@@ -291,12 +291,14 @@
                 return;
             }
 
+            const { data: user } = await supabase.from('wisbe_users').select('username').eq('id', userId).maybeSingle();
             const { data: card, error } = await supabase.from('wisbe_cards').select('*').eq('user_id', userId).maybeSingle();
             if (!card) {
                 this.shadowRoot.querySelector('.widget-container').innerHTML = `<div class="loading">Esta tarjeta aún no ha sido configurada</div>`;
                 return;
             }
 
+            if (user?.username) card.header_config.username = user.username;
             this.renderCard(card);
         }
 
@@ -317,8 +319,16 @@
                         <div class="ba-zoom-body" style="aspect-ratio: 1/1; width: 100%; border-radius: 30px; overflow: hidden; position: relative;"></div>
                     </div>
                 `;
-                overlay.querySelector('.ba-zoom-close').onclick = () => overlay.style.display = 'none';
-                overlay.onclick = (e) => { if (e.target === overlay) overlay.style.display = 'none'; };
+            overlay.querySelector('.ba-zoom-close').onclick = () => {
+                overlay.style.display = 'none';
+                overlay.querySelector('.ba-zoom-body').innerHTML = ''; // Stop video
+            };
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    overlay.style.display = 'none';
+                    overlay.querySelector('.ba-zoom-body').innerHTML = ''; // Stop video
+                }
+            };
                 this.shadowRoot.appendChild(overlay);
             }
 
@@ -343,6 +353,10 @@
                             ${this.renderSocials(sm)}
                         </div>
 
+                        <div style="margin-top: 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1px;">
+                            wisbe.xyz/${hc.username || 'perfil'}
+                        </div>
+
                         <hr>
 
                         <h6 class="fw-bold text-start mb-3">Mi Portfolio</h6>
@@ -360,6 +374,11 @@
                     </div>
                 </div>
             `;
+
+            // Bind events for portfolio zoom via delegation
+            container.querySelectorAll('.portfolio-item').forEach(item => {
+                item.onclick = () => this.openPortfolioZoom(item.dataset.url, item.dataset.type);
+            });
         }
 
         renderBAPairs(ba) {
@@ -387,6 +406,7 @@
             const overlay = this.shadowRoot.querySelector('.ba-zoom-overlay');
             const body = overlay.querySelector('.ba-zoom-body');
             overlay.style.display = 'flex';
+            body.style.aspectRatio = '1/1';
             body.innerHTML = `
                 <div class="comparison-slider" style="width: 100%; height: 100%; position: relative;">
                     <div class="ba-before" style="background-image: url('${pair.before}')"></div>
@@ -477,14 +497,28 @@
         }
 
         renderPortfolio(portfolio) {
-            return portfolio.map(item => {
+            return portfolio.map((item, idx) => {
                 const url = typeof item === 'string' ? item : item.url;
                 const type = typeof item === 'string' ? 'image' : item.resource_type;
+
                 if (type === 'video') {
-                    return `<div class="portfolio-item"><video src="${url}" muted loop playsinline onmouseenter="this.play()" onmouseleave="this.pause()"></video></div>`;
+                    return `<div class="portfolio-item" data-url="${url}" data-type="video" style="cursor:pointer;"><video src="${url}" muted loop playsinline onmouseenter="this.play()" onmouseleave="this.pause()"></video></div>`;
                 }
-                return `<div class="portfolio-item"><img src="${url}"></div>`;
+                return `<div class="portfolio-item" data-url="${url}" data-type="image" style="cursor:pointer;"><img src="${url}"></div>`;
             }).join('');
+        }
+
+        openPortfolioZoom(url, type) {
+            const overlay = this.shadowRoot.querySelector('.ba-zoom-overlay');
+            const body = overlay.querySelector('.ba-zoom-body');
+            overlay.style.display = 'flex';
+            body.style.aspectRatio = 'initial'; // Allow natural aspect ratio
+
+            if (type === 'video') {
+                body.innerHTML = `<video src="${url}" controls autoplay style="max-width: 100%; max-height: 80vh; border-radius: 20px;"></video>`;
+            } else {
+                body.innerHTML = `<img src="${url}" style="max-width: 100%; max-height: 80vh; border-radius: 20px; object-contain: contain;">`;
+            }
         }
     }
 
