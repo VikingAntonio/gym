@@ -481,6 +481,9 @@
                             <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Suelta tus trabajos aquí</p>
                             <input type="file" id="portfolioInput" multiple accept="image/*,video/*" class="hidden">
                         </div>
+                        <div id="portfolioPreview" class="flex flex-wrap gap-4 mt-6">
+                            <!-- Portfolio management items -->
+                        </div>
                     </div>
 
                     <div class="h-px bg-slate-200"></div>
@@ -639,7 +642,9 @@
             const urlParams = new URLSearchParams(window.location.search);
             targetUserId = urlParams.get('user_id');
             targetUsername = urlParams.get('u');
-            isPublicView = !!(targetUserId || targetUsername);
+
+            // Only force public view if u (username) is present and no user_id (which usually comes from admin context)
+            isPublicView = !!targetUsername && !targetUserId;
 
             if (!isPublicView) {
                 currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'freelance']);
@@ -1204,20 +1209,29 @@
 
         async function loadCardConfig(userId) {
             try {
+                if (!userId) return;
                 const { data, error } = await supabase.from('wisbe_cards').select('*').eq('user_id', userId).maybeSingle();
 
-                // Clear current
-                document.getElementById('portfolioPreview').innerHTML = '';
-                document.getElementById('socialContainer').innerHTML = '';
-                document.getElementById('baPairsContainer').innerHTML = '';
-                document.getElementById('baPreviewList').innerHTML = '';
-                document.getElementById('inputFB').value = '';
-                document.getElementById('inputIG').value = '';
-                document.getElementById('inputLI').value = '';
-                document.getElementById('inputWA').value = '';
-                document.getElementById('inputName').value = '';
-                document.getElementById('inputTitle').value = '';
-                document.getElementById('inputBio').value = '';
+                // Clear current states
+                portfolioData = [];
+                baPairsData = [];
+
+                // Clear UI
+                const pPreview = document.getElementById('portfolioPreview');
+                const sContainer = document.getElementById('socialContainer');
+                const baContainer = document.getElementById('baPairsContainer');
+                const baList = document.getElementById('baPreviewList');
+
+                if (pPreview) pPreview.innerHTML = '';
+                if (sContainer) sContainer.innerHTML = '';
+                if (baContainer) baContainer.innerHTML = '';
+                if (baList) baList.innerHTML = '';
+
+                ['inputFB', 'inputIG', 'inputLI', 'inputWA', 'inputName', 'inputTitle', 'inputBio'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+
                 document.getElementById('profileImg').src = 'https://via.placeholder.com/150';
                 document.getElementById('headerDesign').style.background = '#667eea';
 
@@ -1227,28 +1241,24 @@
                 window.currentHeaderImageUrl = null;
 
                 if (data) {
-                    document.getElementById('inputName').value = data.header_config.name || '';
-                    document.getElementById('inputTitle').value = data.header_config.title || '';
-                    document.getElementById('inputBio').value = data.header_config.bio || '';
-                    document.getElementById('inputHeaderColor').value = data.header_config.header_color || '#667eea';
+                    const hc = data.header_config || {};
+                    document.getElementById('inputName').value = hc.name || '';
+                    document.getElementById('inputTitle').value = hc.title || '';
+                    document.getElementById('inputBio').value = hc.bio || '';
+                    document.getElementById('inputHeaderColor').value = hc.header_color || '#667eea';
 
-                    document.getElementById('previewName').textContent = data.header_config.name || 'Nombre';
-                    document.getElementById('previewTitle').textContent = data.header_config.title || 'Cargo / Profesión';
-                    document.getElementById('previewBio').textContent = data.header_config.bio || 'Breve descripción de tus servicios o experiencia profesional.';
+                    document.getElementById('previewName').textContent = hc.name || 'Nombre';
+                    document.getElementById('previewTitle').textContent = hc.title || 'Cargo / Profesión';
+                    document.getElementById('previewBio').textContent = hc.bio || 'Breve descripción de tus servicios o experiencia profesional.';
 
-                    const profileUrl = data.header_config.profile_url;
-                    // Strict check for valid cloudinary/web url, excluding placeholder indicators or accidental object strings
+                    const profileUrl = hc.profile_url;
                     if (profileUrl && typeof profileUrl === 'string' && profileUrl.startsWith('http') && !profileUrl.includes('via.placeholder') && !profileUrl.includes('[object')) {
                         document.getElementById('profileImg').src = profileUrl;
                         document.getElementById('drop-profile').innerHTML = `<img src="${profileUrl}" class="w-full h-full object-cover">`;
-                    } else {
-                        document.getElementById('profileImg').src = 'https://via.placeholder.com/150';
-                        // Keep the icon in drop-profile if no real image
-                        document.getElementById('drop-profile').innerHTML = '<i class="fas fa-image text-slate-300 text-7xl" id="profile-placeholder"></i>';
                     }
 
-                    const headerColor = data.header_config.header_color || '#667eea';
-                    const headerImg = data.header_config.header_image_url;
+                    const headerColor = hc.header_color || '#667eea';
+                    const headerImg = hc.header_image_url;
                     if (headerImg && headerImg.startsWith('http') && !headerImg.includes('[object')) {
                         document.getElementById('headerDesign').style.background = `url('${headerImg}')`;
                         document.getElementById('headerDesign').style.backgroundSize = 'cover';
@@ -1259,11 +1269,11 @@
                         document.getElementById('headerDesign').style.background = headerColor;
                     }
 
-                    if (data.portfolio) {
+                    if (data.portfolio && Array.isArray(data.portfolio)) {
                         data.portfolio.forEach(item => {
                             const url = typeof item === 'string' ? item : item.url;
                             const type = typeof item === 'string' ? 'image' : item.resource_type;
-                            addPortfolioItem(url, type);
+                            if (url) addPortfolioItem(url, type);
                         });
                     }
 
@@ -1273,25 +1283,33 @@
                     document.getElementById('inputLI').value = sm.linkedin || '';
                     document.getElementById('inputWA').value = sm.whatsapp || '';
 
-                    const container = document.getElementById('socialContainer');
+                    // Update social icons preview
                     const items = [{v:sm.facebook,i:'fa-facebook-f'},{v:sm.instagram,i:'fa-instagram'},{v:sm.linkedin,i:'fa-linkedin-in'},{v:sm.whatsapp,i:'fa-whatsapp',w:true}];
                     items.forEach(s => {
                         if (s.v) {
                             const a = document.createElement('a');
                             a.href = s.v.startsWith('http') ? s.v : (s.w ? `https://wa.me/${s.v.replace(/\D/g,'')}` : `https://${s.v}`);
                             a.target = '_blank'; a.className = 'social-icon'; a.innerHTML = `<i class="fab ${s.i}"></i>`;
-                            container.appendChild(a);
+                            if (sContainer) sContainer.appendChild(a);
                         }
                     });
 
-                    if (data.before_after) {
-                        // Compatibility check: old format was array of urls [before, after]
+                    if (data.before_after && Array.isArray(data.before_after)) {
                         if (data.before_after.length > 0 && typeof data.before_after[0] === 'string') {
                             addBAPair(data.before_after[0], data.before_after[1]);
                         } else {
-                            data.before_after.forEach(pair => addBAPair(pair.before, pair.after));
+                            data.before_after.forEach(pair => {
+                                if (pair.before && pair.after) addBAPair(pair.before, pair.after);
+                            });
                         }
                     }
+
+                    // Final check for B/A pairs
+                    setTimeout(() => {
+                        if (document.getElementById('baPairsContainer').children.length === 0) {
+                            addBAPair();
+                        }
+                    }, 500);
                 }
             } catch (err) { console.error("Error loading config:", err); }
         }
