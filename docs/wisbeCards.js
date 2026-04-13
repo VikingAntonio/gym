@@ -345,9 +345,9 @@
                     </div>
 
                     <div class="card-body-content">
-                        <h3 class="fw-bold mb-1">${hc.name || 'Tu Nombre'}</h3>
-                        <p class="text-primary mb-3">${hc.title || 'Tu Profesión'}</p>
-                        <p class="small text-muted mb-4">${hc.bio || ''}</p>
+                        <h3 class="fw-bold mb-1">${hc.name || 'Nombre'}</h3>
+                        <p class="text-primary mb-3">${hc.title || 'Cargo / Profesión'}</p>
+                        <p class="small text-muted mb-4">${hc.bio || 'Breve descripción de tus servicios o experiencia profesional.'}</p>
 
                         <div class="social-icons-container">
                             ${this.renderSocials(sm)}
