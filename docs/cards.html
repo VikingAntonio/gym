@@ -180,10 +180,12 @@
         .portfolio-item {
             aspect-ratio: 1/1;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            border-radius: 20px;
             overflow: hidden;
             cursor: pointer;
             position: relative;
+            box-shadow: var(--neo-shadow);
+            border: 1px solid rgba(255,255,255,0.5);
         }
 
         .portfolio-item img, .portfolio-item video {
@@ -345,9 +347,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                 <div class="bg-slate-50 p-8 rounded-[40px] border border-slate-100">
                     <div id="share-qrcode" class="flex justify-center mb-6"></div>
-                    <button id="downloadShareQR" class="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">
-                        <i class="fas fa-download mr-1"></i> Descargar QR PNG
-                    </button>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Código QR de Acceso</p>
                 </div>
 
                 <div class="space-y-6">
@@ -476,13 +476,12 @@
 
                     <div class="space-y-6">
                         <h6 class="text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2">Portfolio Visual</h6>
-                        <div id="portfolioUploadZone" class="neo-card p-10 text-center cursor-pointer border-2 border-dashed border-slate-200 flex flex-col items-center justify-center min-h-[160px] hover:border-emerald-400 transition-all bg-white/50">
-                            <i class="fas fa-cloud-upload-alt text-4xl text-slate-300 mb-4"></i>
-                            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Suelta tus trabajos aquí</p>
-                            <input type="file" id="portfolioInput" multiple accept="image/*,video/*" class="hidden">
-                        </div>
-                        <div id="portfolioPreview" class="flex flex-wrap gap-4 mt-6">
-                            <!-- Portfolio management items -->
+                        <div id="portfolioPreview" class="portfolio-grid mt-6">
+                            <!-- Portfolio items added here -->
+                            <div id="portfolioPlusBox" class="portfolio-item rounded-[20px] border-2 border-dashed border-slate-200 text-slate-300 hover:text-emerald-500 hover:border-emerald-400 transition-all flex flex-col items-center justify-center group bg-white/30 cursor-pointer">
+                                <i class="fas fa-plus text-2xl group-hover:scale-110 transition-transform"></i>
+                                <input type="file" id="portfolioInput" multiple accept="image/*,video/*" class="hidden">
+                            </div>
                         </div>
                     </div>
 
@@ -494,9 +493,8 @@
                             <div id="baPairsContainer" class="contents">
                                 <!-- Dynamic Pairs -->
                             </div>
-                            <button id="addBAPairBtn" class="min-h-[160px] rounded-[40px] border-2 border-dashed border-slate-200 text-slate-300 hover:text-emerald-500 hover:border-emerald-400 transition-all flex flex-col items-center justify-center group bg-white/30">
-                                <i class="fas fa-plus-circle text-4xl mb-3 group-hover:scale-110 transition-transform"></i>
-                                <span class="text-[10px] font-black uppercase tracking-widest">Añadir Caso</span>
+                            <button id="addBAPairBtn" class="aspect-square rounded-[40px] border-2 border-dashed border-slate-200 text-slate-300 hover:text-emerald-500 hover:border-emerald-400 transition-all flex flex-col items-center justify-center group bg-white/30">
+                                <i class="fas fa-plus text-4xl group-hover:scale-110 transition-transform"></i>
                             </button>
                         </div>
                     </div>
@@ -537,6 +535,15 @@
 
                                 <div class="social-icons-container" id="socialContainer">
                                     <!-- Icons added dynamically -->
+                                </div>
+
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px;">
+                                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1px;" id="previewLink">
+                                        wisbe.xyz/perfil
+                                    </div>
+                                    <button onclick="openShareModal()" style="background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 14px;">
+                                        <i class="fas fa-share-nodes"></i>
+                                    </button>
                                 </div>
 
                                 <hr class="card-hr">
@@ -715,8 +722,9 @@
             document.getElementById('custom-link').innerText = customUrl;
             document.getElementById('display-custom-url').innerText = `wisbe.xyz/${username}`;
 
-            // Update Share Modal Link
+            // Update Share Modal and Preview Link
             document.getElementById('share-link-code').innerText = customUrl;
+            document.getElementById('previewLink').innerText = `wisbe.xyz/${username}`;
         }
 
         window.openShareModal = () => {
@@ -750,11 +758,10 @@
 
         function initShareQR() {
             const qrContainer = document.getElementById("share-qrcode");
-            const downloadBtn = document.getElementById("downloadShareQR");
             qrContainer.innerHTML = '';
 
             const url = document.getElementById('share-link-code').innerText;
-            const qrcode = new QRCode(qrContainer, {
+            new QRCode(qrContainer, {
                 text: url,
                 width: 200,
                 height: 200,
@@ -762,15 +769,6 @@
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.H
             });
-
-            downloadBtn.onclick = () => {
-                const qrImg = qrContainer.querySelector('img');
-                const canvas = qrContainer.querySelector('canvas');
-                const link = document.createElement('a');
-                link.download = 'mi-tarjeta-wisbe-qr.png';
-                link.href = qrImg ? qrImg.src : canvas.toDataURL("image/png");
-                link.click();
-            };
         }
 
         window.copyToClipboard = (id) => {
@@ -783,11 +781,15 @@
 
         function initDragAndDrop() {
             const portfolioPreview = document.getElementById('portfolioPreview');
-            const uploadZone = document.getElementById('portfolioUploadZone');
+            const plusBox = document.getElementById('portfolioPlusBox');
 
             new Sortable(portfolioPreview, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
+                filter: '#portfolioPlusBox',
+                onMove: function (evt) {
+                    return evt.related.id !== 'portfolioPlusBox';
+                },
                 onEnd: function() { updatePortfolioArray(); }
             });
 
@@ -834,7 +836,7 @@
             };
 
             // Portfolio
-            setupGenericUpload(uploadZone, 'portfolioInput', handlePortfolioFiles);
+            setupGenericUpload(plusBox, 'portfolioInput', handlePortfolioFiles);
 
             // Profile
             setupGenericUpload(document.getElementById('drop-profile'), 'profileInput', async (files) => {
@@ -875,8 +877,8 @@
         }
 
         async function handlePortfolioFiles(files) {
-            const status = document.getElementById('portfolioUploadZone').querySelector('p');
-            status.textContent = "Subiendo...";
+            const plusIcon = document.getElementById('portfolioPlusBox').querySelector('i');
+            plusIcon.className = "fas fa-spinner fa-spin text-emerald-500";
 
             for (let file of files) {
                 try {
@@ -887,7 +889,7 @@
                     showPopup('Error', 'Fallo al subir a Cloudinary', 'error');
                 }
             }
-            status.textContent = "Haz clic o arrastra archivos aquí";
+            plusIcon.className = "fas fa-plus";
         }
 
         function addPortfolioItem(url, type) {
@@ -912,7 +914,9 @@
                 div.onmouseleave = () => div.querySelector('video').pause();
             }
 
-            document.getElementById('portfolioPreview').appendChild(div);
+            const portfolioPreview = document.getElementById('portfolioPreview');
+            const plusBox = document.getElementById('portfolioPlusBox');
+            portfolioPreview.insertBefore(div, plusBox);
             updatePortfolioArray();
         }
 
@@ -920,11 +924,12 @@
             const items = document.querySelectorAll('#portfolioPreview .portfolio-item');
             portfolioData = Array.from(items).map(item => {
                 const media = item.querySelector('img, video');
+                if (!media) return null;
                 return {
                     url: media.src,
                     resource_type: item.getAttribute('data-type')
                 };
-            });
+            }).filter(i => i !== null);
             renderPortfolioPreview();
         }
 
@@ -989,14 +994,14 @@
                     <div class="space-y-2">
                         <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest block ml-1">Antes</label>
                         <div id="drop-before-${pairId}" class="aspect-square rounded-[20px] shadow-inner flex items-center justify-center cursor-pointer hover:shadow-md overflow-hidden bg-slate-50 transition-all border border-slate-100">
-                            ${beforeUrl ? `<img src="${beforeUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-upload text-slate-200"></i>'}
+                            ${beforeUrl ? `<img src="${beforeUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-plus text-slate-200"></i>'}
                             <input type="file" id="input-before-${pairId}" class="hidden" accept="image/*">
                         </div>
                     </div>
                     <div class="space-y-2">
                         <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest block ml-1">Después</label>
                         <div id="drop-after-${pairId}" class="aspect-square rounded-[20px] shadow-inner flex items-center justify-center cursor-pointer hover:shadow-md overflow-hidden bg-slate-50 transition-all border border-slate-100">
-                            ${afterUrl ? `<img src="${afterUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-upload text-slate-200"></i>'}
+                            ${afterUrl ? `<img src="${afterUrl}" class="w-full h-full object-cover">` : '<i class="fas fa-plus text-slate-200"></i>'}
                             <input type="file" id="input-after-${pairId}" class="hidden" accept="image/*">
                         </div>
                     </div>
@@ -1222,7 +1227,11 @@
                 const baContainer = document.getElementById('baPairsContainer');
                 const baList = document.getElementById('baPreviewList');
 
-                if (pPreview) pPreview.innerHTML = '';
+                if (pPreview) {
+                    // Remove only items, keep plusBox
+                    const items = pPreview.querySelectorAll('.portfolio-item:not(#portfolioPlusBox)');
+                    items.forEach(i => i.remove());
+                }
                 if (sContainer) sContainer.innerHTML = '';
                 if (baContainer) baContainer.innerHTML = '';
                 if (baList) baList.innerHTML = '';
