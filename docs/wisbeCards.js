@@ -30,7 +30,7 @@
 
             this.shadowRoot.innerHTML = `
                 <style>
-                    @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
+                    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
                     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
                     :host {
@@ -468,11 +468,11 @@
         }
 
         renderSocials(sm) {
-            const map = { facebook: 'bi-facebook', instagram: 'bi-instagram', linkedin: 'bi-linkedin', whatsapp: 'bi-whatsapp' };
+            const map = { facebook: 'fa-facebook-f', instagram: 'fa-instagram', linkedin: 'fa-linkedin-in', whatsapp: 'fa-whatsapp' };
             return Object.entries(sm).map(([key, val]) => {
                 if (!val) return '';
                 let href = val.startsWith('http') ? val : (key === 'whatsapp' ? `https://wa.me/${val.replace(/\D/g,'')}` : `https://${val}`);
-                return `<a href="${href}" target="_blank" class="social-icon"><i class="bi ${map[key] || 'bi-link'}"></i></a>`;
+                return `<a href="${href}" target="_blank" class="social-icon"><i class="fab ${map[key] || 'fa-link'}"></i></a>`;
             }).join('');
         }
 
