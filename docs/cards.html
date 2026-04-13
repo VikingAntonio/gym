@@ -127,6 +127,18 @@
             --bs-body-color: #dee2e6;
         }
 
+        .sticky-preview {
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .sticky-preview::-webkit-scrollbar {
+            display: none;
+        }
+
         .card-preview-container {
             max-width: 450px;
             margin: 20px auto;
@@ -400,27 +412,27 @@
             <div id="editorColumn" class="space-y-12 animate-fade">
                 <div class="neo-card space-y-12">
                     <!-- Top Media Controls -->
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-white/40 p-8 rounded-[60px] border border-white shadow-sm w-full">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-white/40 p-6 rounded-[60px] border border-white shadow-sm w-full">
                         <!-- Profile section -->
-                        <div class="md:col-span-4 flex flex-col items-center gap-3">
+                        <div class="md:col-span-3 flex flex-col items-center gap-3">
                             <label class="text-[12px] font-black text-slate-500 uppercase tracking-widest">Foto de Perfil</label>
-                            <div id="drop-profile" class="profile-drop-zone w-40 h-40 border-[8px] border-white shadow-2xl hover:scale-105 transition-all duration-500 flex items-center justify-center bg-slate-50">
+                            <div id="drop-profile" class="profile-drop-zone w-32 h-32 border-[6px] border-white shadow-2xl hover:scale-105 transition-all duration-500 flex items-center justify-center bg-slate-50">
                                 <i class="fas fa-image text-slate-300 text-6xl" id="profile-placeholder"></i>
                             </div>
                             <span class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Subir Foto</span>
                         </div>
 
                         <!-- Header Style section -->
-                        <div class="md:col-span-8 flex flex-col gap-6">
+                        <div class="md:col-span-9 flex flex-col gap-6">
                             <label class="text-[12px] font-black text-slate-500 uppercase tracking-widest ml-4">Diseño de Cabecera</label>
                             <div class="grid grid-cols-2 gap-6">
                                 <!-- Color Picker Card -->
-                                <div class="bg-white/90 p-4 rounded-[40px] border border-white shadow-sm flex items-center justify-center hover:shadow-md transition-all group h-32">
+                                <div class="bg-white/90 p-4 rounded-[40px] border border-white shadow-sm flex items-center justify-center hover:shadow-md transition-all group h-28">
                                     <input type="color" id="inputHeaderColor" class="w-full h-full rounded-[30px] cursor-pointer border-none p-1 bg-white shadow-inner group-hover:scale-[1.02] transition-transform" value="#667eea">
                                 </div>
 
                                 <!-- Header Image Card -->
-                                <div id="drop-header" class="bg-white/90 p-4 rounded-[40px] border border-white shadow-sm flex items-center justify-center hover:shadow-md transition-all cursor-pointer group h-32">
+                                <div id="drop-header" class="bg-white/90 p-4 rounded-[40px] border border-white shadow-sm flex items-center justify-center hover:shadow-md transition-all cursor-pointer group h-28">
                                     <div class="w-full h-full rounded-[30px] border-2 border-dashed border-slate-200 flex items-center justify-center bg-slate-50 shadow-inner group-hover:border-emerald-300 transition-colors overflow-hidden">
                                         <i class="fas fa-image text-slate-300 text-4xl" id="header-placeholder"></i>
                                     </div>
@@ -512,7 +524,7 @@
 
             <!-- Right Side: Preview -->
             <div id="previewColumn" class="relative">
-                <div class="sticky top-32">
+                <div class="sticky-preview">
                     <div class="flex items-center justify-center gap-4 mb-6">
                         <div class="h-px bg-slate-200 flex-grow"></div>
                         <h5 class="text-xs font-black text-slate-400 uppercase tracking-widest" id="previewTitleHeader">Vista Previa Real</h5>
