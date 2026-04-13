@@ -270,9 +270,72 @@
                     .mb-4 { margin-bottom: 1.5rem !important; }
 
                     .loading { padding: 5rem; text-align: center; color: #6c757d; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; font-size: 12px; }
+
+                    /* Share Modal inside Shadow DOM */
+                    .share-overlay {
+                        position: fixed;
+                        top: 0; left: 0; width: 100%; height: 100%;
+                        background: rgba(15, 23, 42, 0.9);
+                        backdrop-filter: blur(8px);
+                        z-index: 10000;
+                        display: none;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 20px;
+                        color: #1e293b;
+                    }
+                    .share-modal {
+                        background: white;
+                        border-radius: 40px;
+                        padding: 40px;
+                        max-width: 400px;
+                        width: 100%;
+                        text-align: center;
+                        position: relative;
+                        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                    }
+                    .share-close {
+                        position: absolute;
+                        top: 20px; right: 20px;
+                        font-size: 24px; cursor: pointer; color: #94a3b8;
+                    }
+                    .qr-container {
+                        background: #f8fafc;
+                        padding: 20px;
+                        border-radius: 24px;
+                        display: inline-block;
+                        margin-bottom: 20px;
+                    }
+                    .share-btn-action {
+                        background: #1e293b;
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 12px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        width: 100%;
+                        margin-top: 10px;
+                    }
                 </style>
                 <div class="widget-container"><div class="loading">Sincronizando Tarjeta...</div></div>
+                <div class="share-overlay">
+                    <div class="share-modal">
+                        <div class="share-close">×</div>
+                        <h4 style="margin: 0 0 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Compartir Perfil</h4>
+                        <div class="qr-container" id="widget-qr"></div>
+                        <div style="font-family: monospace; background: #f1f5f9; padding: 10px; border-radius: 8px; font-size: 12px; word-break: break-all; margin-bottom: 10px;" id="widget-link-text"></div>
+                        <button class="share-btn-action" id="widget-copy-btn">Copiar Link</button>
+                        <button class="share-btn-action" id="widget-native-btn" style="background: #059669;">Compartir</button>
+                    </div>
+                </div>
             `;
+
+            if (!window.QRCode) {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+                document.head.appendChild(s);
+            }
 
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -353,8 +416,13 @@
                             ${this.renderSocials(sm)}
                         </div>
 
-                        <div style="margin-top: 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1px;">
-                            wisbe.xyz/${hc.username || 'perfil'}
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px;">
+                            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1px;">
+                                wisbe.xyz/${hc.username || 'perfil'}
+                            </div>
+                            <button class="share-trigger" style="background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 14px;">
+                                <i class="fas fa-share-nodes"></i>
+                            </button>
                         </div>
 
                         <hr>
@@ -375,10 +443,47 @@
                 </div>
             `;
 
-            // Bind events for portfolio zoom via delegation
+            // Bind events
             container.querySelectorAll('.portfolio-item').forEach(item => {
                 item.onclick = () => this.openPortfolioZoom(item.dataset.url, item.dataset.type);
             });
+
+            container.querySelector('.share-trigger').onclick = () => this.openShareModal(hc.username);
+        }
+
+        async openShareModal(username) {
+            const overlay = this.shadowRoot.querySelector('.share-overlay');
+            const qrBox = this.shadowRoot.querySelector('#widget-qr');
+            const linkText = this.shadowRoot.querySelector('#widget-link-text');
+            const copyBtn = this.shadowRoot.querySelector('#widget-copy-btn');
+            const nativeBtn = this.shadowRoot.querySelector('#widget-native-btn');
+            const closeBtn = this.shadowRoot.querySelector('.share-close');
+
+            const url = `https://wisbe.xyz/cards.html?u=${username}`;
+            linkText.innerText = url;
+
+            overlay.style.display = 'flex';
+            qrBox.innerHTML = '';
+
+            while (!window.QRCode) await new Promise(r => setTimeout(r, 100));
+            new QRCode(qrBox, { text: url, width: 160, height: 160 });
+
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(url);
+                copyBtn.innerText = '¡Copiado!';
+                setTimeout(() => copyBtn.innerText = 'Copiar Link', 2000);
+            };
+
+            nativeBtn.onclick = () => {
+                if (navigator.share) {
+                    navigator.share({ title: 'Tarjeta Digital Wisbe', url });
+                } else {
+                    copyBtn.click();
+                }
+            };
+
+            closeBtn.onclick = () => overlay.style.display = 'none';
+            overlay.onclick = (e) => { if (e.target === overlay) overlay.style.display = 'none'; };
         }
 
         renderBAPairs(ba) {
