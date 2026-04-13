@@ -1,0 +1,9 @@
+127.0.0.1 - - [13/Apr/2026 05:40:53] "GET /cards.html HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 05:40:53] "GET /assets/css/styleGYM.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 05:40:53] "GET /wisbeCards.js HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 05:40:53] "GET /assets/js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 05:40:53] "GET /assets/js/config.js HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 05:40:53] "GET /login.html HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 05:40:53] "GET /assets/css/styleGYM.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 05:40:53] "GET /assets/js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 05:40:53] "GET /assets/js/config.js HTTP/1.1" 200 -
