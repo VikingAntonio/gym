@@ -433,18 +433,18 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="md:col-span-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Nombre / Empresa</label>
-                            <input type="text" id="inputName" class="neo-input" placeholder="Tu Nombre">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Nombre</label>
+                            <input type="text" id="inputName" class="neo-input" placeholder="Nombre">
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Título / Profesión</label>
-                            <input type="text" id="inputTitle" class="neo-input" placeholder="Tu Profesión">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Cargo / Profesión</label>
+                            <input type="text" id="inputTitle" class="neo-input" placeholder="Cargo / Profesión">
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Bio Profesional</label>
-                            <textarea id="inputBio" class="neo-input resize-none" rows="3" placeholder="Cuéntale al mundo quién eres..."></textarea>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Breve Descripción</label>
+                            <textarea id="inputBio" class="neo-input resize-none" rows="3" placeholder="Describe brevemente tus servicios o experiencia profesional..."></textarea>
                         </div>
                     </div>
 
@@ -528,9 +528,9 @@
                             </div>
 
                             <div class="card-body-content">
-                                <h3 class="font-bold text-2xl mb-1 text-white" id="previewName">Tu Nombre</h3>
-                                <p class="text-blue-400 mb-4" id="previewTitle">Tu Profesión</p>
-                                <p class="text-sm text-slate-400 mb-6" id="previewBio">Tu biografía aparecerá aquí. Cuéntale al mundo lo que haces.</p>
+                                <h3 class="font-bold text-2xl mb-1 text-white" id="previewName">Nombre</h3>
+                                <p class="text-blue-400 mb-4" id="previewTitle">Cargo / Profesión</p>
+                                <p class="text-sm text-slate-400 mb-6" id="previewBio">Breve descripción de tus servicios o experiencia profesional.</p>
 
                                 <div class="social-icons-container" id="socialContainer">
                                     <!-- Icons added dynamically -->
@@ -1232,9 +1232,9 @@
                     document.getElementById('inputBio').value = data.header_config.bio || '';
                     document.getElementById('inputHeaderColor').value = data.header_config.header_color || '#667eea';
 
-                    document.getElementById('previewName').textContent = data.header_config.name || 'Tu Nombre';
-                    document.getElementById('previewTitle').textContent = data.header_config.title || 'Tu Profesión';
-                    document.getElementById('previewBio').textContent = data.header_config.bio || '';
+                    document.getElementById('previewName').textContent = data.header_config.name || 'Nombre';
+                    document.getElementById('previewTitle').textContent = data.header_config.title || 'Cargo / Profesión';
+                    document.getElementById('previewBio').textContent = data.header_config.bio || 'Breve descripción de tus servicios o experiencia profesional.';
 
                     const profileUrl = data.header_config.profile_url;
                     // Strict check for valid cloudinary/web url, excluding placeholder indicators or accidental object strings
@@ -1335,8 +1335,12 @@
 
         function initRealTimePreview() {
             ['inputName', 'inputTitle', 'inputBio'].forEach(id => {
-                document.getElementById(id).addEventListener('input', (e) => {
-                    document.getElementById(id.replace('input', 'preview')).textContent = e.target.value || document.getElementById(id).placeholder;
+                const input = document.getElementById(id);
+                const preview = document.getElementById(id.replace('input', 'preview'));
+                const defaultText = preview.textContent;
+
+                input.addEventListener('input', (e) => {
+                    preview.textContent = e.target.value || defaultText;
                 });
             });
         }
