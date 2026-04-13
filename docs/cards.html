@@ -100,9 +100,9 @@
         .upload-zone-small:hover { color: #3b82f6; }
 
         .profile-drop-zone {
-            width: 120px;
-            height: 120px;
-            border-radius: 30px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             box-shadow: var(--neo-shadow);
             display: flex;
             align-items: center;
@@ -111,6 +111,7 @@
             overflow: hidden;
             background: #f0f4f8;
             position: relative;
+            border: 2px solid white;
         }
 
         .profile-drop-zone img { width: 100%; height: 100%; object-fit: cover; }
@@ -194,8 +195,20 @@
             aspect-ratio: 1/1;
             overflow: hidden;
             border-radius: 20px;
-            margin-top: 20px;
             user-select: none;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .before-after-container:hover {
+            transform: scale(1.02);
+        }
+
+        #baPreviewList {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .ba-before, .ba-after {
@@ -350,11 +363,50 @@
         </div>
     </div>
 
+    <!-- Modal Zoom B/A -->
+    <div id="baZoomModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-lg z-[600] hidden items-center justify-center p-4 animate-fade-in">
+        <div class="bg-white rounded-[50px] p-6 max-w-2xl w-full shadow-2xl relative">
+            <button onclick="closeBAZoom()" class="absolute -top-12 right-0 w-10 h-10 bg-white/20 text-white rounded-full flex items-center justify-center hover:bg-white/30 transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="zoomContainer" class="aspect-square w-full rounded-[40px] overflow-hidden">
+                <!-- Large slider injected here -->
+            </div>
+            <div class="mt-4 text-center">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Desliza para comparar</p>
+            </div>
+        </div>
+    </div>
+
     <main class="container mx-auto px-4 pb-20">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16" id="editorGrid">
             <!-- Left Side: Controls -->
             <div id="editorColumn" class="space-y-12 animate-fade">
                 <div class="neo-card space-y-10">
+                    <!-- Top Media Controls -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="flex items-center gap-6">
+                            <div class="flex flex-col items-center gap-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Perfil</label>
+                                <div id="drop-profile" class="profile-drop-zone">
+                                    <i class="fas fa-image text-slate-300 text-3xl" id="profile-placeholder"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow space-y-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Estilo Cabecera</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" id="inputHeaderColor" class="w-16 h-12 rounded-xl cursor-pointer border-none p-1 bg-white shadow-sm" value="#667eea">
+                                    <div id="drop-header" class="upload-zone-small flex-shrink-0">
+                                        <i class="fas fa-image" id="header-placeholder"></i>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-bold uppercase">Color / Imagen</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-slate-100"></div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="md:col-span-2">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Nombre / Empresa</label>
@@ -369,23 +421,6 @@
                         <div class="md:col-span-2">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-2">Bio Profesional</label>
                             <textarea id="inputBio" class="neo-input resize-none" rows="3" placeholder="Cuéntale al mundo quién eres..."></textarea>
-                        </div>
-
-                        <div class="flex flex-col items-center md:items-start gap-4">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-2">Foto de Perfil</label>
-                            <div id="drop-profile" class="profile-drop-zone">
-                                <i class="fas fa-upload text-slate-200 text-4xl" id="profile-placeholder"></i>
-                            </div>
-                        </div>
-
-                        <div class="space-y-6">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-2">Estilo Cabecera</label>
-                            <div class="flex items-center gap-4">
-                                <input type="color" id="inputHeaderColor" class="flex-grow h-14 rounded-2xl cursor-pointer border-none p-1 bg-white shadow-md" value="#667eea">
-                                <div id="drop-header" class="upload-zone-small flex-shrink-0">
-                                    <i class="fas fa-image" id="header-placeholder"></i>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -969,55 +1004,101 @@
                 const container = document.createElement('div');
                 container.className = 'before-after-container comparison-slider';
                 container.innerHTML = `
-                    <div class="ba-before" style="background-image: url('${pair.after}')"></div>
+                    <div class="ba-before" style="background-image: url('${pair.before}')"></div>
                     <div class="ba-after" style="width: 50%;">
-                        <div class="ba-after-inner" style="background-image: url('${pair.before}')"></div>
+                        <div class="ba-after-inner" style="background-image: url('${pair.after}')"></div>
                     </div>
                     <div class="ba-handle"></div>
                 `;
+                container.onclick = (e) => {
+                    if (e.target.closest('.ba-handle')) return;
+                    openBAZoom(pair);
+                };
                 previewList.appendChild(container);
             });
-            initPreviewSliders();
+            initPreviewSliders('#baPreviewList .comparison-slider');
         }
 
-        function initPreviewSliders() {
-            const sliders = document.querySelectorAll('#baPreviewList .comparison-slider');
+        window.openBAZoom = (pair) => {
+            const modal = document.getElementById('baZoomModal');
+            const container = document.getElementById('zoomContainer');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            container.innerHTML = `
+                <div class="before-after-container comparison-slider" style="aspect-ratio: 1/1; width: 100%; height: 100%;">
+                    <div class="ba-before" style="background-image: url('${pair.before}')"></div>
+                    <div class="ba-after" style="width: 50%;">
+                        <div class="ba-after-inner" style="background-image: url('${pair.after}')"></div>
+                    </div>
+                    <div class="ba-handle"></div>
+                </div>
+            `;
+            initPreviewSliders('#zoomContainer .comparison-slider');
+        };
+
+        window.closeBAZoom = () => {
+            document.getElementById('baZoomModal').classList.add('hidden');
+            document.getElementById('baZoomModal').classList.remove('flex');
+        };
+
+        let activeBAHandler = null;
+
+        function initPreviewSliders(selector) {
+            const sliders = document.querySelectorAll(selector);
+
+            if (!window._baEventsBound) {
+                window.addEventListener('mousemove', (e) => {
+                    if (activeBAHandler) activeBAHandler.move(e);
+                });
+                window.addEventListener('touchmove', (e) => {
+                    if (activeBAHandler) activeBAHandler.move(e);
+                }, { passive: false });
+                window.addEventListener('mouseup', () => {
+                    if (activeBAHandler) activeBAHandler.isDragging = false;
+                    activeBAHandler = null;
+                });
+                window.addEventListener('touchend', () => {
+                    if (activeBAHandler) activeBAHandler.isDragging = false;
+                    activeBAHandler = null;
+                });
+                window._baEventsBound = true;
+            }
+
             sliders.forEach(slider => {
                 const after = slider.querySelector('.ba-after');
                 const inner = slider.querySelector('.ba-after-inner');
                 const handle = slider.querySelector('.ba-handle');
-                let isDragging = false;
+
+                const handler = {
+                    isDragging: false,
+                    move: (e) => {
+                        if (!handler.isDragging) return;
+                        const rect = slider.getBoundingClientRect();
+                        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                        let x = clientX - rect.left;
+                        if (x < 0) x = 0;
+                        if (x > rect.width) x = rect.width;
+                        const percent = (x / rect.width) * 100;
+                        after.style.width = `${percent}%`;
+                        handle.style.left = `${percent}%`;
+                    }
+                };
 
                 const updateSizing = () => {
-                    inner.style.width = slider.offsetWidth + 'px';
+                    if (inner) inner.style.width = slider.offsetWidth + 'px';
                 };
                 window.addEventListener('resize', updateSizing);
                 updateSizing();
 
-                const move = (e) => {
-                    if (!isDragging) return;
-                    const rect = slider.getBoundingClientRect();
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    let x = clientX - rect.left;
-                    if (x < 0) x = 0;
-                    if (x > rect.width) x = rect.width;
-                    const percent = (x / rect.width) * 100;
-                    after.style.width = `${percent}%`;
-                    handle.style.left = `${percent}%`;
-                };
-
                 const start = (e) => {
-                    isDragging = true;
+                    handler.isDragging = true;
+                    activeBAHandler = handler;
                     if (!e.touches) e.preventDefault();
                 };
-                const end = () => isDragging = false;
 
                 handle.addEventListener('mousedown', start);
                 handle.addEventListener('touchstart', start, { passive: false });
-                window.addEventListener('mousemove', move);
-                window.addEventListener('touchmove', move, { passive: false });
-                window.addEventListener('mouseup', end);
-                window.addEventListener('touchend', end);
             });
         }
 
@@ -1072,7 +1153,7 @@
                 document.getElementById('headerDesign').style.background = '#667eea';
 
                 // Reset drop areas
-                document.getElementById('drop-profile').innerHTML = '<i class="fas fa-upload text-slate-200 text-4xl" id="profile-placeholder"></i>';
+                document.getElementById('drop-profile').innerHTML = '<i class="fas fa-image text-slate-200 text-4xl" id="profile-placeholder"></i>';
                 document.getElementById('drop-header').innerHTML = '<i class="fas fa-image" id="header-placeholder"></i>';
                 window.currentHeaderImageUrl = null;
 

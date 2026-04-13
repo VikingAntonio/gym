@@ -12,9 +12,16 @@
     }
 
     class WisbeCards extends HTMLElement {
-        constructor() { super(); this.attachShadow({ mode: 'open' }); }
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open' });
+            this._activeHandler = null;
+            this._eventsBound = false;
+        }
+
         static get observedAttributes() { return ['domain', 'username', 'user_id']; }
         attributeChangedCallback() { this.render(); }
+
         async render() {
             const urlParams = new URLSearchParams(window.location.search);
             const domain = this.getAttribute('domain');
@@ -100,14 +107,26 @@
                         object-fit: cover;
                     }
 
+                    .ba-list {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 12px;
+                        margin-top: 15px;
+                    }
+
                     .before-after-container {
                         position: relative;
                         width: 100%;
                         aspect-ratio: 1/1;
                         overflow: hidden;
                         border-radius: 20px;
-                        margin-top: 20px;
                         user-select: none;
+                        cursor: pointer;
+                        transition: transform 0.3s;
+                    }
+
+                    .before-after-container:hover {
+                        transform: scale(1.02);
                     }
 
                     /* Slider Core */
@@ -130,7 +149,7 @@
                     }
 
                     .ba-after-inner {
-                        width: 100%; /* Dynamically set in JS to match slider width */
+                        width: 100%;
                         height: 100%;
                         background-size: cover;
                         background-position: center;
@@ -169,6 +188,49 @@
                         top: 50%;
                         left: 50%;
                         transform: translate(-50%, -50%);
+                    }
+
+                    /* Zoom Modal */
+                    .ba-zoom-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.9);
+                        backdrop-filter: blur(10px);
+                        z-index: 9999;
+                        display: none;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 20px;
+                    }
+
+                    .ba-zoom-content {
+                        background: white;
+                        border-radius: 40px;
+                        padding: 10px;
+                        width: 100%;
+                        max-width: 600px;
+                        position: relative;
+                        box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+                    }
+
+                    .ba-zoom-close {
+                        position: absolute;
+                        top: -50px;
+                        right: 0;
+                        width: 40px;
+                        height: 40px;
+                        background: rgba(255,255,255,0.2);
+                        color: white;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                        font-size: 24px;
+                        transition: all 0.3s;
                     }
 
                     .social-icons-container {
@@ -244,6 +306,21 @@
             const portfolio = data.portfolio || [];
             const ba = data.before_after || [];
 
+            // Inject Zoom Overlay
+            if (!this.shadowRoot.querySelector('.ba-zoom-overlay')) {
+                const overlay = document.createElement('div');
+                overlay.className = 'ba-zoom-overlay';
+                overlay.innerHTML = `
+                    <div class="ba-zoom-content">
+                        <div class="ba-zoom-close">×</div>
+                        <div class="ba-zoom-body" style="aspect-ratio: 1/1; width: 100%; border-radius: 30px; overflow: hidden; position: relative;"></div>
+                    </div>
+                `;
+                overlay.querySelector('.ba-zoom-close').onclick = () => overlay.style.display = 'none';
+                overlay.onclick = (e) => { if (e.target === overlay) overlay.style.display = 'none'; };
+                this.shadowRoot.appendChild(overlay);
+            }
+
             const headerBackground = hc.header_image_url
                 ? `url('${hc.header_image_url}')`
                 : (hc.header_color || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
@@ -275,7 +352,7 @@
                         ${ba.length > 0 ? `
                             <hr>
                             <h6 class="fw-bold text-start mb-3">Trabajos Realizados</h6>
-                            <div class="ba-list" style="display: flex; flex-direction: column; gap: 20px;">
+                            <div class="ba-list">
                                 ${this.renderBAPairs(ba)}
                             </div>
                         ` : ''}
@@ -290,62 +367,102 @@
                 pairs = [{before: ba[0], after: ba[1]}];
             }
 
-            setTimeout(() => this.initComparisonSliders(), 100);
+            setTimeout(() => this.initComparisonSliders('.ba-list .comparison-slider'), 100);
 
             return pairs.map((pair, idx) => `
-                <div class="before-after-container comparison-slider">
-                    <div class="ba-before" style="background-image: url('${pair.after}')"></div>
+                <div class="before-after-container comparison-slider"
+                     data-before="${pair.before}"
+                     data-after="${pair.after}">
+                    <div class="ba-before" style="background-image: url('${pair.before}')"></div>
                     <div class="ba-after" style="width: 50%;">
-                        <div class="ba-after-inner" style="background-image: url('${pair.before}')"></div>
+                        <div class="ba-after-inner" style="background-image: url('${pair.after}')"></div>
                     </div>
                     <div class="ba-handle"></div>
                 </div>
             `).join('');
         }
 
-        initComparisonSliders() {
-            const sliders = this.shadowRoot.querySelectorAll('.comparison-slider');
+        openZoom(pair) {
+            const overlay = this.shadowRoot.querySelector('.ba-zoom-overlay');
+            const body = overlay.querySelector('.ba-zoom-body');
+            overlay.style.display = 'flex';
+            body.innerHTML = `
+                <div class="comparison-slider" style="width: 100%; height: 100%; position: relative;">
+                    <div class="ba-before" style="background-image: url('${pair.before}')"></div>
+                    <div class="ba-after" style="width: 50%;">
+                        <div class="ba-after-inner" style="background-image: url('${pair.after}')"></div>
+                    </div>
+                    <div class="ba-handle"></div>
+                </div>
+            `;
+            this.initComparisonSliders('.ba-zoom-body .comparison-slider');
+        }
+
+        initComparisonSliders(selector) {
+            const sliders = this.shadowRoot.querySelectorAll(selector);
+
+            if (!this._eventsBound) {
+                window.addEventListener('mousemove', (e) => {
+                    if (this._activeHandler) this._activeHandler.move(e);
+                });
+                window.addEventListener('touchmove', (e) => {
+                    if (this._activeHandler) this._activeHandler.move(e);
+                }, { passive: false });
+                window.addEventListener('mouseup', () => {
+                    if (this._activeHandler) this._activeHandler.isDragging = false;
+                    this._activeHandler = null;
+                });
+                window.addEventListener('touchend', () => {
+                    if (this._activeHandler) this._activeHandler.isDragging = false;
+                    this._activeHandler = null;
+                });
+                this._eventsBound = true;
+            }
+
             sliders.forEach(slider => {
                 const after = slider.querySelector('.ba-after');
                 const inner = slider.querySelector('.ba-after-inner');
                 const handle = slider.querySelector('.ba-handle');
-                let isDragging = false;
 
-                const updateSizing = () => {
-                    inner.style.width = slider.offsetWidth + 'px';
+                const handler = {
+                    isDragging: false,
+                    move: (e) => {
+                        if (!handler.isDragging) return;
+                        const rect = slider.getBoundingClientRect();
+                        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                        let x = clientX - rect.left;
+                        if (x < 0) x = 0;
+                        if (x > rect.width) x = rect.width;
+                        const percent = (x / rect.width) * 100;
+                        after.style.width = `${percent}%`;
+                        handle.style.left = `${percent}%`;
+                    }
                 };
 
+                const updateSizing = () => {
+                    if (inner) inner.style.width = slider.offsetWidth + 'px';
+                };
                 window.addEventListener('resize', updateSizing);
                 updateSizing();
 
-                const move = (e) => {
-                    if (!isDragging) return;
-                    const rect = slider.getBoundingClientRect();
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    let x = clientX - rect.left;
-
-                    if (x < 0) x = 0;
-                    if (x > rect.width) x = rect.width;
-
-                    const percent = (x / rect.width) * 100;
-                    after.style.width = `${percent}%`;
-                    handle.style.left = `${percent}%`;
-                };
-
                 const start = (e) => {
-                    isDragging = true;
+                    handler.isDragging = true;
+                    this._activeHandler = handler;
                     if (!e.touches) e.preventDefault();
                 };
-                const end = () => isDragging = false;
 
                 handle.addEventListener('mousedown', start);
                 handle.addEventListener('touchstart', start, { passive: false });
 
-                window.addEventListener('mousemove', move);
-                window.addEventListener('touchmove', move, { passive: false });
-
-                window.addEventListener('mouseup', end);
-                window.addEventListener('touchend', end);
+                if (slider.parentElement.classList.contains('ba-list')) {
+                    slider.onclick = (e) => {
+                        if (e.target.closest('.ba-handle')) return;
+                        this.openZoom({
+                            before: slider.dataset.before,
+                            after: slider.dataset.after
+                        });
+                    };
+                }
             });
         }
 
