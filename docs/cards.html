@@ -363,12 +363,14 @@
                 </div>
 
                 <div class="space-y-6">
-                    <div class="bg-slate-900 rounded-3xl p-6 relative group border border-slate-800 shadow-2xl overflow-hidden">
+                    <div class="bg-slate-900 rounded-3xl p-6 group border border-slate-800 shadow-2xl overflow-hidden">
                         <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 block text-left">Tu Link Directo</label>
-                        <code id="share-link-code" class="text-emerald-400 font-mono text-sm block overflow-x-auto whitespace-nowrap text-left pr-10 pb-2">https://wisbe.xyz/username</code>
-                        <button onclick="copyToClipboard('share-link-code')" class="absolute right-6 bottom-8 text-slate-500 hover:text-white transition-all scale-125">
-                            <i class="fas fa-copy"></i>
-                        </button>
+                        <div class="flex items-center justify-between gap-4">
+                            <code id="share-link-code" class="text-emerald-400 font-mono text-sm truncate text-left">https://wisbe.xyz/username</code>
+                            <button onclick="copyToClipboard('share-link-code')" class="text-slate-500 hover:text-white transition-all scale-125 flex-shrink-0">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <button onclick="nativeShare()" class="w-full py-5 bg-slate-100 text-slate-900 rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all">
