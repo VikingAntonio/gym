@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Maestro Wisbe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/styleGYM.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav id="main-nav"></nav>
+
+    <header class="container mx-auto px-4 pt-10 pb-6 border-b border-slate-200 bg-white shadow-sm mb-12">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl font-black shadow-lg shadow-blue-600/20">W</div>
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Panel Maestro</h1>
+                    <p class="text-slate-500 font-medium">Administración Global de Sistemas Wisbe</p>
+                </div>
+            </div>
+            <div id="user-badge" class="flex items-center bg-blue-50 border border-blue-100 px-5 py-3 rounded-2xl">
+                <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    <span id="header-user-name" class="block text-sm font-bold text-slate-900 uppercase">Admin Wisbe</span>
+                    <span class="block text-[10px] text-blue-600 font-black tracking-widest uppercase">Super Administrador</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 pb-20">
+        <!-- Global Management Section -->
+        <div class="mb-12">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-8 flex items-center gap-4">
+                Gestión Centralizada <div class="h-px bg-slate-200 flex-grow"></div>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 animate-fade">
+                <!-- Usuarios Globales -->
+                <a href="adminUsuarios.html" class="card group hover:border-blue-600 transition-all duration-300 bg-white p-8">
+                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-[24px] flex items-center justify-center text-2xl mb-8 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3 uppercase tracking-tight">Usuarios</h3>
+                    <p class="text-slate-500 text-sm mb-8 leading-relaxed font-medium">Administra todos los usuarios, roles y unidades de negocio globalmente.</p>
+                    <div class="flex items-center text-blue-600 text-[10px] font-black uppercase tracking-widest">
+                        Acceder <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                    </div>
+                </a>
+
+                <!-- Configuración Global -->
+                <div class="card bg-slate-100/50 border-dashed border-slate-300 p-8 flex flex-col items-center justify-center text-center opacity-60">
+                    <div class="w-16 h-16 bg-white rounded-[24px] flex items-center justify-center text-2xl mb-6 text-slate-400">
+                        <i class="fas fa-sliders-h"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-400 uppercase tracking-tight">Ajustes Globales</h3>
+                    <p class="text-slate-400 text-xs mt-2 uppercase font-black tracking-widest">Próximamente</p>
+                </div>
+
+                <!-- Soporte Técnico -->
+                <div class="card bg-slate-100/50 border-dashed border-slate-300 p-8 flex flex-col items-center justify-center text-center opacity-60">
+                    <div class="w-16 h-16 bg-white rounded-[24px] flex items-center justify-center text-2xl mb-6 text-slate-400">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-400 uppercase tracking-tight">Ticket Soporte</h3>
+                    <p class="text-slate-400 text-xs mt-2 uppercase font-black tracking-widest">Próximamente</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Modules Section -->
+        <div>
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-8 flex items-center gap-4">
+                Sistemas Disponibles <div class="h-px bg-slate-200 flex-grow"></div>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade">
+                <!-- Gym System -->
+                <a href="gym.html" class="card group hover:border-emerald-500 transition-all duration-300 bg-white p-8">
+                    <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-[24px] flex items-center justify-center text-2xl mb-8 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3 uppercase tracking-tight">Wisbe Gym</h3>
+                    <p class="text-slate-500 text-sm mb-8 leading-relaxed font-medium">Gestión de rutinas, nutrición y personal para centros fitness.</p>
+                    <div class="flex items-center text-emerald-600 text-[10px] font-black uppercase tracking-widest">
+                        Entrar al Sistema <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                    </div>
+                </a>
+
+                <!-- Beauty System -->
+                <a href="beauty.html" class="card group hover:border-pink-500 transition-all duration-300 bg-white p-8">
+                    <div class="w-16 h-16 bg-pink-50 text-pink-600 rounded-[24px] flex items-center justify-center text-2xl mb-8 group-hover:bg-pink-600 group-hover:text-white transition-all">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3 uppercase tracking-tight">Wisbe Beauty</h3>
+                    <p class="text-slate-500 text-sm mb-8 leading-relaxed font-medium">Control de citas, servicios y agenda para salones de belleza.</p>
+                    <div class="flex items-center text-pink-600 text-[10px] font-black uppercase tracking-widest">
+                        Entrar al Sistema <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                    </div>
+                </a>
+
+                <!-- Independientes -->
+                <a href="independientes.html" class="card group hover:border-indigo-500 transition-all duration-300 bg-white p-8">
+                    <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-[24px] flex items-center justify-center text-2xl mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3 uppercase tracking-tight">Independientes</h3>
+                    <p class="text-slate-500 text-sm mb-8 leading-relaxed font-medium">Tarjetas digitales y presencia profesional para freelancers.</p>
+                    <div class="flex items-center text-indigo-600 text-[10px] font-black uppercase tracking-widest">
+                        Entrar al Sistema <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { renderNavbar, Auth } from './assets/js/utils.js';
+        renderNavbar();
+
+        // Security check: only admins or wisbe business unit
+        const user = await Auth.checkAccess(['gym-admin']);
+        if (user) {
+            document.getElementById('header-user-name').innerText = user.full_name || user.username;
+        }
+    </script>
+</body>
+</html>

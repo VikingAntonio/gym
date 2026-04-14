@@ -56,6 +56,12 @@
     <script type="module">
         import { Auth, showPopup } from './assets/js/utils.js';
 
+        // Check if user is already logged in
+        const existingUser = Auth.getUser();
+        if (existingUser) {
+            window.location.href = Auth.getRedirectUrl(existingUser);
+        }
+
         let isLogin = true;
         const form = document.getElementById('auth-form');
         const registerFields = document.getElementById('register-fields');
@@ -85,8 +91,8 @@
                 submitBtn.innerText = 'PROCESANDO...';
 
                 if (isLogin) {
-                    await Auth.login(email, password);
-                    window.location.href = 'gym.html';
+                    const user = await Auth.login(email, password);
+                    window.location.href = Auth.getRedirectUrl(user);
                 } else {
                     const fullName = document.getElementById('full_name').value;
 
