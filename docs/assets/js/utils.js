@@ -256,6 +256,29 @@ export const Auth = {
         return user ? JSON.parse(user) : null;
     },
 
+    getRedirectUrl(user) {
+        if (!user) return 'login.html';
+
+        // Admin Master Dashboard
+        if (user.role === 'gym-admin' || user.business_unit === 'wisbe') {
+            return 'panelWisbe.html';
+        }
+
+        // Specific Business Unit Dashboards
+        if (user.role === 'beauty' || user.business_unit === 'beauty') {
+            return 'beauty.html';
+        }
+
+        // Generic "Independientes" or Card-focused units
+        const cardUnits = ['freelance', 'independiente', 'tienda', 'construction', 'school'];
+        if (user.role === 'freelance' || cardUnits.includes(user.business_unit)) {
+            return 'independientes.html';
+        }
+
+        // Default to Gym for owners/others
+        return 'gym.html';
+    },
+
     getSelectedOwnerId() {
         return localStorage.getItem('admin_selected_owner_id') || null;
     },
@@ -331,8 +354,8 @@ export function renderNavbar() {
                     <li><a href="test.html" class="btn btn-primary text-xs uppercase tracking-wider">Hacer Test</a></li>
                 `}
 
-                ${isAdminOrOwner ? `
-                    <li><a href="${user.role === 'beauty' ? 'beauty.html' : 'gym.html'}" class="text-slate-400 hover:text-blue-500 transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
+                ${user && (isAdminOrOwner || ['beauty', 'freelance'].includes(user.role)) ? `
+                    <li><a href="${Auth.getRedirectUrl(user)}" class="text-slate-400 hover:text-blue-500 transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
                 ` : ''}
 
                 ${user ? `
