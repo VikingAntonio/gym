@@ -384,6 +384,39 @@ export function renderNavbar() {
 }
 
 /**
+ * Sistema de Temas (Neumorphism Light/Dark)
+ */
+export function renderThemeToggle() {
+    // Create button if it doesn't exist
+    if (document.getElementById('theme-toggle-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'theme-toggle-btn';
+    btn.className = 'theme-toggle';
+    btn.title = 'Cambiar Tema';
+
+    const updateIcon = (theme) => {
+        btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-stars-fill"></i>';
+    };
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('wisbe_theme') || (document.body.getAttribute('data-theme') || 'light');
+    document.body.setAttribute('data-theme', savedTheme);
+    updateIcon(savedTheme);
+
+    btn.onclick = () => {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        document.body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('wisbe_theme', newTheme);
+        updateIcon(newTheme);
+    };
+
+    document.body.appendChild(btn);
+}
+
+/**
  * Renderiza el panel lateral para administradores (Wisbe)
  */
 export async function renderAdminSidebar(onOwnerChange) {

@@ -68,7 +68,9 @@
     </div>
 
     <script type="module">
-        import { Auth } from './assets/js/utils.js';
+        import { Auth, renderThemeToggle } from './assets/js/utils.js';
+
+        renderThemeToggle();
 
         // Security check
         const user = await Auth.checkAccess(['gym-admin']);
