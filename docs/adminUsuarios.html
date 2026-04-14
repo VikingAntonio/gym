@@ -7,10 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./assets/css/styleGYM.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="min-h-screen">
+<body class="bg-slate-50 min-h-screen">
     <nav id="main-nav"></nav>
 
     <main class="container mx-auto px-4 py-12">
@@ -118,9 +117,7 @@
     </main>
 
     <script type="module">
-        import { supabase, renderNavbar, Auth, showPopup, showConfirm, renderAdminSidebar, renderThemeToggle } from './assets/js/utils.js';
-
-        renderThemeToggle();
+        import { supabase, renderNavbar, Auth, showPopup, showConfirm, renderAdminSidebar } from './assets/js/utils.js';
 
         let currentUser = null;
         let isAdmin = false;
