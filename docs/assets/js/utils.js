@@ -469,3 +469,49 @@ export async function renderAdminSidebar(onOwnerChange) {
         renderList();
     }
 }
+
+/**
+ * Inicializa el tema y el botón de alternancia
+ */
+export function initTheme() {
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    // Función para actualizar el icono
+    const updateIcon = (isDark) => {
+        if (!themeToggle) return;
+        const icon = themeToggle.querySelector('i');
+        if (!icon) return;
+        if (isDark) {
+            icon.className = 'bi bi-moon-stars-fill';
+        } else {
+            icon.className = 'bi bi-sun-fill';
+        }
+    };
+
+    // Aplicar tema guardado
+    const savedTheme = localStorage.getItem('wisbe_theme');
+    if (savedTheme === 'dark') {
+        body.setAttribute('data-theme', 'dark');
+        updateIcon(true);
+    } else {
+        body.removeAttribute('data-theme');
+        updateIcon(false);
+    }
+
+    // Event listener para el botón
+    if (themeToggle) {
+        themeToggle.onclick = () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('wisbe_theme', 'light');
+                updateIcon(false);
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('wisbe_theme', 'dark');
+                updateIcon(true);
+            }
+        };
+    }
+}
