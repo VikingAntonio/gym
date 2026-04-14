@@ -1,7 +1,7 @@
-127.0.0.1 - - [14/Apr/2026 07:51:23] "GET /gym.html HTTP/1.1" 200 -
-127.0.0.1 - - [14/Apr/2026 07:51:23] "GET /assets/css/styleGYM.css HTTP/1.1" 200 -
-127.0.0.1 - - [14/Apr/2026 07:51:23] "GET /assets/js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [14/Apr/2026 07:51:23] "GET /assets/js/config.js HTTP/1.1" 200 -
-127.0.0.1 - - [14/Apr/2026 07:51:23] "GET /login.html HTTP/1.1" 200 -
-127.0.0.1 - - [14/Apr/2026 07:51:26] "GET /beauty.html HTTP/1.1" 200 -
-127.0.0.1 - - [14/Apr/2026 07:51:28] "GET /adminNutricion.html HTTP/1.1" 200 -
+127.0.0.1 - - [14/Apr/2026 09:36:43] "GET /panelWisbe.html HTTP/1.1" 200 -
+127.0.0.1 - - [14/Apr/2026 09:36:43] "GET /assets/css/styleGYM.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Apr/2026 09:36:44] "GET /assets/js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Apr/2026 09:36:44] "GET /assets/js/config.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Apr/2026 09:36:47] "GET /gym.html HTTP/1.1" 200 -
+127.0.0.1 - - [14/Apr/2026 09:36:49] "GET /beauty.html HTTP/1.1" 200 -
+127.0.0.1 - - [14/Apr/2026 09:36:52] "GET /independientes.html HTTP/1.1" 200 -
