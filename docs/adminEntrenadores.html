@@ -141,7 +141,9 @@
     </main>
 
     <script type="module">
-        import { supabase, renderNavbar, Auth, showPopup, showToast, uploadToCloudinary, setupDragAndDrop, showConfirm, renderAdminSidebar } from './assets/js/utils.js';
+        import { supabase, renderNavbar, Auth, showPopup, showToast, uploadToCloudinary, setupDragAndDrop, showConfirm, renderAdminSidebar, renderThemeToggle } from './assets/js/utils.js';
+
+        renderThemeToggle();
 
         let currentUser = null;
         let isAdmin = false;

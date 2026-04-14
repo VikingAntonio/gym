@@ -132,44 +132,12 @@
             </div>
         </section>
 
-        <!-- System Stats Bar -->
-        <section class="mt-20">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="card flex items-center bg-white border-slate-200">
-                    <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mr-5 text-xl">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Base de Datos</p>
-                        <p class="text-sm font-bold text-slate-800">Supabase Cloud</p>
-                    </div>
-                    <div class="ml-auto w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
-                </div>
-                <div class="card flex items-center bg-white border-slate-200">
-                    <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mr-5 text-xl">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Seguridad</p>
-                        <p class="text-sm font-bold text-slate-800">RLS Protocol Active</p>
-                    </div>
-                </div>
-                <div class="card flex items-center bg-white border-slate-200">
-                    <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mr-5 text-xl">
-                        <i class="fas fa-cloud"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Multimedia</p>
-                        <p class="text-sm font-bold text-slate-800">Cloudinary CDN</p>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
     <script type="module">
-        import { renderNavbar, Auth, showPopup } from './assets/js/utils.js';
+        import { renderNavbar, Auth, showPopup, renderThemeToggle } from './assets/js/utils.js';
         renderNavbar();
+        renderThemeToggle();
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
 
         if (currentUser) {
