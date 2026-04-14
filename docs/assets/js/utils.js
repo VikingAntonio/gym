@@ -402,6 +402,7 @@ export function renderThemeToggle() {
     // Load saved theme
     const savedTheme = localStorage.getItem('wisbe_theme') || (document.body.getAttribute('data-theme') || 'light');
     document.body.setAttribute('data-theme', savedTheme);
+    // Standardize to white/black based on theme if needed, but the CSS handles it now.
     updateIcon(savedTheme);
 
     btn.onclick = () => {
