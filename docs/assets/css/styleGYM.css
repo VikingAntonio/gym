@@ -9,6 +9,25 @@
     --border: #e2e8f0;
     --radius-lg: 1rem;
     --radius-md: 0.5rem;
+
+    /* Neumorphism Light */
+    --neu-bg: #e0e5ec;
+    --neu-text: #44476a;
+    --neu-light: #ffffff;
+    --neu-dark: #a3b1c6;
+    --neu-accent: #ff6b00;
+
+    /* Neumorphism Dark */
+    --neu-bg-dark: #1a1a1a;
+    --neu-text-dark: #e0e0e0;
+    --neu-light-dark: #252525;
+    --neu-dark-dark: #0f0f0f;
+}
+
+[data-theme="dark"] {
+    --bg-main: var(--neu-bg-dark);
+    --text-main: var(--neu-text-dark);
+    --border: var(--neu-light-dark);
 }
 
 body {
@@ -169,4 +188,53 @@ body {
 }
 .custom-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
+}
+
+/* Neumorphic Utilities */
+.neu-card {
+    background: var(--bg-main);
+    border-radius: 30px;
+    box-shadow: 9px 9px 16px var(--neu-dark),
+                -9px -9px 16px var(--neu-light);
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .neu-card {
+    box-shadow: 9px 9px 16px var(--neu-dark-dark),
+                -9px -9px 16px var(--neu-light-dark);
+}
+
+.neu-card-inset {
+    background: var(--bg-main);
+    border-radius: 30px;
+    box-shadow: inset 9px 9px 16px var(--neu-dark),
+                inset -9px -9px 16px var(--neu-light);
+}
+
+[data-theme="dark"] .neu-card-inset {
+    box-shadow: inset 9px 9px 16px var(--neu-dark-dark),
+                inset -9px -9px 16px var(--neu-light-dark);
+}
+
+.neu-btn {
+    background: var(--bg-main);
+    border-radius: 20px;
+    box-shadow: 5px 5px 10px var(--neu-dark),
+                -5px -5px 10px var(--neu-light);
+    transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .neu-btn {
+    box-shadow: 5px 5px 10px var(--neu-dark-dark),
+                -5px -5px 10px var(--neu-light-dark);
+}
+
+.neu-btn:active {
+    box-shadow: inset 5px 5px 10px var(--neu-dark),
+                inset -5px -5px 10px var(--neu-light);
+}
+
+[data-theme="dark"] .neu-btn:active {
+    box-shadow: inset 5px 5px 10px var(--neu-dark-dark),
+                inset -5px -5px 10px var(--neu-light-dark);
 }
