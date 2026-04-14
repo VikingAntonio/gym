@@ -459,7 +459,7 @@
             const nativeBtn = this.shadowRoot.querySelector('#widget-native-btn');
             const closeBtn = this.shadowRoot.querySelector('.share-close');
 
-            const url = `https://wisbe.xyz/cards.html?u=${username}`;
+            const url = `https://wisbe.xyz/${username}`;
             linkText.innerText = url;
 
             overlay.style.display = 'flex';
