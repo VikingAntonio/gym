@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirigiendo... - Wisbe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/styleGYM.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center">
+    <div class="text-center animate-fade">
+        <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-6 shadow-xl shadow-blue-600/20">
+            W
+        </div>
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight uppercase mb-2">Redirigiendo a tu Tarjeta</h1>
+        <p class="text-slate-500 font-medium flex items-center justify-center gap-2">
+            <i class="fas fa-spinner fa-spin"></i> Un momento por favor...
+        </p>
+    </div>
+
+    <script>
+        (function() {
+            // Obtener el path del usuario (ej: /nombre_usuario_12345678)
+            const path = window.location.pathname.split('/').pop();
+
+            if (path && path !== '404.html' && path !== 'index.html') {
+                // Redirigir a cards.html con el parámetro u
+                window.location.href = '/cards.html?u=' + path;
+            } else {
+                // Si no hay path o es la raíz, ir al inicio
+                window.location.href = '/index.html';
+            }
+        })();
+    </script>
+</body>
+</html>

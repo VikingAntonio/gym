@@ -230,11 +230,15 @@ export const Auth = {
 
         if (!profile) {
             // Last resort: manual profile creation if everything failed
+            const fullName = data.user.user_metadata?.full_name || '';
+            const sanitizedName = fullName.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const fallbackUsername = sanitizedName || data.user.email.split('@')[0];
+
             profile = {
                 id: data.user.id,
                 email: data.user.email,
-                username: data.user.email.split('@')[0],
-                full_name: data.user.user_metadata?.full_name || '',
+                username: `${fallbackUsername}_${data.user.id.substring(0, 8)}`,
+                full_name: fullName,
                 domain: data.user.user_metadata?.domain || '',
                 role: data.user.user_metadata?.role || 'gym-owner',
                 owner_id: data.user.user_metadata?.owner_id || null

@@ -616,7 +616,7 @@
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">3. Link Directo (Custom URL)</label>
                                 <div class="bg-slate-900 rounded-2xl p-6 relative group border border-slate-800 shadow-2xl">
-                                    <code id="custom-link" class="text-orange-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">https://wisbe.xyz/cards.html?u=usuario</code>
+                                    <code id="custom-link" class="text-orange-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">https://wisbe.xyz/username</code>
                                     <button onclick="copyToClipboard('custom-link')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-125">
                                         <i class="fas fa-copy"></i>
                                     </button>
@@ -732,7 +732,7 @@
             const username = user.username || user.email.split('@')[0];
 
             document.getElementById('widget-code').innerText = `<wisbe-cards domain="${domain}"></wisbe-cards>`;
-            const customUrl = `${window.location.origin}${window.location.pathname}?u=${username}`;
+            const customUrl = `https://wisbe.xyz/${username}`;
             document.getElementById('custom-link').innerText = customUrl;
             document.getElementById('display-custom-url').innerText = `wisbe.xyz/${username}`;
 
