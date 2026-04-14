@@ -13,6 +13,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="neu-page min-h-screen">
+    <button class="theme-toggle" id="themeToggle" title="Cambiar Tema">
+        <i class="bi bi-moon-stars-fill"></i>
+    </button>
+
     <nav id="main-nav"></nav>
 
     <div class="container mx-auto px-4 py-12 text-center">
@@ -27,7 +31,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20 animate-fade">
             <!-- Tarjeta Digital -->
             <a href="cards.html" class="neu-card p-8 group">
-                <i class="fas fa-id-card text-4xl mb-4"></i>
+                <i class="fas fa-id-card text-4xl mb-4 transition-all duration-300 group-hover:scale-110"></i>
                 <span class="text-sm font-bold uppercase tracking-widest">Tarjeta Digital</span>
             </a>
         </div>

@@ -13,6 +13,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="neu-page min-h-screen">
+    <button class="theme-toggle" id="themeToggle" title="Cambiar Tema">
+        <i class="bi bi-moon-stars-fill"></i>
+    </button>
+
     <nav id="main-nav"></nav>
 
     <div class="container mx-auto px-4 py-12 text-center">
@@ -27,13 +31,13 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20 animate-fade">
             <!-- Citas -->
             <a href="beautyCitas.html" class="neu-card p-8 group">
-                <i class="fas fa-calendar-check text-4xl mb-4"></i>
+                <i class="fas fa-calendar-check text-4xl mb-4 transition-all duration-300 group-hover:scale-110"></i>
                 <span class="text-sm font-bold uppercase tracking-widest">Citas</span>
             </a>
 
             <!-- Usuarios (Compartido) -->
             <a href="adminUsuarios.html" class="neu-card p-8 group">
-                <i class="fas fa-users text-4xl mb-4"></i>
+                <i class="fas fa-users text-4xl mb-4 transition-all duration-300 group-hover:scale-110"></i>
                 <span class="text-sm font-bold uppercase tracking-widest">Clientes</span>
             </a>
         </div>
@@ -42,7 +46,7 @@
         <section class="mt-20 text-left">
             <div class="flex items-center justify-between mb-10">
                 <h2 class="text-xl font-black uppercase tracking-widest opacity-80">Widget Beauty</h2>
-                <div class="h-px bg-slate-300 flex-grow ml-10 opacity-30"></div>
+                <!-- Removed horizontal bar -->
             </div>
 
             <div class="neu-card p-10 md:p-14 text-left block">
