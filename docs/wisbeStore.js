@@ -37,11 +37,13 @@
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-            const { data: user } = await supabase.from('wisbe_users').select('id').ilike('domain', domain).maybeSingle();
+            const { data: user } = await supabase.from('wisbe_users').select('id, whatsapp_number').ilike('domain', domain).maybeSingle();
             if (!user) {
                 this.shadowRoot.querySelector('.loading').innerText = 'Tienda no encontrada';
                 return;
             }
+
+            this.whatsappNumber = user.whatsapp_number || '';
 
             const { data: products } = await supabase.from('wisbe_store_products')
                 .select('*')
@@ -73,7 +75,7 @@
                                 <p class="product-description">${p.description || ''}</p>
                                 <div class="product-footer">
                                     <span class="product-price">$${parseFloat(p.price).toFixed(2)}</span>
-                                    <button class="buy-button" onclick="window.open('https://wa.me/?text=Hola, me interesa el producto: ${p.title}', '_blank')">
+                                    <button class="buy-button" onclick="window.open('https://wa.me/${this.whatsappNumber}?text=Hola, me interesa el producto: ${p.title}', '_blank')">
                                         Comprar
                                     </button>
                                 </div>
@@ -111,8 +113,10 @@
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-            const { data: user } = await supabase.from('wisbe_users').select('id').ilike('domain', domain).maybeSingle();
+            const { data: user } = await supabase.from('wisbe_users').select('id, whatsapp_number').ilike('domain', domain).maybeSingle();
             if (!user) return this.shadowRoot.innerHTML = '';
+
+            this.whatsappNumber = user.whatsapp_number || '';
 
             const { data: promos } = await supabase.from('wisbe_store_promos')
                 .select('*')
@@ -142,7 +146,9 @@
                                 <p class="product-description">${p.description || ''}</p>
                                 <div class="product-footer">
                                     <span class="product-price" style="color: #db2777;">$${parseFloat(p.price).toFixed(2)}</span>
-                                    <button class="buy-button" style="background: #db2777;">Aprovechar</button>
+                                    <button class="buy-button" style="background: #db2777;" onclick="window.open('https://wa.me/${this.whatsappNumber}?text=Hola, me interesa esta oferta: ${p.title}', '_blank')">
+                                        Aprovechar
+                                    </button>
                                 </div>
                             </div>
                         </div>
