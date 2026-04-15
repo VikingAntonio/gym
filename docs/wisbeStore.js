@@ -14,6 +14,8 @@
             --store-border: #e2e8f0;
             --amber-600: #d97706;
             --amber-50: #fffbeb;
+            --pink-600: #db2777;
+            --pink-50: #fdf2f8;
             display: block;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
@@ -36,8 +38,7 @@
             overflow: hidden;
             border: 1px solid var(--store-border);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             position: relative;
         }
 
@@ -140,6 +141,7 @@
 
         .badge-promo { background: #fee2e2; color: #ef4444; }
         .badge-amber { background: var(--amber-50); color: var(--amber-600); border: 1px solid #fde68a; }
+        .badge-pink { background: var(--pink-50); color: var(--pink-600); border: 1px solid #fbcfe8; }
 
         .loading { text-align: center; padding: 4rem; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; }
 
@@ -191,8 +193,15 @@
     }
 
     async function getOwnerIdByDomain(supabase, domain) {
-        const { data } = await supabase.from('wisbe_users').select('id, whatsapp_number').ilike('domain', domain).maybeSingle();
-        return data;
+        if (!domain) return null;
+        try {
+            const { data, error } = await supabase.from('wisbe_users').select('id, whatsapp_number').ilike('domain', domain.trim()).maybeSingle();
+            if (error) console.error('Error fetching user by domain:', error);
+            return data;
+        } catch (e) {
+            console.error('Exception fetching user by domain:', e);
+            return null;
+        }
     }
 
     class WisbeStore extends HTMLElement {
@@ -205,7 +214,13 @@
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const user = await getOwnerIdByDomain(supabase, domain);
-            if (!user) return;
+
+            const container = this.shadowRoot.querySelector('.wisbe-store-container');
+            if (!user) {
+                container.innerHTML = `<div class="loading">Dominio no encontrado o no configurado.</div>`;
+                return;
+            }
+
             const { data: products } = await supabase.from('wisbe_store_products').select('*').eq('owner_id', user.id).eq('is_active', true).order('created_at', { ascending: false });
             this.renderProducts(products || [], user.whatsapp_number);
         }
@@ -216,11 +231,61 @@
                 <div class="store-product-card">
                     <div class="product-image-box"><img src="${p.image_url || ''}"></div>
                     <div class="product-info">
-                        <span class="product-category">${p.category || ''}</span>
+                        <span class="product-category">${p.category || 'PRODUCTO'}</span>
                         <h3 class="product-title">${p.title}</h3>
+                        ${p.description ? `<p class="product-description">${p.description}</p>` : ''}
                         <div class="product-footer">
-                            <span class="product-price">$${p.price}</span>
-                            <button class="buy-button" onclick="window.open('https://wa.me/${(whatsapp||'').replace(/\D/g,'')}?text=Interés: ${encodeURIComponent(p.title)}', '_blank')">Comprar</button>
+                            <span class="product-price">$${parseFloat(p.price).toFixed(2)}</span>
+                            <button class="buy-button" onclick="window.open('https://wa.me/${(whatsapp||'').replace(/\D/g,'')}?text=Hola, me interesa este producto: ${encodeURIComponent(p.title)}', '_blank')">Comprar</button>
+                        </div>
+                    </div>
+                </div>`).join('')}</div>`;
+        }
+    }
+
+    class WisbeStorePromos extends HTMLElement {
+        constructor() { super(); this.attachShadow({ mode: 'open' }); }
+        static get observedAttributes() { return ['domain']; }
+        attributeChangedCallback() { this.render(); }
+        async render() {
+            const domain = this.getAttribute('domain');
+            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-promos-container"><div class="loading">Cargando Promociones...</div></div>`;
+            while (!window.supabase) await new Promise(r => setTimeout(r, 100));
+            const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+            const user = await getOwnerIdByDomain(supabase, domain);
+
+            const container = this.shadowRoot.querySelector('.wisbe-promos-container');
+            if (!user) {
+                container.innerHTML = `<div class="loading">Dominio no encontrado o no configurado.</div>`;
+                return;
+            }
+
+            const { data: promos } = await supabase.from('wisbe_store_promos').select('*').eq('owner_id', user.id).order('created_at', { ascending: false });
+            this.renderPromos(promos || [], user.whatsapp_number);
+        }
+
+        renderPromos(promos, whatsapp) {
+            const container = this.shadowRoot.querySelector('.wisbe-promos-container');
+            const now = new Date();
+            const validPromos = promos.filter(p => !p.expires_at || new Date(p.expires_at) > now);
+
+            if (validPromos.length === 0) {
+                container.innerHTML = '<div class="loading">No hay promociones activas en este momento.</div>';
+                return;
+            }
+
+            container.innerHTML = `<div class="store-grid">${validPromos.map(p => `
+                <div class="store-product-card">
+                    <div class="product-image-box">
+                        <img src="${p.image_url || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80'}">
+                        <span class="store-badge badge-pink">${p.type === 'promo' ? 'DESCUENTO' : 'PAQUETE'}</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">${p.title}</h3>
+                        ${p.description ? `<p class="product-description">${p.description}</p>` : ''}
+                        <div class="product-footer">
+                            <span class="product-price">$${parseFloat(p.price).toFixed(2)}</span>
+                            <button class="buy-button" style="background:var(--pink-600);" onclick="window.open('https://wa.me/${(whatsapp||'').replace(/\D/g,'')}?text=Hola, me interesa esta oferta: ${encodeURIComponent(p.title)}', '_blank')">Lo Quiero</button>
                         </div>
                     </div>
                 </div>`).join('')}</div>`;
@@ -237,7 +302,12 @@
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const user = await getOwnerIdByDomain(supabase, domain);
-            if (!user) return;
+
+            const container = this.shadowRoot.querySelector('.wisbe-auctions-container');
+            if (!user) {
+                container.innerHTML = `<div class="loading">Dominio no encontrado o no configurado.</div>`;
+                return;
+            }
 
             const { data: auctions } = await supabase.from('wisbe_store_auctions').select('*, bids:wisbe_store_bids(*)').eq('owner_id', user.id).eq('is_active', true);
             this.renderAuctions(auctions || [], user.whatsapp_number, supabase);
@@ -302,9 +372,9 @@
                 const submitBtn = card.querySelector('.bid-submit');
                 if (submitBtn) {
                     submitBtn.onclick = () => {
-                        const val = card.querySelector('.free-bid-input').value;
-                        if (val > currentBid) this.placeBid(a, val, whatsapp, supabase);
-                        else alert('La puja debe ser mayor a la actual');
+                        const val = parseFloat(card.querySelector('.free-bid-input').value);
+                        if (!isNaN(val) && val > currentBid) this.placeBid(a, val, whatsapp, supabase);
+                        else alert('La puja debe ser un número válido y mayor a la actual');
                     };
                 }
 
@@ -333,5 +403,6 @@
     }
 
     customElements.define('wisbe-store', WisbeStore);
+    customElements.define('wisbe-store-promos', WisbeStorePromos);
     customElements.define('wisbe-store-auctions', WisbeStoreAuctions);
 })();
