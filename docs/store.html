@@ -103,20 +103,43 @@
     </div>
 
     <script type="module">
-        import { renderNavbar, Auth, showPopup, initTheme } from './assets/js/utils.js';
+        import { supabase, renderNavbar, Auth, showPopup, showToast, initTheme, renderAdminSidebar } from './assets/js/utils.js';
 
-        const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'tienda']);
+        let currentUser = null;
+        let isAdmin = false;
 
-        renderNavbar();
-        initTheme();
+        async function initPage() {
+            renderNavbar();
+            initTheme();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'tienda']);
+            if (!currentUser) return;
 
-        if (currentUser) {
-            const domainText = currentUser.domain || 'SIN DOMINIO';
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                renderAdminSidebar(() => {
+                    updateWidgetCode();
+                });
+            }
+
+            updateWidgetCode();
+        }
+
+        async function updateWidgetCode() {
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            let domain = currentUser.domain;
+
+            if (isAdmin && selectedOwnerId) {
+                const { data } = await supabase.from('wisbe_users').select('domain').eq('id', selectedOwnerId).maybeSingle();
+                domain = data?.domain;
+            }
+
+            const domainText = domain || 'SIN DOMINIO';
             document.getElementById('user-domain').innerText = domainText;
 
-            if (currentUser.domain) {
-                document.getElementById('label-full').innerText = `<wisbe-store domain="${currentUser.domain}"></wisbe-store>`;
-                document.getElementById('label-promos').innerText = `<wisbe-store-promos domain="${currentUser.domain}"></wisbe-store-promos>`;
+            if (domain) {
+                document.getElementById('label-full').innerText = `<wisbe-store domain="${domain}"></wisbe-store>`;
+                document.getElementById('label-promos').innerText = `<wisbe-store-promos domain="${domain}"></wisbe-store-promos>`;
             } else {
                 const errorMsg = 'ERROR: CONFIGURA TU DOMINIO';
                 document.getElementById('label-full').innerText = errorMsg;
@@ -127,9 +150,11 @@
         window.copyToClipboard = (id) => {
             const text = document.getElementById(id).innerText;
             navigator.clipboard.writeText(text).then(() => {
-                showPopup('¡Copiado!', 'El fragmento de código está listo para usar');
+                showToast('¡Copiado al portapapeles!');
             });
         };
+
+        initPage();
     </script>
 </body>
 </html>
