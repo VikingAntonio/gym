@@ -1,99 +1,91 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso al Panel Administrativo</title>
+    <title>Login - Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./assets/css/styleGYM.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
         :root {
-            --neu-bg: #f0f2f5;
-            --neu-shadow-light: #ffffff;
-            --neu-shadow-dark: #c9d1d9;
-            --primary-blue: #2563eb;
-            --primary-hover: #1d4ed8;
+            --brand-blue: #1e40af; /* Indigo blue */
+            --brand-hover: #1e3a8a;
+            --bg-page: #f9fafb;
         }
 
         body {
-            background-color: var(--neu-bg);
-            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-page);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #111827;
         }
 
-        .neu-card {
-            background: var(--neu-bg);
-            border-radius: 40px;
-            box-shadow: 20px 20px 60px var(--neu-shadow-dark),
-                       -20px -20px 60px var(--neu-shadow-light);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+        .login-card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f3f4f6;
         }
 
-        .neu-input {
-            background: var(--neu-bg);
-            border: none;
-            border-radius: 20px;
-            box-shadow: inset 6px 6px 12px var(--neu-shadow-dark),
-                        inset -6px -6px 12px var(--neu-shadow-light);
-            transition: all 0.3s ease;
-            color: #1e293b;
-        }
-
-        .neu-input:focus {
+        .input-field {
+            width: 100%;
+            padding: 14px 18px;
+            background: #fdfdfd;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 14px;
+            font-size: 14px;
+            transition: all 0.2s ease;
             outline: none;
-            box-shadow: inset 8px 8px 16px var(--neu-shadow-dark),
-                        inset -8px -8px 16px var(--neu-shadow-light);
         }
 
-        .neu-button {
-            background: var(--primary-blue);
+        .input-field:focus {
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+        }
+
+        .btn-brand {
+            background-color: var(--brand-blue);
             color: white;
-            border-radius: 20px;
-            box-shadow: 7px 7px 15px var(--neu-shadow-dark),
-                       -7px -7px 15px var(--neu-shadow-light);
-            transition: all 0.3s ease;
-            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: block;
+            width: 100%;
+            text-align: center;
         }
 
-        .neu-button:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 9px 9px 20px var(--neu-shadow-dark),
-                       -9px -9px 20px var(--neu-shadow-light);
+        .btn-brand:hover {
+            background-color: var(--brand-hover);
+            transform: translateY(-1px);
         }
 
-        .neu-button:active {
+        .btn-brand:active {
             transform: translateY(0);
-            box-shadow: inset 4px 4px 8px rgba(0,0,0,0.1);
         }
 
         .label-style {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--primary-blue);
-            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
             display: block;
-            margin-left: 15px;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
         .logo-img {
-            max-height: 70px;
+            max-height: 60px;
             width: auto;
-            margin: 0 auto 40px;
+            margin: 0 auto 32px;
         }
 
         #toggle-auth {
-            font-weight: 800;
-            color: var(--primary-blue);
-            text-transform: uppercase;
-            font-size: 10px;
-            letter-spacing: 0.05em;
+            color: var(--brand-blue);
+            font-weight: 700;
+            cursor: pointer;
         }
 
         #toggle-auth:hover {
@@ -101,53 +93,52 @@
         }
 
         .animate-fade {
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: fadeIn 0.4s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-6">
-    <div class="neu-card w-full max-w-lg p-12 md:p-16 animate-fade">
-        <header class="text-center mb-12">
+    <div class="login-card w-full max-w-md p-8 md:p-12 animate-fade">
+        <header class="text-center mb-8">
             <img src="https://wisbe.xyz/assets/img/wisbelogo.png" alt="Wisbe Logo" class="logo-img">
-            <h1 id="page-title" class="text-3xl font-black text-slate-900 tracking-tight uppercase mb-3">Acceder al Panel</h1>
-            <p id="page-desc" class="text-slate-500 font-medium">Gestión profesional de contenidos fitness.</p>
+            <h1 id="page-title" class="text-2xl font-800 tracking-tight text-gray-900">Login</h1>
         </header>
 
-        <form id="auth-form" class="space-y-8">
-            <div id="register-fields" class="hidden space-y-6 animate-fade">
+        <form id="auth-form" class="space-y-6">
+            <div id="register-fields" class="hidden space-y-4">
                 <div>
-                    <label class="label-style">Nombre Completo</label>
-                    <input type="text" id="full_name" class="neu-input w-full px-6 py-4 text-sm" placeholder="Nombre y Apellidos">
+                    <label class="label-style">Full Name</label>
+                    <input type="text" id="full_name" class="input-field" placeholder="">
                 </div>
             </div>
 
-            <div class="space-y-6">
+            <div class="space-y-5">
                 <div>
-                    <label class="label-style">Correo Electrónico</label>
-                    <input type="email" id="email" required class="neu-input w-full px-6 py-4 text-sm" placeholder="correo@ejemplo.com">
+                    <label class="label-style">Email Address</label>
+                    <input type="email" id="email" required class="input-field" placeholder="">
                 </div>
                 <div>
-                    <label class="label-style">Contraseña</label>
-                    <input type="password" id="password" required class="neu-input w-full px-6 py-4 text-sm" placeholder="••••••••">
+                    <label class="label-style">Password</label>
+                    <input type="password" id="password" required class="input-field" placeholder="">
                 </div>
             </div>
 
-            <div class="pt-6">
-                <button type="submit" id="submit-btn" class="neu-button w-full py-5 text-xs font-black uppercase tracking-widest">
-                    Ingresar al Panel
+            <div class="pt-2">
+                <button type="submit" id="submit-btn" class="btn-brand uppercase tracking-wider">
+                    Login
                 </button>
             </div>
         </form>
 
-        <div class="mt-12 pt-8 border-t border-slate-200 text-center">
-            <p class="text-sm font-medium text-slate-500">
-                <span id="toggle-text">¿Aún no tienes cuenta?</span>
-                <button id="toggle-auth" class="ml-2 hover:text-blue-700 transition-colors">Regístrate Aquí</button>
+        <div class="mt-10 pt-6 border-t border-gray-100 text-center">
+            <p class="text-sm text-gray-500 font-medium">
+                <span id="toggle-text">Don't have an account?</span>
+                <button id="toggle-auth" class="ml-1">Sign Up</button>
             </p>
         </div>
     </div>
@@ -167,17 +158,16 @@
         const submitBtn = document.getElementById('submit-btn');
         const toggleBtn = document.getElementById('toggle-auth');
         const pageTitle = document.getElementById('page-title');
-        const pageDesc = document.getElementById('page-desc');
         const toggleText = document.getElementById('toggle-text');
 
-        toggleBtn.onclick = () => {
+        toggleBtn.onclick = (e) => {
+            e.preventDefault();
             isLogin = !isLogin;
             registerFields.classList.toggle('hidden');
-            pageTitle.innerText = isLogin ? 'Acceder al Panel' : 'Crear Nueva Cuenta';
-            pageDesc.innerText = isLogin ? 'Gestión profesional de contenidos fitness.' : 'Regístrate para comenzar a gestionar tu propio centro.';
-            submitBtn.innerText = isLogin ? 'Ingresar al Panel' : 'Registrar Cuenta';
-            toggleText.innerText = isLogin ? '¿Aún no tienes cuenta?' : '¿Ya eres usuario?';
-            toggleBtn.innerText = isLogin ? 'Regístrate Aquí' : 'Inicia Sesión';
+            pageTitle.innerText = isLogin ? 'Login' : 'Register';
+            submitBtn.innerText = isLogin ? 'Login' : 'Create Account';
+            toggleText.innerText = isLogin ? "Don't have an account?" : "Already have an account?";
+            toggleBtn.innerText = isLogin ? 'Sign Up' : 'Login';
         };
 
         form.onsubmit = async (e) => {
@@ -187,7 +177,7 @@
 
             try {
                 submitBtn.disabled = true;
-                submitBtn.innerText = 'PROCESANDO...';
+                submitBtn.innerText = 'PROCESSING...';
 
                 if (isLogin) {
                     const user = await Auth.login(email, password);
@@ -195,7 +185,7 @@
                 } else {
                     const fullName = document.getElementById('full_name').value;
 
-                    if (!fullName) throw new Error('El nombre es obligatorio');
+                    if (!fullName) throw new Error('Full name is required');
 
                     await Auth.register(email, password, {
                         full_name: fullName,
@@ -203,15 +193,15 @@
                         business_unit: 'gym'
                     });
 
-                    showPopup('Registro Exitoso', 'Por favor, confirma tu correo electrónico para activar el acceso.', 'success');
+                    showPopup('Registration Successful', 'Please confirm your email address to activate your account.', 'success');
                     isLogin = true;
                     toggleBtn.click();
                 }
             } catch (err) {
-                showPopup('Error de Acceso', err.message, 'error');
+                showPopup('Access Error', err.message, 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerText = isLogin ? 'Ingresar al Panel' : 'Registrar Cuenta';
+                submitBtn.innerText = isLogin ? 'Login' : 'Create Account';
             }
         };
     </script>
