@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Subastas - Wisbe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/styleGYM.css">
+    <link rel="stylesheet" href="wisbeStore.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Subastas</h1>
+                <p class="text-slate-500 font-medium mt-1">Crea subastas emocionantes para tus productos.</p>
+            </div>
+            <button id="btn-nueva-subasta" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl uppercase tracking-widest text-xs font-black shadow-lg shadow-amber-600/20 transition-all">
+                <i class="fas fa-plus mr-2"></i> Nueva Subasta
+            </button>
+        </header>
+
+        <div id="auctions-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade mb-20">
+            <!-- Loading -->
+            <div class="col-span-full flex flex-col items-center justify-center py-20 text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                <span class="text-sm font-black uppercase tracking-widest">Cargando subastas...</span>
+            </div>
+        </div>
+
+        <!-- Widget Integration -->
+        <section class="mt-20">
+            <div class="flex items-center justify-between mb-10">
+                <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Integración de Subastas</h2>
+            </div>
+
+            <div class="bg-white p-8 md:p-14 rounded-[40px] shadow-sm border border-slate-200">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                    <div>
+                        <h4 class="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Copia el código</h4>
+                        <p class="text-slate-500 text-sm mb-12 leading-relaxed font-medium">Usa este fragmento para mostrar tus subastas activas en tu web.</p>
+                        <div class="bg-slate-900 rounded-2xl p-6 relative group border border-slate-800 shadow-2xl">
+                            <code id="widget-code" class="text-amber-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">&lt;wisbe-store-auctions domain="..."&gt;&lt;/wisbe-store-auctions&gt;</code>
+                            <button onclick="copyToClipboard('widget-code')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-125">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 rounded-[40px] p-12 flex flex-col items-center justify-center text-center border border-dashed border-slate-300">
+                        <i class="fas fa-gavel text-4xl mb-6 text-amber-600"></i>
+                        <h5 class="font-black text-slate-900 text-2xl mb-3 tracking-tight uppercase">Tu Dominio</h5>
+                        <p id="user-domain" class="text-amber-600 font-mono font-black text-xl mb-6 tracking-tight uppercase">Cargando...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auction Modal -->
+        <div id="modal-auction" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-white w-full max-w-5xl rounded-[40px] p-10 shadow-2xl animate-fade my-10 border border-slate-100">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 id="modal-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase">Configurador de Subasta</h2>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="auction-form" class="space-y-8">
+                    <input type="hidden" id="auction-id">
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        <!-- Left: Info & Timing -->
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Producto de Stock (Opcional)</label>
+                                <select id="product_id" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-amber-500 font-bold">
+                                    <option value="">-- Nuevo Producto / No en Stock --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Título de la Subasta</label>
+                                <input type="text" id="title" required class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-amber-500 font-bold" placeholder="Ej: Playera Firmada Edición Limitada">
+                            </div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Inicio</label>
+                                    <input type="datetime-local" id="starts_at" required class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-amber-500 font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Finalización</label>
+                                    <input type="datetime-local" id="ends_at" required class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-amber-500 font-bold">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Descripción</label>
+                                <textarea id="description" rows="4" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-amber-500 font-medium resize-none" placeholder="Detalles del artículo a subastar..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Right: Bid Config & Image -->
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Puja Inicial ($)</label>
+                                    <input type="number" step="0.01" id="initial_bid" required class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-amber-500 font-bold" placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Incrementos Permitidos</label>
+                                    <div class="flex gap-2 flex-wrap mt-2" id="increment-options">
+                                        <label class="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-colors">
+                                            <input type="checkbox" name="increments" value="5" checked> <span class="text-xs font-bold">$5</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-colors">
+                                            <input type="checkbox" name="increments" value="10" checked> <span class="text-xs font-bold">$10</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-colors">
+                                            <input type="checkbox" name="increments" value="20"> <span class="text-xs font-bold">$20</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-colors">
+                                            <input type="checkbox" name="increments" value="50"> <span class="text-xs font-bold">$50</span>
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-4">
+                                        <input type="checkbox" id="allow_free_bids" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500">
+                                        <label for="allow_free_bids" class="text-[10px] font-black text-slate-600 uppercase tracking-widest">Permitir puja libre</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Foto del Artículo</label>
+                                <div id="drop-zone" class="border-2 border-dashed border-slate-200 rounded-[32px] p-8 text-center cursor-pointer hover:border-amber-400 transition-all bg-slate-50 relative overflow-hidden group min-h-[220px] flex flex-col items-center justify-center">
+                                    <div id="preview-container" class="absolute inset-0 hidden">
+                                        <img id="image-preview" src="" class="w-full h-full object-contain rounded-[32px] bg-white">
+                                        <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span class="text-white text-xs font-black uppercase tracking-widest">Cambiar Imagen</span>
+                                        </div>
+                                    </div>
+                                    <div id="upload-placeholder">
+                                        <i class="fas fa-camera text-4xl text-slate-300 mb-4"></i>
+                                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Arrastra o selecciona archivo</p>
+                                    </div>
+                                    <input type="file" id="image-input" class="hidden" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-8">
+                        <button type="submit" id="submit-btn" class="w-full bg-amber-600 hover:bg-amber-700 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-amber-600/30 transition-all">
+                            Lanzar Subasta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, renderNavbar, Auth, showPopup, showToast, uploadToCloudinary, setupDragAndDrop, showConfirm, renderAdminSidebar } from './assets/js/utils.js';
+
+        let currentUser = null;
+        let isAdmin = false;
+        let imageUrl = '';
+        let loadedAuctions = [];
+        let availableProducts = [];
+
+        async function initPage() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'tienda']);
+            if (!currentUser) return;
+
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                renderAdminSidebar(() => {
+                    loadData();
+                    updateWidgetCode();
+                });
+            }
+
+            await loadData();
+            updateWidgetCode();
+        }
+
+        async function loadData() {
+            await Promise.all([loadAuctions(), loadAvailableProducts()]);
+        }
+
+        async function updateWidgetCode() {
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            let domain = currentUser.domain;
+
+            if (isAdmin && selectedOwnerId) {
+                const { data } = await supabase.from('wisbe_users').select('domain').eq('id', selectedOwnerId).maybeSingle();
+                domain = data?.domain;
+            }
+
+            const domainText = domain || 'SIN DOMINIO';
+            if (document.getElementById('user-domain')) document.getElementById('user-domain').innerText = domainText;
+            if (document.getElementById('widget-code')) {
+                document.getElementById('widget-code').innerText = `<wisbe-store-auctions domain="${domain || '...' }"></wisbe-store-auctions>`;
+            }
+        }
+
+        async function loadAvailableProducts() {
+            let query = supabase.from('wisbe_store_products').select('id, title, image_url, description').eq('is_active', true);
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (isAdmin && selectedOwnerId) query = query.eq('owner_id', selectedOwnerId);
+            else if (!isAdmin) query = query.eq('owner_id', currentUser.id);
+
+            const { data } = await query;
+            availableProducts = data || [];
+
+            const select = document.getElementById('product_id');
+            select.innerHTML = '<option value="">-- Nuevo Producto / No en Stock --</option>' +
+                availableProducts.map(p => `<option value="${p.id}">${p.title}</option>`).join('');
+
+            select.onchange = (e) => {
+                const p = availableProducts.find(x => x.id === e.target.value);
+                if (p) {
+                    document.getElementById('title').value = p.title;
+                    document.getElementById('description').value = p.description || '';
+                    if (p.image_url) {
+                        imageUrl = p.image_url;
+                        document.getElementById('image-preview').src = imageUrl;
+                        document.getElementById('preview-container').classList.remove('hidden');
+                    }
+                }
+            };
+        }
+
+        async function loadAuctions() {
+            let query = supabase.from('wisbe_store_auctions').select('*, bids:wisbe_store_bids(amount)');
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (isAdmin && selectedOwnerId) query = query.eq('owner_id', selectedOwnerId);
+            else if (!isAdmin) query = query.eq('owner_id', currentUser.id);
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+            if (error) return console.error(error);
+
+            loadedAuctions = data || [];
+            renderAuctions(loadedAuctions);
+        }
+
+        function renderAuctions(auctions) {
+            const grid = document.getElementById('auctions-grid');
+            if (auctions.length === 0) {
+                grid.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 bg-white rounded-[40px] border border-dashed border-slate-200">No hay subastas programadas.</div>';
+                return;
+            }
+
+            grid.innerHTML = auctions.map(a => {
+                const now = new Date();
+                const end = new Date(a.ends_at);
+                const isFinished = now > end;
+                const maxBid = a.bids?.length > 0 ? Math.max(...a.bids.map(b => b.amount)) : a.initial_bid;
+
+                return `
+                <div class="bg-white rounded-[32px] border border-slate-200 overflow-hidden group hover:border-amber-500 transition-all flex flex-col shadow-sm">
+                    <div class="h-44 overflow-hidden bg-slate-50 relative p-4">
+                        <img src="${a.image_url || 'https://via.placeholder.com/400?text=Subasta'}"
+                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            ${isFinished ? '<span class="px-2 py-1 bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest rounded-lg">Finalizada</span>' : '<span class="px-2 py-1 bg-emerald-500 text-white text-[8px] font-black uppercase tracking-widest rounded-lg pulse-animation">Activa</span>'}
+                        </div>
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="text-sm font-bold text-slate-900 truncate mb-4">${a.title}</h3>
+
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-slate-50 p-3 rounded-2xl">
+                                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Puja Actual</p>
+                                <p class="text-lg font-black text-amber-600">$${parseFloat(maxBid).toFixed(2)}</p>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-2xl">
+                                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Pujas</p>
+                                <p class="text-lg font-black text-slate-800">${a.bids?.length || 0}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto flex justify-between items-center pt-4 border-t border-slate-100">
+                            <button onclick="editAuction('${a.id}')" class="text-[10px] font-black uppercase tracking-widest text-amber-600 hover:text-amber-700 transition-colors">
+                                GESTIONAR <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                            <button onclick="deleteAuction('${a.id}')" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-300 hover:text-red-500 transition-all border border-slate-100">
+                                <i class="fas fa-trash-alt text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `; }).join('');
+        }
+
+        const modal = document.getElementById('modal-auction');
+        const form = document.getElementById('auction-form');
+        const imagePreview = document.getElementById('image-preview');
+        const previewContainer = document.getElementById('preview-container');
+
+        document.getElementById('btn-nueva-subasta').onclick = () => {
+            form.reset();
+            document.getElementById('auction-id').value = '';
+            imageUrl = '';
+            previewContainer.classList.add('hidden');
+            document.getElementById('modal-title').innerText = 'Lanzar Subasta';
+            modal.style.display = 'flex';
+        };
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+        setupDragAndDrop(
+            document.getElementById('drop-zone'),
+            document.getElementById('image-input'),
+            async (file) => {
+                try {
+                    const btn = document.getElementById('submit-btn');
+                    btn.disabled = true;
+                    btn.innerText = 'CARGANDO FOTO...';
+                    imageUrl = await uploadToCloudinary(file);
+                    imagePreview.src = imageUrl;
+                    previewContainer.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerText = 'LANZAR SUBASTA';
+                } catch (err) {
+                    showPopup('Error', 'Fallo al subir a Cloudinary', 'error');
+                }
+            }
+        );
+
+        window.editAuction = (id) => {
+            const a = loadedAuctions.find(x => x.id == id);
+            if (!a) return;
+
+            document.getElementById('auction-id').value = a.id;
+            document.getElementById('product_id').value = a.product_id || '';
+            document.getElementById('title').value = a.title;
+            document.getElementById('description').value = a.description || '';
+            document.getElementById('initial_bid').value = a.initial_bid;
+            document.getElementById('allow_free_bids').checked = a.allow_free_bids;
+
+            // Starts_at / Ends_at to ISO for input
+            if (a.starts_at) document.getElementById('starts_at').value = new Date(a.starts_at).toISOString().slice(0,16);
+            if (a.ends_at) document.getElementById('ends_at').value = new Date(a.ends_at).toISOString().slice(0,16);
+
+            // Increments
+            const increments = a.fixed_increments || [];
+            document.querySelectorAll('input[name="increments"]').forEach(cb => {
+                cb.checked = increments.includes(parseInt(cb.value));
+            });
+
+            if (a.image_url) {
+                imageUrl = a.image_url;
+                imagePreview.src = a.image_url;
+                previewContainer.classList.remove('hidden');
+            } else {
+                previewContainer.classList.add('hidden');
+            }
+
+            document.getElementById('modal-title').innerText = 'Modificar Subasta';
+            modal.style.display = 'flex';
+        };
+
+        window.deleteAuction = async (id) => {
+            if (await showConfirm('Eliminar Subasta', '¿Seguro que deseas cancelar esta subasta?')) {
+                const { error } = await supabase.from('wisbe_store_auctions').delete().eq('id', id);
+                if (error) return showPopup('Error', error.message, 'error');
+                loadAuctions();
+                showToast('Subasta eliminada');
+            }
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('auction-id').value;
+            const increments = Array.from(document.querySelectorAll('input[name="increments"]:checked')).map(cb => parseInt(cb.value));
+
+            const data = {
+                owner_id: isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id,
+                product_id: document.getElementById('product_id').value || null,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                initial_bid: parseFloat(document.getElementById('initial_bid').value),
+                fixed_increments: increments,
+                allow_free_bids: document.getElementById('allow_free_bids').checked,
+                starts_at: new Date(document.getElementById('starts_at').value).toISOString(),
+                ends_at: new Date(document.getElementById('ends_at').value).toISOString(),
+                image_url: imageUrl
+            };
+
+            const { error } = id
+                ? await supabase.from('wisbe_store_auctions').update(data).eq('id', id)
+                : await supabase.from('wisbe_store_auctions').insert([data]);
+
+            if (error) return showPopup('Error', error.message, 'error');
+
+            modal.style.display = 'none';
+            showPopup('Éxito', 'Subasta actualizada.');
+            loadAuctions();
+        };
+
+        window.copyToClipboard = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            navigator.clipboard.writeText(el.innerText).then(() => {
+                showToast('¡Copiado!');
+            });
+        };
+
+        initPage();
+    </script>
+
+    <style>
+    .pulse-animation { animation: pulse 2s infinite; }
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    </style>
+</body>
+</html>
