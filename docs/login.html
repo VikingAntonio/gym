@@ -8,47 +8,146 @@
     <link rel="stylesheet" href="./assets/css/styleGYM.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        :root {
+            --neu-bg: #f0f2f5;
+            --neu-shadow-light: #ffffff;
+            --neu-shadow-dark: #c9d1d9;
+            --primary-blue: #2563eb;
+            --primary-hover: #1d4ed8;
+        }
+
+        body {
+            background-color: var(--neu-bg);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .neu-card {
+            background: var(--neu-bg);
+            border-radius: 40px;
+            box-shadow: 20px 20px 60px var(--neu-shadow-dark),
+                       -20px -20px 60px var(--neu-shadow-light);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .neu-input {
+            background: var(--neu-bg);
+            border: none;
+            border-radius: 20px;
+            box-shadow: inset 6px 6px 12px var(--neu-shadow-dark),
+                        inset -6px -6px 12px var(--neu-shadow-light);
+            transition: all 0.3s ease;
+            color: #1e293b;
+        }
+
+        .neu-input:focus {
+            outline: none;
+            box-shadow: inset 8px 8px 16px var(--neu-shadow-dark),
+                        inset -8px -8px 16px var(--neu-shadow-light);
+        }
+
+        .neu-button {
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 20px;
+            box-shadow: 7px 7px 15px var(--neu-shadow-dark),
+                       -7px -7px 15px var(--neu-shadow-light);
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .neu-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 9px 9px 20px var(--neu-shadow-dark),
+                       -9px -9px 20px var(--neu-shadow-light);
+        }
+
+        .neu-button:active {
+            transform: translateY(0);
+            box-shadow: inset 4px 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .label-style {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            display: block;
+            margin-left: 15px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .logo-img {
+            max-height: 70px;
+            width: auto;
+            margin: 0 auto 40px;
+        }
+
+        #toggle-auth {
+            font-weight: 800;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+        }
+
+        #toggle-auth:hover {
+            text-decoration: underline;
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-6">
-    <div class="card w-full max-w-lg p-12 bg-white shadow-2xl animate-fade">
+<body class="min-h-screen flex items-center justify-center p-6">
+    <div class="neu-card w-full max-w-lg p-12 md:p-16 animate-fade">
         <header class="text-center mb-12">
-            <div class="w-16 h-16 bg-blue-600 text-white rounded-3xl flex items-center justify-center text-3xl font-black mx-auto mb-8 shadow-xl shadow-blue-600/30">
-                P
-            </div>
+            <img src="https://wisbe.xyz/assets/img/wisbelogo.png" alt="Wisbe Logo" class="logo-img">
             <h1 id="page-title" class="text-3xl font-black text-slate-900 tracking-tight uppercase mb-3">Acceder al Panel</h1>
             <p id="page-desc" class="text-slate-500 font-medium">Gestión profesional de contenidos fitness.</p>
         </header>
 
         <form id="auth-form" class="space-y-8">
-            <div id="register-fields" class="hidden space-y-6">
+            <div id="register-fields" class="hidden space-y-6 animate-fade">
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre Completo</label>
-                    <input type="text" id="full_name" class="input" placeholder="Nombre y Apellidos">
+                    <label class="label-style">Nombre Completo</label>
+                    <input type="text" id="full_name" class="neu-input w-full px-6 py-4 text-sm" placeholder="Nombre y Apellidos">
                 </div>
             </div>
 
             <div class="space-y-6">
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Correo Electrónico</label>
-                    <input type="email" id="email" required class="input" placeholder="correo@ejemplo.com">
+                    <label class="label-style">Correo Electrónico</label>
+                    <input type="email" id="email" required class="neu-input w-full px-6 py-4 text-sm" placeholder="correo@ejemplo.com">
                 </div>
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Contraseña</label>
-                    <input type="password" id="password" required class="input" placeholder="••••••••">
+                    <label class="label-style">Contraseña</label>
+                    <input type="password" id="password" required class="neu-input w-full px-6 py-4 text-sm" placeholder="••••••••">
                 </div>
             </div>
 
             <div class="pt-6">
-                <button type="submit" id="submit-btn" class="w-full btn btn-primary py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30">
+                <button type="submit" id="submit-btn" class="neu-button w-full py-5 text-xs font-black uppercase tracking-widest">
                     Ingresar al Panel
                 </button>
             </div>
         </form>
 
-        <div class="mt-12 pt-8 border-t border-slate-100 text-center">
+        <div class="mt-12 pt-8 border-t border-slate-200 text-center">
             <p class="text-sm font-medium text-slate-500">
                 <span id="toggle-text">¿Aún no tienes cuenta?</span>
-                <button id="toggle-auth" class="text-blue-600 font-black uppercase tracking-widest text-[10px] ml-2 hover:text-blue-700 transition-colors">Regístrate Aquí</button>
+                <button id="toggle-auth" class="ml-2 hover:text-blue-700 transition-colors">Regístrate Aquí</button>
             </p>
         </div>
     </div>
