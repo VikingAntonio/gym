@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario - Wisbe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/styleGYM.css">
+    <link rel="stylesheet" href="wisbeStore.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Inventario de Tienda</h1>
+                <p class="text-slate-500 font-medium mt-1">Gestiona tus productos, stock y precios.</p>
+            </div>
+            <button id="btn-nuevo-producto" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl uppercase tracking-widest text-xs font-black shadow-lg shadow-blue-600/20 transition-all">
+                <i class="fas fa-plus mr-2"></i> Nuevo Producto
+            </button>
+        </header>
+
+        <!-- Stats Quick View -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Productos</p>
+                        <h3 id="stat-total" class="text-2xl font-black text-slate-900">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-xl">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bajo Stock</p>
+                        <h3 id="stat-low-stock" class="text-2xl font-black text-slate-900">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Activos</p>
+                        <h3 id="stat-active" class="text-2xl font-black text-slate-900">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="productos-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-fade">
+            <!-- Loading -->
+            <div class="col-span-full flex flex-col items-center justify-center py-20 text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                <span class="text-sm font-black uppercase tracking-widest">Sincronizando inventario...</span>
+            </div>
+        </div>
+
+        <!-- Product Modal -->
+        <div id="modal-producto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-white w-full max-w-4xl rounded-[40px] p-10 shadow-2xl animate-fade my-10 border border-slate-100">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 id="modal-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase">Editor de Producto</h2>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="product-form" class="space-y-10">
+                    <input type="hidden" id="product-id">
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        <!-- Image & Media -->
+                        <div class="space-y-8">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Imagen del Producto</label>
+                                <div id="drop-zone" class="border-2 border-dashed border-slate-200 rounded-[32px] p-8 text-center cursor-pointer hover:border-blue-400 transition-all bg-slate-50 relative overflow-hidden group min-h-[280px] flex flex-col items-center justify-center">
+                                    <div id="preview-container" class="absolute inset-0 hidden">
+                                        <img id="image-preview" src="" class="w-full h-full object-contain rounded-[32px] bg-white">
+                                        <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span class="text-white text-xs font-black uppercase tracking-widest">Cambiar Imagen</span>
+                                        </div>
+                                    </div>
+                                    <div id="upload-placeholder">
+                                        <i class="fas fa-camera text-4xl text-slate-300 mb-4"></i>
+                                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Arrastra o selecciona archivo</p>
+                                    </div>
+                                    <input type="file" id="image-input" class="hidden" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Precio ($)</label>
+                                    <input type="number" step="0.01" id="price" required class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Stock Actual</label>
+                                    <input type="number" id="stock" required class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data -->
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Nombre del Producto</label>
+                                <input type="text" id="title" required class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="Ej: Camiseta Pro Fit">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Categoría</label>
+                                <input type="text" id="category" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="Ej: Ropa, Suplementos...">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Descripción</label>
+                                <textarea id="description" rows="5" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-medium resize-none" placeholder="Describe las características principales..."></textarea>
+                            </div>
+                            <div class="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <input type="checkbox" id="is_active" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked>
+                                <label for="is_active" class="text-xs font-black text-slate-600 uppercase tracking-widest">Producto Activo</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-10 flex gap-6">
+                        <button type="submit" id="submit-btn" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30 transition-all">
+                            Guardar Producto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, renderNavbar, Auth, showPopup, showToast, uploadToCloudinary, setupDragAndDrop, showConfirm, renderAdminSidebar } from './assets/js/utils.js';
+
+        let currentUser = null;
+        let isAdmin = false;
+        let imageUrl = '';
+        let loadedProducts = [];
+
+        async function initPage() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'tienda']);
+            if (!currentUser) return;
+
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                renderAdminSidebar(() => {
+                    loadProducts();
+                });
+            }
+
+            await loadProducts();
+        }
+
+        async function loadProducts() {
+            let query = supabase.from('wisbe_store_products').select('*');
+
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            if (isAdmin) {
+                if (selectedOwnerId) {
+                    query = query.eq('owner_id', selectedOwnerId);
+                }
+            } else {
+                query = query.eq('owner_id', currentUser.id);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+
+            if (error) {
+                // Si la tabla no existe, intentaremos informar al usuario o manejarlo
+                console.error(error);
+                if (error.code === '42P01') {
+                    showPopup('Configuración Requerida', 'La tabla wisbe_store_products no existe en la base de datos.', 'error');
+                }
+                return;
+            }
+
+            loadedProducts = data || [];
+            renderProducts(loadedProducts);
+            updateStats(loadedProducts);
+        }
+
+        function updateStats(products) {
+            document.getElementById('stat-total').innerText = products.length;
+            document.getElementById('stat-low-stock').innerText = products.filter(p => p.stock < 5).length;
+            document.getElementById('stat-active').innerText = products.filter(p => p.is_active).length;
+        }
+
+        function renderProducts(products) {
+            const grid = document.getElementById('productos-grid');
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 bg-white rounded-[40px] border border-dashed border-slate-200">Aún no hay productos en el inventario.</div>';
+                return;
+            }
+
+            grid.innerHTML = products.map(p => `
+                <div class="bg-white rounded-[32px] border border-slate-200 overflow-hidden group hover:border-blue-500 transition-all flex flex-col shadow-sm">
+                    <div class="h-48 overflow-hidden bg-slate-50 relative p-4">
+                        <img src="${p.image_url || 'https://via.placeholder.com/300?text=Sin+Imagen'}"
+                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            ${!p.is_active ? '<span class="px-2 py-1 bg-red-100 text-red-600 text-[8px] font-black uppercase tracking-widest rounded-lg">Inactivo</span>' : ''}
+                            ${p.stock < 5 ? '<span class="px-2 py-1 bg-amber-100 text-amber-600 text-[8px] font-black uppercase tracking-widest rounded-lg">Bajo Stock</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-sm font-bold text-slate-900 truncate flex-grow" title="${p.title}">${p.title}</h3>
+                            <span class="text-blue-600 font-black text-sm ml-2">$${parseFloat(p.price).toFixed(2)}</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">${p.category || 'Sin Categoría'}</p>
+
+                        <div class="flex items-center gap-2 mb-6">
+                            <span class="text-[10px] font-black text-slate-500">STOCK:</span>
+                            <span class="text-[10px] font-black ${p.stock < 5 ? 'text-amber-600' : 'text-slate-900'}">${p.stock} Uds.</span>
+                        </div>
+
+                        <div class="mt-auto flex justify-between items-center pt-4 border-t border-slate-100">
+                            <button onclick="editProduct('${p.id}')" class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors">
+                                EDITAR <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                            <button onclick="deleteProduct('${p.id}')" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all border border-slate-100">
+                                <i class="fas fa-trash-alt text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const modal = document.getElementById('modal-producto');
+        const form = document.getElementById('product-form');
+        const imagePreview = document.getElementById('image-preview');
+        const previewContainer = document.getElementById('preview-container');
+
+        document.getElementById('btn-nuevo-producto').onclick = () => {
+            form.reset();
+            document.getElementById('product-id').value = '';
+            document.getElementById('is_active').checked = true;
+            imageUrl = '';
+            previewContainer.classList.add('hidden');
+            document.getElementById('modal-title').innerText = 'Agregar Producto';
+            modal.style.display = 'flex';
+        };
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+        setupDragAndDrop(
+            document.getElementById('drop-zone'),
+            document.getElementById('image-input'),
+            async (file) => {
+                try {
+                    const btn = document.getElementById('submit-btn');
+                    btn.disabled = true;
+                    btn.innerText = 'PROCESANDO...';
+
+                    imageUrl = await uploadToCloudinary(file);
+                    imagePreview.src = imageUrl;
+                    previewContainer.classList.remove('hidden');
+
+                    btn.disabled = false;
+                    btn.innerText = 'GUARDAR PRODUCTO';
+                } catch (err) {
+                    showPopup('Error', 'Fallo al subir a Cloudinary', 'error');
+                }
+            }
+        );
+
+        window.editProduct = (id) => {
+            const p = loadedProducts.find(x => x.id == id);
+            if (!p) return;
+
+            document.getElementById('product-id').value = p.id;
+            document.getElementById('title').value = p.title;
+            document.getElementById('price').value = p.price;
+            document.getElementById('stock').value = p.stock;
+            document.getElementById('category').value = p.category || '';
+            document.getElementById('description').value = p.description || '';
+            document.getElementById('is_active').checked = p.is_active;
+
+            if (p.image_url) {
+                imageUrl = p.image_url;
+                imagePreview.src = p.image_url;
+                previewContainer.classList.remove('hidden');
+            } else {
+                previewContainer.classList.add('hidden');
+            }
+
+            document.getElementById('modal-title').innerText = 'Modificar Producto';
+            modal.style.display = 'flex';
+        };
+
+        window.deleteProduct = async (id) => {
+            if (await showConfirm('Eliminar Producto', '¿Seguro que deseas eliminar este producto del inventario?')) {
+                const { error } = await supabase.from('wisbe_store_products').delete().eq('id', id);
+                if (error) return showPopup('Error', error.message, 'error');
+                loadProducts();
+                showToast('Producto eliminado');
+            }
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('product-id').value;
+            const data = {
+                title: document.getElementById('title').value,
+                price: parseFloat(document.getElementById('price').value),
+                stock: parseInt(document.getElementById('stock').value),
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                is_active: document.getElementById('is_active').checked,
+                image_url: imageUrl,
+                owner_id: isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id
+            };
+
+            const { error } = id
+                ? await supabase.from('wisbe_store_products').update(data).eq('id', id)
+                : await supabase.from('wisbe_store_products').insert([data]);
+
+            if (error) return showPopup('Error', error.message, 'error');
+
+            modal.style.display = 'none';
+            showPopup('Éxito', 'Inventario actualizado correctamente.');
+            loadProducts();
+        };
+
+        initPage();
+    </script>
+</body>
+</html>
