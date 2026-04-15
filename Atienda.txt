@@ -1,6 +1,6 @@
 -- SCHEMA PARA MÓDULO DE TIENDA (WISBE)
--- TABLA: wisbe_store_products (Inventario)
 
+-- TABLA: wisbe_store_products (Stock y Productos)
 CREATE TABLE IF NOT EXISTS public.wisbe_store_products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_id UUID NOT NULL REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
@@ -24,52 +24,64 @@ CREATE TABLE IF NOT EXISTS public.wisbe_store_promos (
     price DECIMAL(12,2) DEFAULT 0.00,
     type TEXT DEFAULT 'promo', -- 'promo' o 'package'
     image_url TEXT,
-    product_ids UUID[] DEFAULT '{}', -- Array de IDs de productos incluidos
+    product_ids UUID[] DEFAULT '{}',
     expires_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- TABLA: wisbe_store_settings (Configuración)
-CREATE TABLE IF NOT EXISTS public.wisbe_store_settings (
+-- TABLA: wisbe_store_auctions (Subastas)
+CREATE TABLE IF NOT EXISTS public.wisbe_store_auctions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_id UUID NOT NULL UNIQUE REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
-    store_name TEXT,
-    welcome_message TEXT,
-    currency TEXT DEFAULT 'USD',
+    owner_id UUID NOT NULL REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
+    product_id UUID REFERENCES public.wisbe_store_products(id) ON DELETE SET NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    image_url TEXT,
+    initial_bid DECIMAL(12,2) DEFAULT 0.00,
+    fixed_increments INTEGER[] DEFAULT '{5,10,20,50}', -- Opciones de puja fija
+    allow_free_bids BOOLEAN DEFAULT true,
+    starts_at TIMESTAMPTZ DEFAULT now(),
+    ends_at TIMESTAMPTZ NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- TABLA: wisbe_store_bids (Pujas de Subastas)
+CREATE TABLE IF NOT EXISTS public.wisbe_store_bids (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    auction_id UUID NOT NULL REFERENCES public.wisbe_store_auctions(id) ON DELETE CASCADE,
+    bidder_name TEXT NOT NULL,
+    bidder_contact TEXT NOT NULL, -- WhatsApp o Email
+    amount DECIMAL(12,2) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- HABILITAR RLS
 ALTER TABLE public.wisbe_store_products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wisbe_store_promos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wisbe_store_auctions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wisbe_store_bids ENABLE ROW LEVEL SECURITY;
 
 -- POLÍTICAS: wisbe_store_products
-CREATE POLICY "Public read products" ON public.wisbe_store_products
-    FOR SELECT USING (is_active = true);
-
-CREATE POLICY "Owners manage products" ON public.wisbe_store_products
-    FOR ALL TO authenticated
-    USING (auth.uid() = owner_id OR public.is_admin())
-    WITH CHECK (auth.uid() = owner_id OR public.is_admin());
+CREATE POLICY "Public read products" ON public.wisbe_store_products FOR SELECT USING (is_active = true);
+CREATE POLICY "Owners manage products" ON public.wisbe_store_products FOR ALL TO authenticated
+    USING (auth.uid() = owner_id OR public.is_admin());
 
 -- POLÍTICAS: wisbe_store_promos
-CREATE POLICY "Public read promos" ON public.wisbe_store_promos
-    FOR SELECT USING (true);
+CREATE POLICY "Public read promos" ON public.wisbe_store_promos FOR SELECT USING (true);
+CREATE POLICY "Owners manage promos" ON public.wisbe_store_promos FOR ALL TO authenticated
+    USING (auth.uid() = owner_id OR public.is_admin());
 
-CREATE POLICY "Owners manage promos" ON public.wisbe_store_promos
-    FOR ALL TO authenticated
-    USING (auth.uid() = owner_id OR public.is_admin())
-    WITH CHECK (auth.uid() = owner_id OR public.is_admin());
+-- POLÍTICAS: wisbe_store_auctions
+CREATE POLICY "Public read auctions" ON public.wisbe_store_auctions FOR SELECT USING (true);
+CREATE POLICY "Owners manage auctions" ON public.wisbe_store_auctions FOR ALL TO authenticated
+    USING (auth.uid() = owner_id OR public.is_admin());
 
--- POLÍTICAS: wisbe_store_settings
-CREATE POLICY "Public read settings" ON public.wisbe_store_settings
-    FOR SELECT USING (true);
-
-CREATE POLICY "Owners manage settings" ON public.wisbe_store_settings
-    FOR ALL TO authenticated
-    USING (auth.uid() = owner_id OR public.is_admin())
-    WITH CHECK (auth.uid() = owner_id OR public.is_admin());
+-- POLÍTICAS: wisbe_store_bids (Cualquiera puede pujar, todos pueden ver)
+CREATE POLICY "Public read bids" ON public.wisbe_store_bids FOR SELECT USING (true);
+CREATE POLICY "Anyone can bid" ON public.wisbe_store_bids FOR INSERT WITH CHECK (true);
 
 -- TRIGGERS PARA UPDATED_AT
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -80,14 +92,6 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_wisbe_store_products_modtime
-    BEFORE UPDATE ON public.wisbe_store_products
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_wisbe_store_promos_modtime
-    BEFORE UPDATE ON public.wisbe_store_promos
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_wisbe_store_settings_modtime
-    BEFORE UPDATE ON public.wisbe_store_settings
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_wisbe_store_products_modtime BEFORE UPDATE ON public.wisbe_store_products FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_wisbe_store_promos_modtime BEFORE UPDATE ON public.wisbe_store_promos FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_wisbe_store_auctions_modtime BEFORE UPDATE ON public.wisbe_store_auctions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

@@ -12,11 +12,13 @@
             --store-card-bg: #ffffff;
             --store-text: #0f172a;
             --store-border: #e2e8f0;
+            --amber-600: #d97706;
+            --amber-50: #fffbeb;
             display: block;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
-        .wisbe-store-container, .wisbe-promos-container {
+        .wisbe-store-container, .wisbe-promos-container, .wisbe-auctions-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 1rem;
@@ -59,10 +61,6 @@
             max-height: 100%;
             object-fit: contain;
             transition: transform 0.5s;
-        }
-
-        .store-product-card:hover .product-image-box img {
-            transform: scale(1.05);
         }
 
         .product-info {
@@ -123,14 +121,10 @@
             font-weight: 700;
             font-size: 0.85rem;
             cursor: pointer;
-            transition: opacity 0.2s, transform 0.2s;
-            white-space: nowrap;
+            transition: all 0.2s;
         }
 
-        .buy-button:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-        }
+        .buy-button:hover { opacity: 0.9; transform: scale(1.02); }
 
         .store-badge {
             position: absolute;
@@ -142,13 +136,51 @@
             font-weight: 900;
             text-transform: uppercase;
             z-index: 10;
-            letter-spacing: 0.05em;
         }
 
-        .badge-promo { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
-        .badge-out { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+        .badge-promo { background: #fee2e2; color: #ef4444; }
+        .badge-amber { background: var(--amber-50); color: var(--amber-600); border: 1px solid #fde68a; }
 
         .loading { text-align: center; padding: 4rem; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; }
+
+        /* Auction Specifics */
+        .bid-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .bid-btn {
+            background: var(--amber-50);
+            color: var(--amber-600);
+            border: 1px solid #fde68a;
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+            font-weight: 800;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .bid-btn:hover { background: #fef3c7; }
+
+        .auction-status {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .winner-box {
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 1rem;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
     `;
 
     if (!window.supabase) {
@@ -158,155 +190,148 @@
         document.head.appendChild(script);
     }
 
+    async function getOwnerIdByDomain(supabase, domain) {
+        const { data } = await supabase.from('wisbe_users').select('id, whatsapp_number').ilike('domain', domain).maybeSingle();
+        return data;
+    }
+
     class WisbeStore extends HTMLElement {
-        constructor() {
-            super();
-            this.attachShadow({ mode: 'open' });
-        }
-
+        constructor() { super(); this.attachShadow({ mode: 'open' }); }
         static get observedAttributes() { return ['domain']; }
         attributeChangedCallback() { this.render(); }
-
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `
-                <style>
-                    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-                    ${COMMON_CSS}
-                </style>
-                <div class="wisbe-store-container">
-                    <div class="loading"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando Tienda...</div>
-                </div>
-            `;
-
+            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-store-container"><div class="loading">Cargando Tienda...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-
-            const { data: user } = await supabase.from('wisbe_users').select('id, whatsapp_number').ilike('domain', domain).maybeSingle();
-            if (!user) {
-                this.shadowRoot.querySelector('.loading').innerText = 'Tienda no encontrada';
-                return;
-            }
-
-            this.whatsappNumber = user.whatsapp_number || '';
-
-            const { data: products } = await supabase.from('wisbe_store_products')
-                .select('*')
-                .eq('owner_id', user.id)
-                .eq('is_active', true)
-                .order('created_at', { ascending: false });
-
-            this.renderProducts(products || []);
+            const user = await getOwnerIdByDomain(supabase, domain);
+            if (!user) return;
+            const { data: products } = await supabase.from('wisbe_store_products').select('*').eq('owner_id', user.id).eq('is_active', true).order('created_at', { ascending: false });
+            this.renderProducts(products || [], user.whatsapp_number);
         }
-
-        renderProducts(products) {
+        renderProducts(products, whatsapp) {
             const container = this.shadowRoot.querySelector('.wisbe-store-container');
-            if (products.length === 0) {
-                container.innerHTML = '<div class="loading">No hay productos disponibles actualmente.</div>';
-                return;
-            }
-
-            container.innerHTML = `
-                <div class="store-grid">
-                    ${products.map(p => `
-                        <div class="store-product-card">
-                            <div class="product-image-box">
-                                <img src="${p.image_url || 'https://via.placeholder.com/300'}" alt="${p.title}">
-                                ${p.stock <= 0 ? '<span class="store-badge badge-out">Agotado</span>' : ''}
-                            </div>
-                            <div class="product-info">
-                                <span class="product-category">${p.category || 'Producto'}</span>
-                                <h3 class="product-title">${p.title}</h3>
-                                <p class="product-description">${p.description || ''}</p>
-                                <div class="product-footer">
-                                    <span class="product-price">$${parseFloat(p.price).toFixed(2)}</span>
-                                    <button class="buy-button" onclick="window.open('https://wa.me/${this.whatsappNumber.replace(/\D/g,'')}?text=Hola, me interesa el producto: ${encodeURIComponent(p.title)}', '_blank')">
-                                        Comprar
-                                    </button>
-                                </div>
-                            </div>
+            if (products.length === 0) { container.innerHTML = '<div class="loading">No hay productos.</div>'; return; }
+            container.innerHTML = `<div class="store-grid">${products.map(p => `
+                <div class="store-product-card">
+                    <div class="product-image-box"><img src="${p.image_url || ''}"></div>
+                    <div class="product-info">
+                        <span class="product-category">${p.category || ''}</span>
+                        <h3 class="product-title">${p.title}</h3>
+                        <div class="product-footer">
+                            <span class="product-price">$${p.price}</span>
+                            <button class="buy-button" onclick="window.open('https://wa.me/${(whatsapp||'').replace(/\D/g,'')}?text=Interés: ${encodeURIComponent(p.title)}', '_blank')">Comprar</button>
                         </div>
-                    `).join('')}
-                </div>
-            `;
+                    </div>
+                </div>`).join('')}</div>`;
         }
     }
 
-    class WisbeStorePromos extends HTMLElement {
-        constructor() {
-            super();
-            this.attachShadow({ mode: 'open' });
-        }
-
+    class WisbeStoreAuctions extends HTMLElement {
+        constructor() { super(); this.attachShadow({ mode: 'open' }); }
         static get observedAttributes() { return ['domain']; }
         attributeChangedCallback() { this.render(); }
-
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `
-                <style>
-                    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-                    ${COMMON_CSS}
-                </style>
-                <div class="wisbe-promos-container">
-                    <div class="loading">Buscando ofertas...</div>
-                </div>
-            `;
-
+            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-auctions-container"><div class="loading">Sincronizando Subastas...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+            const user = await getOwnerIdByDomain(supabase, domain);
+            if (!user) return;
 
-            const { data: user } = await supabase.from('wisbe_users').select('id, whatsapp_number').ilike('domain', domain).maybeSingle();
-            if (!user) return this.shadowRoot.innerHTML = '';
-
-            this.whatsappNumber = user.whatsapp_number || '';
-
-            const { data: promos } = await supabase.from('wisbe_store_promos')
-                .select('*')
-                .eq('owner_id', user.id)
-                .order('created_at', { ascending: false });
-
-            this.renderPromos(promos || []);
+            const { data: auctions } = await supabase.from('wisbe_store_auctions').select('*, bids:wisbe_store_bids(*)').eq('owner_id', user.id).eq('is_active', true);
+            this.renderAuctions(auctions || [], user.whatsapp_number, supabase);
         }
 
-        renderPromos(promos) {
-            const container = this.shadowRoot.querySelector('.wisbe-promos-container');
-            if (promos.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
+        renderAuctions(auctions, whatsapp, supabase) {
+            const container = this.shadowRoot.querySelector('.wisbe-auctions-container');
+            if (auctions.length === 0) { container.innerHTML = '<div class="loading">No hay subastas activas.</div>'; return; }
 
-            container.innerHTML = `
-                <div class="store-grid">
-                    ${promos.map(p => `
-                        <div class="store-product-card" style="border-color: #f472b6;">
-                            <div class="product-image-box" style="background: #fdf2f8;">
-                                <img src="${p.image_url || 'https://via.placeholder.com/300'}" alt="${p.title}">
-                                <span class="store-badge badge-promo">${p.type === 'promo' ? 'OFERTA' : 'PACK'}</span>
-                            </div>
-                            <div class="product-info">
-                                <h3 class="product-title">${p.title}</h3>
-                                <p class="product-description">${p.description || ''}</p>
-                                <div class="product-footer">
-                                    <span class="product-price" style="color: #db2777;">$${parseFloat(p.price).toFixed(2)}</span>
-                                    <button class="buy-button" style="background: #db2777;" onclick="window.open('https://wa.me/${this.whatsappNumber.replace(/\D/g,'')}?text=Hola, me interesa esta oferta: ${encodeURIComponent(p.title)}', '_blank')">
-                                        Aprovechar
-                                    </button>
-                                </div>
-                            </div>
+            container.innerHTML = `<div class="store-grid"></div>`;
+            const grid = container.querySelector('.store-grid');
+
+            auctions.forEach(a => {
+                const card = document.createElement('div');
+                card.className = 'store-product-card';
+                const now = new Date();
+                const end = new Date(a.ends_at);
+                const isFinished = now > end;
+
+                const sortedBids = (a.bids || []).sort((x, y) => y.amount - x.amount);
+                const currentBid = sortedBids.length > 0 ? sortedBids[0].amount : a.initial_bid;
+                const winner = sortedBids.length > 0 ? sortedBids[0].bidder_name : null;
+
+                card.innerHTML = `
+                    <div class="product-image-box">
+                        <img src="${a.image_url || ''}">
+                        <span class="store-badge badge-amber">${isFinished ? 'Finalizada' : 'En Vivo'}</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">${a.title}</h3>
+                        <div class="auction-status">
+                            <p style="font-size:0.7rem; font-weight:800; color:var(--store-secondary); text-transform:uppercase; margin:0 0 0.25rem;">Puja Actual</p>
+                            <p style="font-size:1.5rem; font-weight:900; color:var(--amber-600); margin:0;">$${parseFloat(currentBid).toFixed(2)}</p>
+                            <p style="font-size:0.6rem; color:var(--store-secondary); margin-top:0.5rem;"><i class="far fa-clock"></i> ${isFinished ? 'Terminó' : 'Termina: ' + end.toLocaleString()}</p>
                         </div>
-                    `).join('')}
-                </div>
-            `;
+
+                        ${isFinished && winner ? `
+                            <div class="winner-box">🏆 Ganador: ${winner}</div>
+                        ` : ''}
+
+                        ${!isFinished ? `
+                            <div style="margin-top:auto;">
+                                <p style="font-size:0.7rem; font-weight:800; color:var(--store-secondary); text-transform:uppercase; margin-bottom:0.5rem;">Pujar Ahora</p>
+                                <div class="bid-controls">
+                                    ${(a.fixed_increments || [5,10,20,50]).map(inc => `<button class="bid-btn" data-inc="${inc}">+$${inc}</button>`).join('')}
+                                </div>
+                                ${a.allow_free_bids ? `
+                                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                                        <input type="number" class="free-bid-input" placeholder="Monto" style="flex-grow:1; border:1px solid var(--store-border); border-radius:0.75rem; padding:0.5rem; font-size:0.75rem;">
+                                        <button class="buy-button bid-submit" style="padding:0.5rem 1rem;">Pujar</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                // Bid Handlers
+                card.querySelectorAll('.bid-btn').forEach(btn => {
+                    btn.onclick = () => this.placeBid(a, parseFloat(currentBid) + parseFloat(btn.dataset.inc), whatsapp, supabase);
+                });
+                const submitBtn = card.querySelector('.bid-submit');
+                if (submitBtn) {
+                    submitBtn.onclick = () => {
+                        const val = card.querySelector('.free-bid-input').value;
+                        if (val > currentBid) this.placeBid(a, val, whatsapp, supabase);
+                        else alert('La puja debe ser mayor a la actual');
+                    };
+                }
+
+                grid.appendChild(card);
+            });
+        }
+
+        async placeBid(auction, amount, whatsapp, supabase) {
+            const name = prompt('Tu Nombre:');
+            const contact = prompt('Tu WhatsApp/Contacto (Para avisarte si ganas):');
+            if (!name || !contact) return;
+
+            const { error } = await supabase.from('wisbe_store_bids').insert([{
+                auction_id: auction.id,
+                bidder_name: name,
+                bidder_contact: contact,
+                amount: amount
+            }]);
+
+            if (error) alert('Error al pujar: ' + error.message);
+            else {
+                alert('¡Puja realizada con éxito!');
+                this.render(); // Refresh
+            }
         }
     }
 
-    if (!customElements.get('wisbe-store')) {
-        customElements.define('wisbe-store', WisbeStore);
-    }
-    if (!customElements.get('wisbe-store-promos')) {
-        customElements.define('wisbe-store-promos', WisbeStorePromos);
-    }
+    customElements.define('wisbe-store', WisbeStore);
+    customElements.define('wisbe-store-auctions', WisbeStoreAuctions);
 })();

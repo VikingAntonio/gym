@@ -29,10 +29,10 @@
         <h1 class="text-2xl font-black uppercase tracking-widest opacity-80 mb-12">Panel de Tienda</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20 animate-fade">
-            <!-- Inventario -->
+            <!-- Stock y Productos -->
             <a href="adminStoreInventory.html" class="neu-card p-8 group">
                 <i class="fas fa-boxes text-4xl mb-4 transition-all duration-300 group-hover:scale-110"></i>
-                <span class="text-sm font-bold uppercase tracking-widest">Inventario</span>
+                <span class="text-sm font-bold uppercase tracking-widest">Stock / Productos</span>
             </a>
 
             <!-- Promos -->
@@ -41,10 +41,10 @@
                 <span class="text-sm font-bold uppercase tracking-widest">Promos y Paquetes</span>
             </a>
 
-            <!-- Configuración General -->
-            <a href="adminStoreConfig.html" class="neu-card p-8 group">
-                <i class="fas fa-cog text-4xl mb-4 transition-all duration-300 group-hover:scale-110"></i>
-                <span class="text-sm font-bold uppercase tracking-widest">Configuración</span>
+            <!-- Subastas -->
+            <a href="adminStoreAuctions.html" class="neu-card p-8 group">
+                <i class="fas fa-gavel text-4xl mb-4 transition-all duration-300 group-hover:scale-110"></i>
+                <span class="text-sm font-bold uppercase tracking-widest">Subastas</span>
             </a>
         </div>
 
@@ -58,7 +58,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
                     <div>
                         <h4 class="text-xl font-bold mb-4 uppercase tracking-tight">Copia el código</h4>
-                        <p class="text-sm mb-12 leading-relaxed opacity-70">Integra tu tienda o secciones específicas en cualquier sitio web.</p>
+                        <p class="text-sm mb-12 leading-relaxed opacity-70">Integra tu tienda, ofertas o subastas en cualquier sitio web.</p>
 
                         <div class="space-y-10">
                             <div>
@@ -82,6 +82,12 @@
                                     <div class="bg-black/10 rounded-2xl p-4 relative group border border-white/10">
                                         <code id="label-promos" class="text-pink-500 font-mono text-xs block">&lt;wisbe-store-promos domain="..."&gt;&lt;/wisbe-store-promos&gt;</code>
                                         <button onclick="copyToClipboard('label-promos')" class="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-all">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="bg-black/10 rounded-2xl p-4 relative group border border-white/10">
+                                        <code id="label-auctions" class="text-amber-500 font-mono text-xs block">&lt;wisbe-store-auctions domain="..."&gt;&lt;/wisbe-store-auctions&gt;</code>
+                                        <button onclick="copyToClipboard('label-auctions')" class="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-all">
                                             <i class="fas fa-copy"></i>
                                         </button>
                                     </div>
@@ -137,17 +143,19 @@
             if (domain) {
                 document.getElementById('label-full').innerText = `<wisbe-store domain="${domain}"></wisbe-store>`;
                 document.getElementById('label-promos').innerText = `<wisbe-store-promos domain="${domain}"></wisbe-store-promos>`;
+                document.getElementById('label-auctions').innerText = `<wisbe-store-auctions domain="${domain}"></wisbe-store-auctions>`;
             } else {
                 const errorMsg = 'ERROR: CONFIGURA TU DOMINIO';
                 document.getElementById('label-full').innerText = errorMsg;
                 document.getElementById('label-promos').innerText = errorMsg;
+                document.getElementById('label-auctions').innerText = errorMsg;
             }
         }
 
         window.copyToClipboard = (id) => {
             const text = document.getElementById(id).innerText;
             navigator.clipboard.writeText(text).then(() => {
-                showToast('¡Copiado al portapapeles!');
+                showToast('¡Copiado!');
             });
         };
 
