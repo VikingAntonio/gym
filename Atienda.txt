@@ -1,0 +1,93 @@
+-- SCHEMA PARA MÓDULO DE TIENDA (WISBE)
+-- TABLA: wisbe_store_products (Inventario)
+
+CREATE TABLE IF NOT EXISTS public.wisbe_store_products (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_id UUID NOT NULL REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    price DECIMAL(12,2) DEFAULT 0.00,
+    stock INTEGER DEFAULT 0,
+    category TEXT,
+    image_url TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- TABLA: wisbe_store_promos (Promociones y Paquetes)
+CREATE TABLE IF NOT EXISTS public.wisbe_store_promos (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_id UUID NOT NULL REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    price DECIMAL(12,2) DEFAULT 0.00,
+    type TEXT DEFAULT 'promo', -- 'promo' o 'package'
+    image_url TEXT,
+    product_ids UUID[] DEFAULT '{}', -- Array de IDs de productos incluidos
+    expires_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- TABLA: wisbe_store_settings (Configuración)
+CREATE TABLE IF NOT EXISTS public.wisbe_store_settings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_id UUID NOT NULL UNIQUE REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
+    store_name TEXT,
+    welcome_message TEXT,
+    currency TEXT DEFAULT 'USD',
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- HABILITAR RLS
+ALTER TABLE public.wisbe_store_products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wisbe_store_promos ENABLE ROW LEVEL SECURITY;
+
+-- POLÍTICAS: wisbe_store_products
+CREATE POLICY "Public read products" ON public.wisbe_store_products
+    FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Owners manage products" ON public.wisbe_store_products
+    FOR ALL TO authenticated
+    USING (auth.uid() = owner_id OR public.is_admin())
+    WITH CHECK (auth.uid() = owner_id OR public.is_admin());
+
+-- POLÍTICAS: wisbe_store_promos
+CREATE POLICY "Public read promos" ON public.wisbe_store_promos
+    FOR SELECT USING (true);
+
+CREATE POLICY "Owners manage promos" ON public.wisbe_store_promos
+    FOR ALL TO authenticated
+    USING (auth.uid() = owner_id OR public.is_admin())
+    WITH CHECK (auth.uid() = owner_id OR public.is_admin());
+
+-- POLÍTICAS: wisbe_store_settings
+CREATE POLICY "Public read settings" ON public.wisbe_store_settings
+    FOR SELECT USING (true);
+
+CREATE POLICY "Owners manage settings" ON public.wisbe_store_settings
+    FOR ALL TO authenticated
+    USING (auth.uid() = owner_id OR public.is_admin())
+    WITH CHECK (auth.uid() = owner_id OR public.is_admin());
+
+-- TRIGGERS PARA UPDATED_AT
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_wisbe_store_products_modtime
+    BEFORE UPDATE ON public.wisbe_store_products
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_wisbe_store_promos_modtime
+    BEFORE UPDATE ON public.wisbe_store_promos
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_wisbe_store_settings_modtime
+    BEFORE UPDATE ON public.wisbe_store_settings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
