@@ -64,6 +64,25 @@ ALTER TABLE public.wisbe_store_promos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wisbe_store_auctions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wisbe_store_bids ENABLE ROW LEVEL SECURITY;
 
+-- ELIMINAR POLÍTICAS EXISTENTES PARA EVITAR ERRORES DE DUPLICADO
+DO $$
+BEGIN
+    -- Productos
+    DROP POLICY IF EXISTS "Public read products" ON public.wisbe_store_products;
+    DROP POLICY IF EXISTS "Owners manage products" ON public.wisbe_store_products;
+    -- Promos
+    DROP POLICY IF EXISTS "Public read promos" ON public.wisbe_store_promos;
+    DROP POLICY IF EXISTS "Owners manage promos" ON public.wisbe_store_promos;
+    -- Subastas
+    DROP POLICY IF EXISTS "Public read auctions" ON public.wisbe_store_auctions;
+    DROP POLICY IF EXISTS "Owners manage auctions" ON public.wisbe_store_auctions;
+    -- Pujas
+    DROP POLICY IF EXISTS "Public read bids" ON public.wisbe_store_bids;
+    DROP POLICY IF EXISTS "Anyone can bid" ON public.wisbe_store_bids;
+EXCEPTION
+    WHEN undefined_object THEN null;
+END $$;
+
 -- POLÍTICAS: wisbe_store_products
 CREATE POLICY "Public read products" ON public.wisbe_store_products FOR SELECT USING (is_active = true);
 CREATE POLICY "Owners manage products" ON public.wisbe_store_products FOR ALL TO authenticated
@@ -92,6 +111,11 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_wisbe_store_products_modtime ON public.wisbe_store_products;
 CREATE TRIGGER update_wisbe_store_products_modtime BEFORE UPDATE ON public.wisbe_store_products FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_wisbe_store_promos_modtime ON public.wisbe_store_promos;
 CREATE TRIGGER update_wisbe_store_promos_modtime BEFORE UPDATE ON public.wisbe_store_promos FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_wisbe_store_auctions_modtime ON public.wisbe_store_auctions;
 CREATE TRIGGER update_wisbe_store_auctions_modtime BEFORE UPDATE ON public.wisbe_store_auctions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
