@@ -25,7 +25,7 @@
         </header>
 
         <div class="max-w-3xl mx-auto">
-            <div class="bg-white rounded-[40px] p-10 shadow-sm border border-slate-200">
+            <div class="bg-white rounded-[40px] p-10 shadow-sm border border-slate-200 mb-12">
                 <form id="config-form" class="space-y-10">
                     <section>
                         <h3 class="text-xs font-black text-blue-600 uppercase tracking-widest mb-6">Información General</h3>
@@ -67,11 +67,22 @@
                     </div>
                 </form>
             </div>
+
+            <!-- Widget Integration Section (Compact) -->
+            <div class="bg-slate-900 p-8 rounded-[40px] shadow-2xl border border-slate-800">
+                <h4 class="text-white text-xs font-black uppercase tracking-widest mb-6">Tu Identificador de Tienda</h4>
+                <div class="bg-black/20 rounded-2xl p-6 relative group border border-white/5">
+                    <code id="domain-code" class="text-emerald-400 font-mono text-xs block">domain="..."</code>
+                    <button onclick="copyToClipboard('domain-code')" class="absolute right-6 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-all">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </main>
 
     <script type="module">
-        import { supabase, renderNavbar, Auth, showPopup, renderAdminSidebar } from './assets/js/utils.js';
+        import { supabase, renderNavbar, Auth, showPopup, showToast, renderAdminSidebar } from './assets/js/utils.js';
 
         let currentUser = null;
         let isAdmin = false;
@@ -87,12 +98,32 @@
                 renderAdminSidebar(() => {
                     loadConfig();
                     loadUserData();
+                    updateDomainCode();
                 });
             }
 
             await loadConfig();
             loadUserData();
+            updateDomainCode();
         }
+
+        async function updateDomainCode() {
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            let domain = currentUser.domain;
+            if (isAdmin && selectedOwnerId) {
+                const { data } = await supabase.from('wisbe_users').select('domain').eq('id', selectedOwnerId).maybeSingle();
+                domain = data?.domain;
+            }
+            document.getElementById('domain-code').innerText = domain || 'SIN DOMINIO';
+        }
+
+        window.copyToClipboard = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            navigator.clipboard.writeText(el.innerText).then(() => {
+                showToast('¡Copiado!');
+            });
+        };
 
         async function loadUserData() {
             const selectedOwnerId = Auth.getSelectedOwnerId();
