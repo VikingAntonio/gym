@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wisbe Gym - Panel</title>
+    <title>Panel Wisbe</title>
     <link rel="icon" type="image/png" sizes="1662x604" href="./assets/img/iconwisbe.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,11 +22,11 @@
     <div class="container mx-auto px-4 py-12 text-center">
         <div class="mb-12 animate-fade">
             <a href="index.html">
-                <i class="fas fa-dumbbell text-6xl text-emerald-600 mb-4 filter drop-shadow-lg"></i>
+                <img src="https://wisbe.xyz/assets/img/wisbelogo.png" class="h-20 mx-auto mb-4 filter drop-shadow-lg" alt="Wisbe Logo">
             </a>
         </div>
 
-        <h1 class="text-2xl font-black uppercase tracking-widest opacity-80 mb-12">Panel Gym</h1>
+        <h1 class="text-2xl font-black uppercase tracking-widest opacity-80 mb-12">Panel Wisbe</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20 animate-fade">
             <!-- Usuarios -->
@@ -99,19 +99,42 @@
     </div>
 
     <script type="module">
-        import { renderNavbar, Auth, showPopup, initTheme } from './assets/js/utils.js';
+        import { supabase, renderNavbar, Auth, showToast, initTheme, renderAdminSidebar } from './assets/js/utils.js';
 
-        const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+        let currentUser = null;
+        let isAdmin = false;
 
-        renderNavbar();
-        initTheme();
+        async function initPage() {
+            renderNavbar();
+            initTheme();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner']);
+            if (!currentUser) return;
 
-        if (currentUser) {
-            const domainText = currentUser.domain || 'SIN DOMINIO';
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                renderAdminSidebar(() => {
+                    updateWidgetCode();
+                });
+            }
+
+            updateWidgetCode();
+        }
+
+        async function updateWidgetCode() {
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            let domain = currentUser.domain;
+
+            if (isAdmin && selectedOwnerId) {
+                const { data } = await supabase.from('wisbe_users').select('domain').eq('id', selectedOwnerId).maybeSingle();
+                domain = data?.domain;
+            }
+
+            const domainText = domain || 'SIN DOMINIO';
             document.getElementById('user-domain').innerText = domainText;
 
-            if (currentUser.domain) {
-                document.getElementById('widget-code').innerText = `<div id="wisbe-rutinas" domain="${currentUser.domain}"></div>`;
+            if (domain) {
+                document.getElementById('widget-code').innerText = `<div id="wisbe-rutinas" domain="${domain}"></div>`;
             } else {
                 document.getElementById('widget-code').innerText = 'ERROR: CONFIGURA TU DOMINIO';
             }
@@ -120,9 +143,11 @@
         window.copyToClipboard = (id) => {
             const text = document.getElementById(id).innerText;
             navigator.clipboard.writeText(text).then(() => {
-                showPopup('¡Copiado!', 'El fragmento de código está listo para usar');
+                showToast('¡Copiado!');
             });
         };
+
+        initPage();
     </script>
 </body>
 </html>

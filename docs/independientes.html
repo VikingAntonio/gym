@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Independientes - Wisbe</title>
+    <title>Panel Wisbe</title>
     <link rel="icon" type="image/png" sizes="1662x604" href="./assets/img/iconwisbe.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,11 +22,11 @@
     <div class="container mx-auto px-4 py-12 text-center">
         <div class="mb-12 animate-fade">
             <a href="index.html">
-                <i class="fas fa-id-card text-6xl text-indigo-600 mb-4 filter drop-shadow-lg"></i>
+                <img src="https://wisbe.xyz/assets/img/wisbelogo.png" class="h-20 mx-auto mb-4 filter drop-shadow-lg" alt="Wisbe Logo">
             </a>
         </div>
 
-        <h1 class="text-2xl font-black uppercase tracking-widest opacity-80 mb-12">Independientes</h1>
+        <h1 class="text-2xl font-black uppercase tracking-widest opacity-80 mb-12">Panel Wisbe</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20 animate-fade">
             <!-- Tarjeta Digital -->
@@ -38,12 +38,16 @@
     </div>
 
     <script type="module">
-        import { renderNavbar, Auth, initTheme } from './assets/js/utils.js';
+        import { renderNavbar, Auth, initTheme, renderAdminSidebar } from './assets/js/utils.js';
 
         const currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'freelance']);
 
         renderNavbar();
         initTheme();
+
+        if (currentUser && currentUser.role === 'gym-admin') {
+            renderAdminSidebar();
+        }
     </script>
 </body>
 </html>
