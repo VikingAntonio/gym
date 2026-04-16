@@ -416,3 +416,92 @@ body{
         font-size: 1.75rem !important;
     }
 }
+
+/* --- MOBILE 3-COLUMN LAYOUT FIX FOR PRICING --- */
+@media (max-width: 768px) {
+    .pricing-cards .row {
+        margin-left: -5px !important;
+        margin-right: -5px !important;
+    }
+
+    .pricing-card {
+        padding: 0.75rem 0.25rem !important;
+        margin-bottom: 1rem !important;
+        border-radius: 4px !important;
+    }
+
+    .pricing-card h3 {
+        font-size: 0.7rem !important;
+        margin-bottom: 0.25rem !important;
+        letter-spacing: -0.5px !important;
+        height: auto !important;
+        min-height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        word-break: break-all;
+        padding: 0 2px !important;
+    }
+
+    .pricing-card .price {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .pricing-card .setup {
+        display: none !important;
+    }
+
+    .pricing-card .monthly {
+        font-size: 0.85rem !important;
+    }
+
+    .pricing-card .monthly small {
+        display: block;
+        font-size: 0.6rem;
+    }
+
+    .popular-badge {
+        font-size: 0.4rem !important;
+        padding: 1px 4px !important;
+        top: -8px !important;
+        width: 80%;
+    }
+
+    .package-image {
+        display: none !important;
+    }
+
+    .pricing-card .card-body {
+        padding: 0 !important;
+    }
+
+    .pricing-card form {
+        display: none !important;
+    }
+
+    .btn-start {
+        padding: 6px 2px !important;
+        font-size: 0.6rem !important;
+        letter-spacing: 0 !important;
+        margin-top: 5px;
+    }
+
+    /* Table adjustments */
+    .luxury-table th, .luxury-table td {
+        padding: 8px 4px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .w-40 { min-width: 110px !important; }
+    .w-20 { min-width: 60px !important; }
+}
+
+@media (max-width: 576px) {
+    .pricing-card h3 {
+        font-size: 0.6rem !important;
+        letter-spacing: -1px !important;
+    }
+    .pricing-card .monthly {
+        font-size: 0.7rem !important;
+    }
+}
