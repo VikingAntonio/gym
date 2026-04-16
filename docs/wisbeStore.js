@@ -195,8 +195,12 @@
     async function getOwnerIdByDomain(supabase, domain) {
         if (!domain) return null;
         try {
-            const { data, error } = await supabase.from('wisbe_users').select('id, whatsapp_number').ilike('domain', domain.trim()).maybeSingle();
-            if (error) console.error('Error fetching user by domain:', error);
+            // Fix: removed invalid 'whatsapp_number' column from select
+            const { data, error } = await supabase.from('wisbe_users').select('id').ilike('domain', domain.trim()).maybeSingle();
+            if (error) {
+                console.error('Error fetching user by domain:', error);
+                return null;
+            }
             return data;
         } catch (e) {
             console.error('Exception fetching user by domain:', e);
@@ -222,7 +226,7 @@
             }
 
             const { data: products } = await supabase.from('wisbe_store_products').select('*').eq('owner_id', user.id).eq('is_active', true).order('created_at', { ascending: false });
-            this.renderProducts(products || [], user.whatsapp_number);
+            this.renderProducts(products || [], '');
         }
         renderProducts(products, whatsapp) {
             const container = this.shadowRoot.querySelector('.wisbe-store-container');
@@ -261,7 +265,7 @@
             }
 
             const { data: promos } = await supabase.from('wisbe_store_promos').select('*').eq('owner_id', user.id).order('created_at', { ascending: false });
-            this.renderPromos(promos || [], user.whatsapp_number);
+            this.renderPromos(promos || [], '');
         }
 
         renderPromos(promos, whatsapp) {
@@ -310,7 +314,7 @@
             }
 
             const { data: auctions } = await supabase.from('wisbe_store_auctions').select('*, bids:wisbe_store_bids(*)').eq('owner_id', user.id).eq('is_active', true);
-            this.renderAuctions(auctions || [], user.whatsapp_number, supabase);
+            this.renderAuctions(auctions || [], '', supabase);
         }
 
         renderAuctions(auctions, whatsapp, supabase) {
