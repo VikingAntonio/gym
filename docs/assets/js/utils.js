@@ -333,57 +333,149 @@ export const Auth = {
  */
 export function renderNavbar() {
     const params = new URLSearchParams(window.location.search);
-    if (params.has('embedded')) return; // Hide navbar if embedded
+    if (params.has('embedded')) return;
 
     const nav = document.getElementById('main-nav');
     if (!nav) return;
 
     const user = Auth.getUser();
-    const isAdminOrOwner = user && ['gym-admin', 'gym-owner'].includes(user.role);
+    const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/');
 
-    nav.className = "nav-container mb-8";
-    nav.innerHTML = `
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-xl font-bold tracking-tight text-slate-900 uppercase">Dashboard</a>
-            <ul class="hidden md:flex space-x-6 items-center font-semibold text-sm text-slate-600">
-                <li><a href="index.html" class="hover:text-blue-600 transition-colors">Inicio</a></li>
+    if (isIndex) {
+        const isAdminOrOwner = user && ['gym-admin', 'gym-owner'].includes(user.role);
+        nav.className = "nav-container mb-8";
+        nav.innerHTML = `
+            <div class="container mx-auto flex justify-between items-center">
+                <a href="index.html" class="text-xl font-bold tracking-tight text-slate-900 uppercase">Dashboard</a>
+                <ul class="hidden md:flex space-x-6 items-center font-semibold text-sm text-slate-600">
+                    <li><a href="index.html" class="hover:text-blue-600 transition-colors">Inicio</a></li>
 
-                ${user?.role === 'beauty' ? `
-                    <li><a href="beauty.html" class="hover:text-blue-600 transition-colors">Beauty</a></li>
-                    <li><a href="beautyCitas.html" class="hover:text-blue-600 transition-colors">Mis Citas</a></li>
-                ` : `
-                    <li><a href="nutricion.html" class="hover:text-blue-600 transition-colors">Nutrición</a></li>
-                    <li><a href="rutinas.html" class="hover:text-blue-600 transition-colors">Rutinas</a></li>
-                    <li><a href="entrenadores.html" class="hover:text-blue-600 transition-colors">Equipo</a></li>
-                    <li><a href="test.html" class="btn btn-primary text-xs uppercase tracking-wider">Hacer Test</a></li>
-                `}
+                    ${user?.role === 'beauty' ? `
+                        <li><a href="beauty.html" class="hover:text-blue-600 transition-colors">Beauty</a></li>
+                        <li><a href="beautyCitas.html" class="hover:text-blue-600 transition-colors">Mis Citas</a></li>
+                    ` : `
+                        <li><a href="nutricion.html" class="hover:text-blue-600 transition-colors">Nutrición</a></li>
+                        <li><a href="rutinas.html" class="hover:text-blue-600 transition-colors">Rutinas</a></li>
+                        <li><a href="entrenadores.html" class="hover:text-blue-600 transition-colors">Equipo</a></li>
+                        <li><a href="test.html" class="btn btn-primary text-xs uppercase tracking-wider">Hacer Test</a></li>
+                    `}
 
-                ${user && (isAdminOrOwner || ['beauty', 'freelance'].includes(user.role)) ? `
-                    <li><a href="${Auth.getRedirectUrl(user)}" class="text-slate-400 hover:text-blue-500 transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
-                ` : ''}
+                    ${user && (isAdminOrOwner || ['beauty', 'freelance'].includes(user.role)) ? `
+                        <li><a href="${Auth.getRedirectUrl(user)}" class="text-slate-400 hover:text-blue-500 transition-colors" title="Administración"><i class="fas fa-cog text-lg"></i></a></li>
+                    ` : ''}
 
-                ${user ? `
-                    <li class="flex items-center space-x-3 border-l border-white/10 pl-8 ml-4">
-                        <span class="text-[10px] text-slate-500 font-black">${user.full_name || user.username} ${user.role.replace('gym-', '')}</span>
-                        <button id="logout-btn" class="text-red-400 hover:text-red-300 transition-colors" title="Cerrar Sesión">
-                            <i class="fas fa-power-off text-lg"></i>
-                        </button>
-                    </li>
-                ` : `
-                    <li class="pl-8 ml-4">
-                        <a href="login.html" class="text-blue-500 hover:text-blue-400 transition-colors flex items-center">
-                            <i class="fas fa-user-circle mr-2 text-lg"></i> Login
+                    ${user ? `
+                        <li class="flex items-center space-x-3 border-l border-white/10 pl-8 ml-4">
+                            <span class="text-[10px] text-slate-500 font-black">${user.full_name || user.username} ${user.role.replace('gym-', '')}</span>
+                            <button id="logout-btn" class="text-red-400 hover:text-red-300 transition-colors" title="Cerrar Sesión">
+                                <i class="fas fa-power-off text-lg"></i>
+                            </button>
+                        </li>
+                    ` : `
+                        <li class="pl-8 ml-4">
+                            <a href="login.html" class="text-blue-500 hover:text-blue-400 transition-colors flex items-center">
+                                <i class="fas fa-user-circle mr-2 text-lg"></i> Login
+                            </a>
+                        </li>
+                    `}
+                </ul>
+                <button class="md:hidden text-white text-2xl"><i class="fas fa-bars"></i></button>
+            </div>
+        `;
+    } else {
+        nav.className = "nav-container mb-8";
+        nav.innerHTML = `
+            <div class="container mx-auto flex justify-between items-center">
+                <a href="index.html">
+                    <img src="https://wisbe.xyz/assets/img/wisbelogo.png" class="h-10 filter drop-shadow-sm" alt="Wisbe Logo">
+                </a>
+
+                <div class="flex items-center space-x-6">
+                    <!-- Theme Toggle aligned -->
+                    <button id="themeToggle" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors text-lg" title="Cambiar Tema">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </button>
+
+                    ${user ? `
+                        <div class="relative">
+                            <button class="user-dropdown-btn flex items-center space-x-3 bg-white/50 backdrop-blur-sm px-4 py-2 rounded-2xl hover:bg-white transition-all border border-slate-200">
+                                <i class="fas fa-user-circle text-xl text-blue-600"></i>
+                                <span class="text-xs font-black uppercase tracking-widest text-slate-700">${user.full_name || user.username}</span>
+                                <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div class="user-dropdown-menu absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 hidden animate-fade z-[100]">
+                                <a href="panelWisbe.html" class="block px-6 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors uppercase tracking-widest">
+                                    <i class="fas fa-th-large mr-2 w-4"></i> Panel Wisbe
+                                </a>
+                                <a href="index.html" class="block px-6 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors uppercase tracking-widest">
+                                    <i class="fas fa-home mr-2 w-4"></i> Home
+                                </a>
+                                <div class="my-2 border-t border-slate-100"></div>
+                                <button id="logout-btn" class="w-full text-left px-6 py-2 text-xs font-bold text-red-500 hover:bg-red-50 transition-colors uppercase tracking-widest">
+                                    <i class="fas fa-power-off mr-2 w-4"></i> Cerrar Sesión
+                                </button>
+                            </div>
+                        </div>
+                    ` : `
+                        <a href="login.html" class="text-blue-500 hover:text-blue-400 transition-colors flex items-center font-bold text-sm">
+                            <i class="fas fa-user-circle mr-2 text-xl"></i> Login
                         </a>
-                    </li>
-                `}
-            </ul>
-            <button class="md:hidden text-white text-2xl"><i class="fas fa-bars"></i></button>
-        </div>
-    `;
+                    `}
+                </div>
+            </div>
+        `;
+    }
 
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-        logoutBtn.onclick = () => Auth.logout();
+        logoutBtn.onclick = (e) => {
+            e.stopPropagation();
+            Auth.logout();
+        };
+    }
+
+    // Re-initialize theme toggle since it's now dynamic
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+        themeBtn.onclick = () => {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            const icon = themeBtn.querySelector('i');
+
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('wisbe_theme', 'light');
+                if (icon) icon.className = 'bi bi-sun-fill';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('wisbe_theme', 'dark');
+                if (icon) icon.className = 'bi bi-moon-stars-fill';
+            }
+        };
+
+        // Set initial icon state
+        const icon = themeBtn.querySelector('i');
+        if (icon) {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            icon.className = isDark ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+        }
+    }
+
+    // Toggle dropdown on click as requested
+    const userDropdownBtn = nav.querySelector('.user-dropdown-btn');
+    const userDropdownMenu = nav.querySelector('.user-dropdown-menu');
+    if (userDropdownBtn && userDropdownMenu) {
+        userDropdownBtn.onclick = (e) => {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('hidden');
+        };
+
+        // Close when clicking outside
+        document.addEventListener('click', () => {
+            userDropdownMenu.classList.add('hidden');
+        }, { once: false });
     }
 }
 
