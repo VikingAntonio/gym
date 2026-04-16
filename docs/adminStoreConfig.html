@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración de Tienda - Wisbe</title>
+    <title>Store Configuration - Wisbe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./assets/css/styleGYM.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,11 +15,11 @@
     <main class="container mx-auto px-4 py-12">
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
             <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Configuración de Tienda</h1>
-                <p class="text-slate-500 font-medium mt-1">Ajusta los parámetros globales de tu tienda y carrito.</p>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Store Configuration</h1>
+                <p class="text-slate-500 font-medium mt-1">Adjust global parameters for your store and cart.</p>
             </div>
             <a href="store.html" class="bg-slate-200 hover:bg-slate-300 text-slate-600 px-6 py-3 rounded-xl uppercase tracking-widest text-xs font-black transition-all">
-                <i class="fas fa-arrow-left mr-2"></i> Volver al Panel
+                <i class="fas fa-arrow-left mr-2"></i> Back to Panel
             </a>
         </header>
 
@@ -27,30 +27,55 @@
             <div class="bg-white p-8 md:p-12 rounded-[40px] shadow-sm border border-slate-200 animate-fade">
                 <form id="config-form" class="space-y-10">
                     <div>
-                        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight mb-6 flex items-center gap-3">
-                            <i class="fab fa-whatsapp text-emerald-500"></i> Integración WhatsApp
+                        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight mb-8 flex items-center gap-3">
+                            <i class="fas fa-comments text-blue-500"></i> Communication Channels
                         </h3>
-                        <p class="text-sm text-slate-500 mb-8 leading-relaxed">
-                            Define los canales donde recibirás los pedidos del carrito.
-                        </p>
 
                         <div class="space-y-8">
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Número de WhatsApp</label>
-                                <div class="relative">
-                                    <i class="fab fa-whatsapp absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                                    <input type="text" id="whatsapp_number" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="Ej: 52 1 55 1234 5678 (Con LADA)">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">WhatsApp Number</label>
+                                <div class="flex gap-4">
+                                    <div class="w-1/3 relative">
+                                        <select id="country_code" class="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold appearance-none">
+                                            <option value="1">🇺🇸 +1 (USA/CAN)</option>
+                                            <option value="52">🇲🇽 +52 (MEX)</option>
+                                            <option value="34">🇪🇸 +34 (ESP)</option>
+                                            <option value="57">🇨🇴 +57 (COL)</option>
+                                            <option value="54">🇦🇷 +54 (ARG)</option>
+                                            <option value="56">🇨🇱 +56 (CHL)</option>
+                                            <option value="51">🇵🇪 +51 (PER)</option>
+                                            <option value="502">🇬🇹 +502 (GTM)</option>
+                                            <option value="503">🇸🇻 +503 (SLV)</option>
+                                            <option value="504">🇭🇳 +504 (HND)</option>
+                                            <option value="505">🇳🇮 +505 (NIC)</option>
+                                            <option value="506">🇨🇷 +506 (CRI)</option>
+                                            <option value="507">🇵🇦 +507 (PAN)</option>
+                                            <option value="591">🇧🇴 +591 (BOL)</option>
+                                            <option value="593">🇪🇨 +593 (ECU)</option>
+                                            <option value="595">🇵🇾 +595 (PRY)</option>
+                                            <option value="598">🇺🇾 +598 (URY)</option>
+                                            <option value="58">🇻🇪 +58 (VEN)</option>
+                                            <option value="44">🇬🇧 +44 (UK)</option>
+                                            <option value="33">🇫🇷 +33 (FRA)</option>
+                                            <option value="49">🇩🇪 +49 (DEU)</option>
+                                            <option value="39">🇮🇹 +39 (ITA)</option>
+                                        </select>
+                                        <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                                    </div>
+                                    <div class="flex-grow relative">
+                                        <i class="fab fa-whatsapp absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                                        <input type="text" id="whatsapp_number" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="">
+                                    </div>
                                 </div>
-                                <p class="text-[10px] text-slate-400 mt-2 italic">No te preocupes por espacios o símbolos, el sistema los limpiará automáticamente.</p>
+                                <p class="text-[10px] text-slate-400 mt-2 italic uppercase font-black">Don't worry about spaces or symbols, the system will clean them automatically.</p>
                             </div>
 
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Link de Messenger (Opcional)</label>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Messenger Username</label>
                                 <div class="relative">
                                     <i class="fab fa-facebook-messenger absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                                    <input type="text" id="messenger_link" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="m.me/tu.usuario">
+                                    <input type="text" id="messenger_username" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="">
                                 </div>
-                                <p class="text-[10px] text-slate-400 mt-2 italic">Ej: https://m.me/tu.nombre.de.usuario</p>
                             </div>
                         </div>
                     </div>
@@ -59,7 +84,7 @@
 
                     <div class="pt-4">
                         <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30 transition-all">
-                            Guardar Configuración
+                            Save Configuration
                         </button>
                     </div>
                 </form>
@@ -100,10 +125,12 @@
 
             if (data) {
                 document.getElementById('whatsapp_number').value = data.whatsapp_number || '';
-                document.getElementById('messenger_link').value = data.messenger_link || '';
+                document.getElementById('country_code').value = data.whatsapp_country_code || '1';
+                document.getElementById('messenger_username').value = data.messenger_username || '';
             } else {
                 document.getElementById('whatsapp_number').value = '';
-                document.getElementById('messenger_link').value = '';
+                document.getElementById('country_code').value = '1';
+                document.getElementById('messenger_username').value = '';
             }
         }
 
@@ -111,28 +138,30 @@
             e.preventDefault();
             const targetId = isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id;
             const whatsapp = document.getElementById('whatsapp_number').value;
-            const messenger = document.getElementById('messenger_link').value;
+            const countryCode = document.getElementById('country_code').value;
+            const messenger = document.getElementById('messenger_username').value;
             const btn = document.getElementById('submit-btn');
 
             btn.disabled = true;
-            btn.innerText = 'GUARDANDO...';
+            btn.innerText = 'SAVING...';
 
             const { error } = await supabase
                 .from('wisbe_store_settings')
                 .upsert({
                     owner_id: targetId,
                     whatsapp_number: whatsapp,
-                    messenger_link: messenger,
+                    whatsapp_country_code: countryCode,
+                    messenger_username: messenger,
                     updated_at: new Date().toISOString()
                 });
 
             btn.disabled = false;
-            btn.innerText = 'GUARDAR CONFIGURACIÓN';
+            btn.innerText = 'SAVE CONFIGURATION';
 
             if (error) {
                 showPopup('Error', error.message, 'error');
             } else {
-                showToast('Configuración guardada correctamente');
+                showToast('Configuration saved successfully');
             }
         };
 
