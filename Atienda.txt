@@ -10,6 +10,11 @@ CREATE TABLE IF NOT EXISTS public.wisbe_store_settings (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Asegurar columnas si la tabla ya existía
+ALTER TABLE public.wisbe_store_settings ADD COLUMN IF NOT EXISTS whatsapp_country_code TEXT DEFAULT '1';
+ALTER TABLE public.wisbe_store_settings ADD COLUMN IF NOT EXISTS whatsapp_number TEXT;
+ALTER TABLE public.wisbe_store_settings ADD COLUMN IF NOT EXISTS messenger_username TEXT;
+
 -- TABLA: wisbe_store_products (Stock y Productos)
 CREATE TABLE IF NOT EXISTS public.wisbe_store_products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

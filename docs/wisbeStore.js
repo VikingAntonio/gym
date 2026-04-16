@@ -553,6 +553,7 @@
 
             // Init Global Cart
             WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
+            WisbeCart.whatsapp_country_code = user.settings?.whatsapp_country_code || '1';
             WisbeCart.messenger = user.settings?.messenger_username || '';
             WisbeCart.init();
 
@@ -612,7 +613,7 @@
             WisbeCart.init();
 
             const { data: auctions } = await supabase.from('wisbe_store_auctions').select('*, bids:wisbe_store_bids(*)').eq('owner_id', user.id).eq('is_active', true);
-            this.renderAuctions(auctions || [], '', supabase);
+            this.renderAuctions(auctions || [], user.settings?.whatsapp_number || '', supabase);
         }
 
         renderAuctions(auctions, whatsapp, supabase) {
@@ -636,7 +637,7 @@
                 card.innerHTML = `
                     <div class="product-image-box">
                         <img src="${a.image_url || ''}">
-                        <span class="store-badge badge-amber">${isFinished ? 'Finalizada' : 'En Vivo'}</span>
+                        <span class="store-badge badge-amber">${isFinished ? 'Finished' : 'Live'}</span>
                     </div>
                     <div class="product-info">
                         <h3 class="product-title">${a.title}</h3>
@@ -676,7 +677,7 @@
                     submitBtn.onclick = () => {
                         const val = parseFloat(card.querySelector('.free-bid-input').value);
                         if (!isNaN(val) && val > currentBid) this.placeBid(a, val, whatsapp, supabase);
-                        else alert('La puja debe ser un número válido y mayor a la actual');
+                        else alert('Bid must be a valid number and greater than the current bid');
                     };
                 }
 
