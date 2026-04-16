@@ -16,7 +16,6 @@
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
             <div>
                 <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Store Configuration</h1>
-                <p class="text-slate-500 font-medium mt-1">Adjust global parameters for your store and cart.</p>
             </div>
             <a href="store.html" class="bg-slate-200 hover:bg-slate-300 text-slate-600 px-6 py-3 rounded-xl uppercase tracking-widest text-xs font-black transition-all">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Panel
@@ -27,17 +26,14 @@
             <div class="bg-white p-8 md:p-12 rounded-[40px] shadow-sm border border-slate-200 animate-fade">
                 <form id="config-form" class="space-y-10">
                     <div>
-                        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight mb-8 flex items-center gap-3">
-                            <i class="fas fa-comments text-blue-500"></i> Communication Channels
-                        </h3>
-
                         <div class="space-y-8">
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">WhatsApp Number</label>
                                 <div class="flex gap-4">
                                     <div class="w-1/3 relative">
                                         <select id="country_code" class="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold appearance-none">
-                                            <option value="1">🇺🇸 +1 (USA/CAN)</option>
+                                            <option value="1">🇺🇸 +1 (USA)</option>
+                                            <option value="1">🇨🇦 +1 (CAN)</option>
                                             <option value="52">🇲🇽 +52 (MEX)</option>
                                             <option value="34">🇪🇸 +34 (ESP)</option>
                                             <option value="57">🇨🇴 +57 (COL)</option>
@@ -64,17 +60,17 @@
                                     </div>
                                     <div class="flex-grow relative">
                                         <i class="fab fa-whatsapp absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                                        <input type="text" id="whatsapp_number" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="">
+                                        <input type="text" id="whatsapp_number" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold">
                                     </div>
                                 </div>
-                                <p class="text-[10px] text-slate-400 mt-2 italic uppercase font-black">Don't worry about spaces or symbols, the system will clean them automatically.</p>
+                                <p class="text-[10px] text-slate-400 mt-2 italic uppercase font-black text-center">Don't worry about spaces or symbols, the system will clean them automatically.</p>
                             </div>
 
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Messenger Username</label>
                                 <div class="relative">
                                     <i class="fab fa-facebook-messenger absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                                    <input type="text" id="messenger_username" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="">
+                                    <input type="text" id="messenger_username" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold">
                                 </div>
                             </div>
                         </div>
