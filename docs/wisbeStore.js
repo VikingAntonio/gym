@@ -705,7 +705,27 @@
         }
     }
 
+    class WisbeStoreCart extends HTMLElement {
+        constructor() { super(); }
+        static get observedAttributes() { return ['domain']; }
+        attributeChangedCallback() { this.render(); }
+        async render() {
+            const domain = this.getAttribute('domain');
+            if (!domain) return;
+            while (!window.supabase) await new Promise(r => setTimeout(r, 100));
+            const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+            const user = await getOwnerIdByDomain(supabase, domain);
+            if (!user) return;
+
+            WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
+            WisbeCart.whatsapp_country_code = user.settings?.whatsapp_country_code || '1';
+            WisbeCart.messenger = user.settings?.messenger_username || '';
+            WisbeCart.init();
+        }
+    }
+
     customElements.define('wisbe-store', WisbeStore);
     customElements.define('wisbe-store-promos', WisbeStorePromos);
     customElements.define('wisbe-store-auctions', WisbeStoreAuctions);
+    customElements.define('wisbe-store-cart', WisbeStoreCart);
 })();

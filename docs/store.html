@@ -97,6 +97,12 @@
                                             <i class="fas fa-copy"></i>
                                         </button>
                                     </div>
+                                    <div class="bg-black/10 rounded-2xl p-4 relative group border border-white/10">
+                                        <code id="label-cart" class="text-blue-500 font-mono text-xs block">&lt;wisbe-store-cart domain="..."&gt;&lt;/wisbe-store-cart&gt;</code>
+                                        <button onclick="copyToClipboard('label-cart')" class="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-all">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -150,11 +156,13 @@
                 document.getElementById('label-full').innerText = `<wisbe-store domain="${domain}"></wisbe-store>`;
                 document.getElementById('label-promos').innerText = `<wisbe-store-promos domain="${domain}"></wisbe-store-promos>`;
                 document.getElementById('label-auctions').innerText = `<wisbe-store-auctions domain="${domain}"></wisbe-store-auctions>`;
+                document.getElementById('label-cart').innerText = `<wisbe-store-cart domain="${domain}"></wisbe-store-cart>`;
             } else {
                 const errorMsg = 'ERROR: CONFIGURA TU DOMINIO';
                 document.getElementById('label-full').innerText = errorMsg;
                 document.getElementById('label-promos').innerText = errorMsg;
                 document.getElementById('label-auctions').innerText = errorMsg;
+                document.getElementById('label-cart').innerText = errorMsg;
             }
         }
 
