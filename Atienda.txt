@@ -88,6 +88,9 @@ BEGIN
     -- Pujas
     DROP POLICY IF EXISTS "Public read bids" ON public.wisbe_store_bids;
     DROP POLICY IF EXISTS "Anyone can bid" ON public.wisbe_store_bids;
+    -- Configuracion
+    DROP POLICY IF EXISTS "Public read settings" ON public.wisbe_store_settings;
+    DROP POLICY IF EXISTS "Owners manage settings" ON public.wisbe_store_settings;
 EXCEPTION
     WHEN undefined_object THEN null;
 END $$;
