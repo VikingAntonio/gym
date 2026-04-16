@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Tienda - Wisbe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/styleGYM.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans">
+    <nav id="main-nav"></nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">Configuración de Tienda</h1>
+                <p class="text-slate-500 font-medium mt-1">Ajusta los parámetros globales de tu tienda y carrito.</p>
+            </div>
+            <a href="store.html" class="bg-slate-200 hover:bg-slate-300 text-slate-600 px-6 py-3 rounded-xl uppercase tracking-widest text-xs font-black transition-all">
+                <i class="fas fa-arrow-left mr-2"></i> Volver al Panel
+            </a>
+        </header>
+
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white p-8 md:p-12 rounded-[40px] shadow-sm border border-slate-200 animate-fade">
+                <form id="config-form" class="space-y-10">
+                    <div>
+                        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight mb-6 flex items-center gap-3">
+                            <i class="fab fa-whatsapp text-emerald-500"></i> Integración WhatsApp
+                        </h3>
+                        <p class="text-sm text-slate-500 mb-8 leading-relaxed">
+                            Define el número al que llegarán los pedidos del carrito de compras. Incluye el código de país (ej: 521...).
+                        </p>
+
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Número de WhatsApp</label>
+                            <input type="text" id="whatsapp_number" class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold text-lg" placeholder="Ej: 5215512345678">
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-100">
+
+                    <div class="pt-4">
+                        <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30 transition-all">
+                            Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, renderNavbar, Auth, showPopup, showToast, renderAdminSidebar } from './assets/js/utils.js';
+
+        let currentUser = null;
+        let isAdmin = false;
+
+        async function initPage() {
+            renderNavbar();
+            currentUser = await Auth.checkAccess(['gym-admin', 'gym-owner', 'tienda']);
+            if (!currentUser) return;
+
+            isAdmin = currentUser.role === 'gym-admin';
+
+            if (isAdmin) {
+                renderAdminSidebar(() => {
+                    loadSettings();
+                });
+            }
+
+            await loadSettings();
+        }
+
+        async function loadSettings() {
+            const targetId = isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id;
+
+            const { data, error } = await supabase
+                .from('wisbe_store_settings')
+                .select('*')
+                .eq('owner_id', targetId)
+                .maybeSingle();
+
+            if (data) {
+                document.getElementById('whatsapp_number').value = data.whatsapp_number || '';
+            } else {
+                document.getElementById('whatsapp_number').value = '';
+            }
+        }
+
+        document.getElementById('config-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const targetId = isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id;
+            const whatsapp = document.getElementById('whatsapp_number').value;
+            const btn = document.getElementById('submit-btn');
+
+            btn.disabled = true;
+            btn.innerText = 'GUARDANDO...';
+
+            const { error } = await supabase
+                .from('wisbe_store_settings')
+                .upsert({
+                    owner_id: targetId,
+                    whatsapp_number: whatsapp,
+                    updated_at: new Date().toISOString()
+                });
+
+            btn.disabled = false;
+            btn.innerText = 'GUARDAR CONFIGURACIÓN';
+
+            if (error) {
+                showPopup('Error', error.message, 'error');
+            } else {
+                showToast('Configuración guardada correctamente');
+            }
+        };
+
+        initPage();
+    </script>
+</body>
+</html>

@@ -1,5 +1,13 @@
 -- SCHEMA PARA MÓDULO DE TIENDA (WISBE)
 
+-- TABLA: wisbe_store_settings (Configuración de la Tienda)
+CREATE TABLE IF NOT EXISTS public.wisbe_store_settings (
+    owner_id UUID PRIMARY KEY REFERENCES public.wisbe_users(id) ON DELETE CASCADE,
+    whatsapp_number TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- TABLA: wisbe_store_products (Stock y Productos)
 CREATE TABLE IF NOT EXISTS public.wisbe_store_products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -59,6 +67,7 @@ CREATE TABLE IF NOT EXISTS public.wisbe_store_bids (
 );
 
 -- HABILITAR RLS
+ALTER TABLE public.wisbe_store_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wisbe_store_products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wisbe_store_promos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wisbe_store_auctions ENABLE ROW LEVEL SECURITY;
@@ -82,6 +91,11 @@ BEGIN
 EXCEPTION
     WHEN undefined_object THEN null;
 END $$;
+
+-- POLÍTICAS: wisbe_store_settings
+CREATE POLICY "Public read settings" ON public.wisbe_store_settings FOR SELECT USING (true);
+CREATE POLICY "Owners manage settings" ON public.wisbe_store_settings FOR ALL TO authenticated
+    USING (auth.uid() = owner_id OR public.is_admin());
 
 -- POLÍTICAS: wisbe_store_products
 CREATE POLICY "Public read products" ON public.wisbe_store_products FOR SELECT USING (is_active = true);
@@ -119,3 +133,6 @@ CREATE TRIGGER update_wisbe_store_promos_modtime BEFORE UPDATE ON public.wisbe_s
 
 DROP TRIGGER IF EXISTS update_wisbe_store_auctions_modtime ON public.wisbe_store_auctions;
 CREATE TRIGGER update_wisbe_store_auctions_modtime BEFORE UPDATE ON public.wisbe_store_auctions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_wisbe_store_settings_modtime ON public.wisbe_store_settings;
+CREATE TRIGGER update_wisbe_store_settings_modtime BEFORE UPDATE ON public.wisbe_store_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

@@ -22,14 +22,19 @@
 
         .wisbe-store-container, .wisbe-promos-container, .wisbe-auctions-container {
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
+            margin: 4rem auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .store-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2.5rem;
+            width: 100%;
+            justify-content: center;
         }
 
         .store-product-card {
@@ -183,6 +188,120 @@
             font-weight: 800;
             font-size: 0.9rem;
         }
+
+        /* Cart UI */
+        #wisbe-cart-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            transition: all 0.3s;
+            border: none;
+            color: var(--store-primary);
+            font-size: 1.5rem;
+        }
+        #wisbe-cart-btn:hover { transform: scale(1.1); }
+        #wisbe-cart-btn .count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 900;
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        #wisbe-cart-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        #wisbe-cart-modal.open { display: flex; animation: fadeIn 0.3s ease; }
+
+        .cart-content {
+            background: #f8fafc;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 40px;
+            padding: 2.5rem;
+            box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
+            position: relative;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .cart-header h2 { margin: 0; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.2rem; }
+        .close-cart { background: none; border: none; cursor: pointer; color: #64748b; font-size: 1.2rem; }
+
+        .cart-items { flex-grow: 1; overflow-y: auto; margin-bottom: 2rem; padding-right: 0.5rem; }
+        .cart-items::-webkit-scrollbar { width: 5px; }
+        .cart-items::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        .cart-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; }
+        .cart-item-info { flex-grow: 1; }
+        .cart-item-title { font-weight: 800; font-size: 0.85rem; margin-bottom: 0.2rem; }
+        .cart-item-price { font-weight: 700; font-size: 0.8rem; color: var(--store-primary); }
+        .cart-item-remove { background: none; border: none; color: #ef4444; cursor: pointer; padding: 0.5rem; }
+
+        .cart-footer { border-top: 1px dashed #cbd5e1; padding-top: 1.5rem; }
+        .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-weight: 900; font-size: 1.1rem; }
+
+        .checkout-btn {
+            width: 100%;
+            background: var(--store-primary);
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        .checkout-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     `;
 
     if (!window.supabase) {
@@ -195,18 +314,159 @@
     async function getOwnerIdByDomain(supabase, domain) {
         if (!domain) return null;
         try {
-            // Fix: removed invalid 'whatsapp_number' column from select
             const { data, error } = await supabase.from('wisbe_users').select('id').ilike('domain', domain.trim()).maybeSingle();
-            if (error) {
-                console.error('Error fetching user by domain:', error);
+            if (error || !data) {
+                if (error) console.error('Error fetching user by domain:', error);
                 return null;
             }
+
+            // Fetch Store Settings
+            const { data: settings } = await supabase.from('wisbe_store_settings').select('whatsapp_number').eq('owner_id', data.id).maybeSingle();
+            data.settings = settings || {};
+
             return data;
         } catch (e) {
             console.error('Exception fetching user by domain:', e);
             return null;
         }
     }
+
+    const WisbeCart = {
+        items: JSON.parse(localStorage.getItem('wisbe_cart') || '[]'),
+        whatsapp: '',
+
+        init() {
+            if (document.getElementById('wisbe-cart-root')) return;
+            const root = document.createElement('div');
+            root.id = 'wisbe-cart-root';
+            root.attachShadow({ mode: 'open' });
+            document.body.appendChild(root);
+            this.render();
+        },
+
+        addItem(item) {
+            this.items.push(item);
+            this.save();
+            this.render();
+            this.showToast('¡Agregado al carrito!');
+        },
+
+        removeItem(index) {
+            this.items.splice(index, 1);
+            this.save();
+            this.render();
+        },
+
+        save() {
+            localStorage.setItem('wisbe_cart', JSON.stringify(this.items));
+        },
+
+        toggle() {
+            const root = document.getElementById('wisbe-cart-root');
+            const modal = root?.shadowRoot?.getElementById('wisbe-cart-modal');
+            if (modal) modal.classList.toggle('open');
+        },
+
+        showToast(msg) {
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed; bottom:100px; right:2rem; background:#1e293b; color:white; padding:1rem 2rem; border-radius:15px; font-weight:800; font-size:0.7rem; text-transform:uppercase; z-index:10001; animation:fadeIn 0.3s ease;';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                toast.style.transition = 'all 0.5s';
+                setTimeout(() => toast.remove(), 500);
+            }, 2000);
+        },
+
+        checkout() {
+            if (this.items.length === 0) return;
+            if (!this.whatsapp) {
+                this.showToast('Configura tu WhatsApp en el panel.');
+                return;
+            }
+            const total = this.items.reduce((sum, i) => sum + i.price, 0);
+            let text = `🛍️ *Nuevo Pedido - Wisbe Store*\n\n`;
+            this.items.forEach((item, index) => {
+                text += `${index + 1}. *${item.title}* - $${item.price.toFixed(2)}\n`;
+            });
+            text += `\n💰 *Total: $${total.toFixed(2)}*`;
+
+            const waUrl = `https://wa.me/${this.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
+            window.open(waUrl, '_blank');
+        },
+
+        render() {
+            const root = document.getElementById('wisbe-cart-root');
+            if (!root || !root.shadowRoot) return;
+
+            const total = this.items.reduce((sum, i) => sum + i.price, 0);
+
+            root.shadowRoot.innerHTML = `
+                <style>
+                    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+                    ${COMMON_CSS.replace(':host', '.cart-scope')}
+                    .cart-scope {
+                        --store-primary: #2563eb;
+                        --store-secondary: #64748b;
+                        --store-bg: #f8fafc;
+                        --store-card-bg: #ffffff;
+                        --store-text: #0f172a;
+                        --store-border: #e2e8f0;
+                    }
+                </style>
+                <div class="cart-scope">
+                <button id="wisbe-cart-btn" onclick="window.WisbeCart.toggle()">
+                    <i class="fas fa-shopping-cart"></i>
+                    ${this.items.length > 0 ? `<span class="count">${this.items.length}</span>` : ''}
+                </button>
+
+                <div id="wisbe-cart-modal">
+                    <div class="cart-content">
+                        <div class="cart-header">
+                            <h2>Tu Carrito</h2>
+                            <button class="close-cart" onclick="window.WisbeCart.toggle()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div class="cart-items">
+                            ${this.items.length === 0 ? `
+                                <div style="text-align:center; padding:3rem; color:#94a3b8;">
+                                    <i class="fas fa-shopping-basket" style="font-size:3rem; margin-bottom:1rem; opacity:0.3;"></i>
+                                    <p style="font-weight:700;">Tu carrito está vacío</p>
+                                </div>
+                            ` : this.items.map((item, index) => `
+                                <div class="cart-item">
+                                    <img src="${item.image || 'https://via.placeholder.com/50'}" alt="${item.title}">
+                                    <div class="cart-item-info">
+                                        <div class="cart-item-title">${item.title}</div>
+                                        <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                                    </div>
+                                    <button class="cart-item-remove" onclick="window.WisbeCart.removeItem(${index})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="cart-footer">
+                            <div class="cart-total">
+                                <span>Total</span>
+                                <span>$${total.toFixed(2)}</span>
+                            </div>
+                            <button class="checkout-btn" onclick="window.WisbeCart.checkout()" ${this.items.length === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
+                                <i class="fab fa-whatsapp"></i> Finalizar Compra
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            `;
+        }
+    };
+    window.WisbeCart = WisbeCart; // Make it global for onclick handlers
 
     class WisbeStore extends HTMLElement {
         constructor() { super(); this.attachShadow({ mode: 'open' }); }
@@ -225,8 +485,12 @@
                 return;
             }
 
+            // Init Global Cart
+            WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
+            WisbeCart.init();
+
             const { data: products } = await supabase.from('wisbe_store_products').select('*').eq('owner_id', user.id).eq('is_active', true).order('created_at', { ascending: false });
-            this.renderProducts(products || [], '');
+            this.renderProducts(products || []);
         }
         renderProducts(products, whatsapp) {
             const container = this.shadowRoot.querySelector('.wisbe-store-container');
@@ -240,7 +504,7 @@
                         ${p.description ? `<p class="product-description">${p.description}</p>` : ''}
                         <div class="product-footer">
                             <span class="product-price">$${parseFloat(p.price).toFixed(2)}</span>
-                            <button class="buy-button" onclick="window.open('https://wa.me/${(whatsapp||'').replace(/\D/g,'')}?text=Hola, me interesa este producto: ${encodeURIComponent(p.title)}', '_blank')">Comprar</button>
+                            <button class="buy-button" onclick="WisbeCart.addItem({id: '${p.id}', title: '${p.title.replace(/'/g, "\\'")}', price: ${p.price}, image: '${p.image_url}'})">Agregar al Carrito</button>
                         </div>
                     </div>
                 </div>`).join('')}</div>`;
@@ -264,11 +528,15 @@
                 return;
             }
 
+            // Init Global Cart
+            WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
+            WisbeCart.init();
+
             const { data: promos } = await supabase.from('wisbe_store_promos').select('*').eq('owner_id', user.id).order('created_at', { ascending: false });
-            this.renderPromos(promos || [], '');
+            this.renderPromos(promos || []);
         }
 
-        renderPromos(promos, whatsapp) {
+        renderPromos(promos) {
             const container = this.shadowRoot.querySelector('.wisbe-promos-container');
             const now = new Date();
             const validPromos = promos.filter(p => !p.expires_at || new Date(p.expires_at) > now);
@@ -289,7 +557,7 @@
                         ${p.description ? `<p class="product-description">${p.description}</p>` : ''}
                         <div class="product-footer">
                             <span class="product-price">$${parseFloat(p.price).toFixed(2)}</span>
-                            <button class="buy-button" style="background:var(--pink-600);" onclick="window.open('https://wa.me/${(whatsapp||'').replace(/\D/g,'')}?text=Hola, me interesa esta oferta: ${encodeURIComponent(p.title)}', '_blank')">Lo Quiero</button>
+                            <button class="buy-button" style="background:var(--pink-600);" onclick="WisbeCart.addItem({id: '${p.id}', title: '${p.title.replace(/'/g, "\\'")}', price: ${p.price}, image: '${p.image_url}'})">Agregar al Carrito</button>
                         </div>
                     </div>
                 </div>`).join('')}</div>`;
