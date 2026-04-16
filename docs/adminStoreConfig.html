@@ -86,6 +86,42 @@
                 </form>
             </div>
         </div>
+
+        <!-- Widget Integration Section -->
+        <section class="mt-20">
+            <div class="flex items-center justify-between mb-10">
+                <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Widget Integration</h2>
+            </div>
+
+            <div class="bg-white p-8 md:p-14 rounded-[40px] shadow-sm border border-slate-200">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                    <div>
+                        <h4 class="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Copy and paste the code</h4>
+                        <p class="text-slate-500 text-sm mb-12 leading-relaxed font-medium">Use this snippet to enable the floating shopping cart on your website.</p>
+
+                        <div class="space-y-10">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Cart Widget</label>
+                                <div class="bg-slate-900 rounded-2xl p-6 relative group border border-slate-800 shadow-2xl">
+                                    <code id="widget-code" class="text-blue-400 font-mono text-xs block overflow-x-auto whitespace-nowrap">&lt;wisbe-store-cart domain="..."&gt;&lt;/wisbe-store-cart&gt;</code>
+                                    <button onclick="copyToClipboard('widget-code')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-all scale-125">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 rounded-[40px] p-12 flex flex-col items-center justify-center text-center border border-dashed border-slate-300 relative group overflow-hidden">
+                        <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-40 transition-opacity"></div>
+                        <div class="w-24 h-24 bg-white rounded-[32px] shadow-sm flex items-center justify-center text-blue-600 text-4xl mb-8 relative z-10 border border-slate-100">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h5 class="font-black text-slate-900 text-2xl mb-3 tracking-tight uppercase relative z-10">Origin Domain</h5>
+                        <p id="user-domain" class="text-blue-600 font-mono font-black text-xl mb-6 relative z-10 tracking-tight uppercase">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <script type="module">
@@ -104,11 +140,43 @@
             if (isAdmin) {
                 renderAdminSidebar(() => {
                     loadSettings();
+                    updateWidgetCode();
                 });
             }
 
             await loadSettings();
+            updateWidgetCode();
         }
+
+        async function updateWidgetCode() {
+            const selectedOwnerId = Auth.getSelectedOwnerId();
+            let domain = currentUser.domain;
+
+            if (isAdmin && selectedOwnerId) {
+                const { data } = await supabase.from('wisbe_users').select('domain').eq('id', selectedOwnerId).maybeSingle();
+                domain = data?.domain;
+            }
+
+            const domainText = domain || 'NO DOMAIN';
+            if (document.getElementById('user-domain')) document.getElementById('user-domain').innerText = domainText;
+
+            const widgetCode = document.getElementById('widget-code');
+            if (widgetCode) {
+                if (domain) {
+                    widgetCode.innerText = `<wisbe-store-cart domain="${domain}"></wisbe-store-cart>`;
+                } else {
+                    widgetCode.innerText = 'ERROR: CONFIGURE YOUR DOMAIN';
+                }
+            }
+        }
+
+        window.copyToClipboard = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            navigator.clipboard.writeText(el.innerText).then(() => {
+                showToast('Copied!');
+            });
+        };
 
         async function loadSettings() {
             const targetId = isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id;

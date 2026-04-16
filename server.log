@@ -1,8 +1,0 @@
-127.0.0.1 - - [16/Apr/2026 12:07:54] "GET /adminStoreConfig.html HTTP/1.1" 200 -
-127.0.0.1 - - [16/Apr/2026 12:07:54] "GET /assets/css/styleGYM.css HTTP/1.1" 200 -
-127.0.0.1 - - [16/Apr/2026 12:07:55] "GET /assets/js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [16/Apr/2026 12:07:55] "GET /assets/js/config.js HTTP/1.1" 200 -
-127.0.0.1 - - [16/Apr/2026 12:07:55] "GET /login.html HTTP/1.1" 200 -
-127.0.0.1 - - [16/Apr/2026 12:07:57] "GET /store.html HTTP/1.1" 200 -
-127.0.0.1 - - [16/Apr/2026 12:08:00] "GET /test_store_verification.html HTTP/1.1" 200 -
-127.0.0.1 - - [16/Apr/2026 12:08:00] "GET /wisbeStore.js HTTP/1.1" 200 -
