@@ -198,7 +198,7 @@
             height: 70px;
             background: white;
             border-radius: 25px;
-            box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -243,7 +243,7 @@
             max-width: 500px;
             border-radius: 40px;
             padding: 2.5rem;
-            box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
             position: relative;
             max-height: 90vh;
             display: flex;
@@ -302,6 +302,12 @@
         .checkout-btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes cartPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .pop { animation: cartPop 0.4s ease; }
     `;
 
     if (!window.supabase) {
@@ -335,8 +341,15 @@
         items: JSON.parse(localStorage.getItem('wisbe_cart') || '[]'),
         whatsapp: '',
         messenger: '',
+        isOpen: false,
 
         init() {
+            if (!document.querySelector('link[href*="font-awesome"]')) {
+                const fa = document.createElement('link');
+                fa.rel = 'stylesheet';
+                fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+                document.head.appendChild(fa);
+            }
             if (document.getElementById('wisbe-cart-root')) return;
             const root = document.createElement('div');
             root.id = 'wisbe-cart-root';
@@ -350,6 +363,14 @@
             this.save();
             this.render();
             this.showToast('Added to cart!');
+
+            const root = document.getElementById('wisbe-cart-root');
+            const btn = root?.shadowRoot?.getElementById('wisbe-cart-btn');
+            if (btn) {
+                btn.classList.remove('pop');
+                void btn.offsetWidth; // Trigger reflow
+                btn.classList.add('pop');
+            }
         },
 
         removeItem(index) {
@@ -363,9 +384,8 @@
         },
 
         toggle() {
-            const root = document.getElementById('wisbe-cart-root');
-            const modal = root?.shadowRoot?.getElementById('wisbe-cart-modal');
-            if (modal) modal.classList.toggle('open');
+            this.isOpen = !this.isOpen;
+            this.render();
         },
 
         showToast(msg) {
@@ -418,8 +438,8 @@
             const total = this.items.reduce((sum, i) => sum + i.price, 0);
 
             root.shadowRoot.innerHTML = `
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
                 <style>
-                    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
                     ${COMMON_CSS.replace(':host', '.cart-scope')}
                     .cart-scope {
                         --store-primary: #2563eb;
@@ -431,12 +451,12 @@
                     }
                 </style>
                 <div class="cart-scope">
-                <button id="wisbe-cart-btn" onclick="window.WisbeCart.toggle()">
+                <button id="wisbe-cart-btn" onclick="window.WisbeCart.toggle()" class="${this.isOpen ? 'modal-open' : ''}">
                     <i class="fas fa-shopping-cart"></i>
                     ${this.items.length > 0 ? `<span class="count">${this.items.length}</span>` : ''}
                 </button>
 
-                <div id="wisbe-cart-modal">
+                <div id="wisbe-cart-modal" class="${this.isOpen ? 'open' : ''}">
                     <div class="cart-content">
                         <div class="cart-header">
                             <h2>Your Cart</h2>
@@ -495,7 +515,7 @@
         attributeChangedCallback() { this.render(); }
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-store-container"><div class="loading">Loading Store...</div></div>`;
+            this.shadowRoot.innerHTML = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>${COMMON_CSS}</style><div class="wisbe-store-container"><div class="loading">Loading Store...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const user = await getOwnerIdByDomain(supabase, domain);
@@ -540,7 +560,7 @@
         attributeChangedCallback() { this.render(); }
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-promos-container"><div class="loading">Loading Promotions...</div></div>`;
+            this.shadowRoot.innerHTML = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>${COMMON_CSS}</style><div class="wisbe-promos-container"><div class="loading">Loading Promotions...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const user = await getOwnerIdByDomain(supabase, domain);
@@ -595,7 +615,7 @@
         attributeChangedCallback() { this.render(); }
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-auctions-container"><div class="loading">Synchronizing Auctions...</div></div>`;
+            this.shadowRoot.innerHTML = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>${COMMON_CSS}</style><div class="wisbe-auctions-container"><div class="loading">Synchronizing Auctions...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const user = await getOwnerIdByDomain(supabase, domain);
