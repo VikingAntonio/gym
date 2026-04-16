@@ -321,7 +321,7 @@
             }
 
             // Fetch Store Settings
-            const { data: settings } = await supabase.from('wisbe_store_settings').select('whatsapp_number, messenger_link').eq('owner_id', data.id).maybeSingle();
+            const { data: settings } = await supabase.from('wisbe_store_settings').select('whatsapp_number, whatsapp_country_code, messenger_username').eq('owner_id', data.id).maybeSingle();
             data.settings = settings || {};
 
             return data;
@@ -393,15 +393,16 @@
 
             if (channel === 'whatsapp') {
                 if (!this.whatsapp) {
-                    this.showToast('WhatsApp no configurado.');
+                    this.showToast('WhatsApp not configured.');
                     return;
                 }
                 const cleanNumber = this.whatsapp.replace(/\D/g, '');
-                const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
+                const countryCode = this.whatsapp_country_code || '1';
+                const waUrl = `https://wa.me/${countryCode}${cleanNumber}?text=${encodeURIComponent(text)}`;
                 window.open(waUrl, '_blank');
             } else {
                 if (!this.messenger) {
-                    this.showToast('Messenger no configurado.');
+                    this.showToast('Messenger not configured.');
                     return;
                 }
                 let cleanMessenger = this.messenger.replace(/^(https?:\/\/)?(www\.)?m\.me\//, '');
@@ -507,7 +508,8 @@
 
             // Init Global Cart
             WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
-            WisbeCart.messenger = user.settings?.messenger_link || '';
+            WisbeCart.whatsapp_country_code = user.settings?.whatsapp_country_code || '1';
+            WisbeCart.messenger = user.settings?.messenger_username || '';
             WisbeCart.init();
 
             const { data: products } = await supabase.from('wisbe_store_products').select('*').eq('owner_id', user.id).eq('is_active', true).order('created_at', { ascending: false });
@@ -605,7 +607,8 @@
 
             // Init Global Cart (even if just for centering consistency)
             WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
-            WisbeCart.messenger = user.settings?.messenger_link || '';
+            WisbeCart.whatsapp_country_code = user.settings?.whatsapp_country_code || '1';
+            WisbeCart.messenger = user.settings?.messenger_username || '';
             WisbeCart.init();
 
             const { data: auctions } = await supabase.from('wisbe_store_auctions').select('*, bids:wisbe_store_bids(*)').eq('owner_id', user.id).eq('is_active', true);
