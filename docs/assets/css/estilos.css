@@ -387,4 +387,32 @@ body{
   margin-bottom: 50px;
 }
 
-  
+
+/* Mobile Responsiveness for Luxury Theme (Pricing) */
+@media (max-width: 768px) {
+    .luxury-theme .pricing-card {
+        padding: 1.5rem !important;
+    }
+
+    .luxury-theme .pricing-card h3 {
+        font-size: 1.5rem !important;
+    }
+
+    .luxury-theme .luxury-table th,
+    .luxury-theme .luxury-table td {
+        padding: 0.75rem 0.5rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    .luxury-theme .w-40 {
+        min-width: 120px !important;
+    }
+
+    .luxury-theme .w-20 {
+        min-width: 60px !important;
+    }
+
+    .luxury-theme .block-heading h2 {
+        font-size: 1.75rem !important;
+    }
+}
