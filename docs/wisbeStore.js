@@ -349,7 +349,7 @@
             this.items.push(item);
             this.save();
             this.render();
-            this.showToast('¡Agregado al carrito!');
+            this.showToast('Added to cart!');
         },
 
         removeItem(index) {
@@ -385,7 +385,7 @@
             if (this.items.length === 0) return;
 
             const total = this.items.reduce((sum, i) => sum + i.price, 0);
-            let text = `🛍️ *Nuevo Pedido - Wisbe Store*\n\n`;
+            let text = `🛍️ *New Order - Wisbe Store*\n\n`;
             this.items.forEach((item, index) => {
                 text += `${index + 1}. *${item.title}* - $${item.price.toFixed(2)}\n`;
             });
@@ -439,7 +439,7 @@
                 <div id="wisbe-cart-modal">
                     <div class="cart-content">
                         <div class="cart-header">
-                            <h2>Tu Carrito</h2>
+                            <h2>Your Cart</h2>
                             <button class="close-cart" onclick="window.WisbeCart.toggle()">
                                 <i class="fas fa-times"></i>
                             </button>
@@ -449,7 +449,7 @@
                             ${this.items.length === 0 ? `
                                 <div style="text-align:center; padding:3rem; color:#94a3b8;">
                                     <i class="fas fa-shopping-basket" style="font-size:3rem; margin-bottom:1rem; opacity:0.3;"></i>
-                                    <p style="font-weight:700;">Tu carrito está vacío</p>
+                                    <p style="font-weight:700;">Your cart is empty</p>
                                 </div>
                             ` : this.items.map((item, index) => `
                                 <div class="cart-item">
@@ -472,11 +472,11 @@
                             </div>
                             <div style="display:grid; gap:1rem;">
                                 <button class="checkout-btn" onclick="window.WisbeCart.checkout('whatsapp')" ${this.items.length === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                    <i class="fab fa-whatsapp"></i> Checkout via WhatsApp
                                 </button>
                                 ${this.messenger ? `
                                     <button class="checkout-btn" style="background:#0084ff;" onclick="window.WisbeCart.checkout('messenger')" ${this.items.length === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-                                        <i class="fab fa-facebook-messenger"></i> Messenger
+                                        <i class="fab fa-facebook-messenger"></i> Checkout via Messenger
                                     </button>
                                 ` : ''}
                             </div>
@@ -495,14 +495,14 @@
         attributeChangedCallback() { this.render(); }
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-store-container"><div class="loading">Cargando Tienda...</div></div>`;
+            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-store-container"><div class="loading">Loading Store...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const user = await getOwnerIdByDomain(supabase, domain);
 
             const container = this.shadowRoot.querySelector('.wisbe-store-container');
             if (!user) {
-                container.innerHTML = `<div class="loading">Dominio no encontrado o no configurado.</div>`;
+                container.innerHTML = `<div class="loading">Domain not found or not configured.</div>`;
                 return;
             }
 
@@ -515,19 +515,19 @@
             const { data: products } = await supabase.from('wisbe_store_products').select('*').eq('owner_id', user.id).eq('is_active', true).order('created_at', { ascending: false });
             this.renderProducts(products || []);
         }
-        renderProducts(products, whatsapp) {
+        renderProducts(products) {
             const container = this.shadowRoot.querySelector('.wisbe-store-container');
-            if (products.length === 0) { container.innerHTML = '<div class="loading">No hay productos.</div>'; return; }
+            if (products.length === 0) { container.innerHTML = '<div class="loading">No products available.</div>'; return; }
             container.innerHTML = `<div class="store-grid">${products.map(p => `
                 <div class="store-product-card">
                     <div class="product-image-box"><img src="${p.image_url || ''}"></div>
                     <div class="product-info">
-                        <span class="product-category">${p.category || 'PRODUCTO'}</span>
+                        <span class="product-category">${p.category || 'PRODUCT'}</span>
                         <h3 class="product-title">${p.title}</h3>
                         ${p.description ? `<p class="product-description">${p.description}</p>` : ''}
                         <div class="product-footer">
                             <span class="product-price">$${parseFloat(p.price).toFixed(2)}</span>
-                            <button class="buy-button" onclick="WisbeCart.addItem({id: '${p.id}', title: '${p.title.replace(/'/g, "\\'")}', price: ${p.price}, image: '${p.image_url}'})">Agregar al Carrito</button>
+                            <button class="buy-button" onclick="WisbeCart.addItem({id: '${p.id}', title: '${p.title.replace(/'/g, "\\'")}', price: ${p.price}, image: '${p.image_url}'})">Add to Cart</button>
                         </div>
                     </div>
                 </div>`).join('')}</div>`;
@@ -540,20 +540,20 @@
         attributeChangedCallback() { this.render(); }
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-promos-container"><div class="loading">Cargando Promociones...</div></div>`;
+            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-promos-container"><div class="loading">Loading Promotions...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const user = await getOwnerIdByDomain(supabase, domain);
 
             const container = this.shadowRoot.querySelector('.wisbe-promos-container');
             if (!user) {
-                container.innerHTML = `<div class="loading">Dominio no encontrado o no configurado.</div>`;
+                container.innerHTML = `<div class="loading">Domain not found or not configured.</div>`;
                 return;
             }
 
             // Init Global Cart
             WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
-            WisbeCart.messenger = user.settings?.messenger_link || '';
+            WisbeCart.messenger = user.settings?.messenger_username || '';
             WisbeCart.init();
 
             const { data: promos } = await supabase.from('wisbe_store_promos').select('*').eq('owner_id', user.id).order('created_at', { ascending: false });
@@ -566,7 +566,7 @@
             const validPromos = promos.filter(p => !p.expires_at || new Date(p.expires_at) > now);
 
             if (validPromos.length === 0) {
-                container.innerHTML = '<div class="loading">No hay promociones activas en este momento.</div>';
+                container.innerHTML = '<div class="loading">No active promotions at the moment.</div>';
                 return;
             }
 
@@ -574,14 +574,14 @@
                 <div class="store-product-card">
                     <div class="product-image-box">
                         <img src="${p.image_url || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80'}">
-                        <span class="store-badge badge-pink">${p.type === 'promo' ? 'DESCUENTO' : 'PAQUETE'}</span>
+                        <span class="store-badge badge-pink">${p.type === 'promo' ? 'DISCOUNT' : 'BUNDLE'}</span>
                     </div>
                     <div class="product-info">
                         <h3 class="product-title">${p.title}</h3>
                         ${p.description ? `<p class="product-description">${p.description}</p>` : ''}
                         <div class="product-footer">
                             <span class="product-price">$${parseFloat(p.price).toFixed(2)}</span>
-                            <button class="buy-button" style="background:var(--pink-600);" onclick="WisbeCart.addItem({id: '${p.id}', title: '${p.title.replace(/'/g, "\\'")}', price: ${p.price}, image: '${p.image_url}'})">Agregar al Carrito</button>
+                            <button class="buy-button" style="background:var(--pink-600);" onclick="WisbeCart.addItem({id: '${p.id}', title: '${p.title.replace(/'/g, "\\'")}', price: ${p.price}, image: '${p.image_url}'})">Add to Cart</button>
                         </div>
                     </div>
                 </div>`).join('')}</div>`;
@@ -594,14 +594,14 @@
         attributeChangedCallback() { this.render(); }
         async render() {
             const domain = this.getAttribute('domain');
-            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-auctions-container"><div class="loading">Sincronizando Subastas...</div></div>`;
+            this.shadowRoot.innerHTML = `<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'); ${COMMON_CSS}</style><div class="wisbe-auctions-container"><div class="loading">Synchronizing Auctions...</div></div>`;
             while (!window.supabase) await new Promise(r => setTimeout(r, 100));
             const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const user = await getOwnerIdByDomain(supabase, domain);
 
             const container = this.shadowRoot.querySelector('.wisbe-auctions-container');
             if (!user) {
-                container.innerHTML = `<div class="loading">Dominio no encontrado o no configurado.</div>`;
+                container.innerHTML = `<div class="loading">Domain not found or not configured.</div>`;
                 return;
             }
 
@@ -617,7 +617,7 @@
 
         renderAuctions(auctions, whatsapp, supabase) {
             const container = this.shadowRoot.querySelector('.wisbe-auctions-container');
-            if (auctions.length === 0) { container.innerHTML = '<div class="loading">No hay subastas activas.</div>'; return; }
+            if (auctions.length === 0) { container.innerHTML = '<div class="loading">No active auctions.</div>'; return; }
 
             container.innerHTML = `<div class="store-grid"></div>`;
             const grid = container.querySelector('.store-grid');
@@ -641,25 +641,25 @@
                     <div class="product-info">
                         <h3 class="product-title">${a.title}</h3>
                         <div class="auction-status">
-                            <p style="font-size:0.7rem; font-weight:800; color:var(--store-secondary); text-transform:uppercase; margin:0 0 0.25rem;">Puja Actual</p>
+                            <p style="font-size:0.7rem; font-weight:800; color:var(--store-secondary); text-transform:uppercase; margin:0 0 0.25rem;">Current Bid</p>
                             <p style="font-size:1.5rem; font-weight:900; color:var(--amber-600); margin:0;">$${parseFloat(currentBid).toFixed(2)}</p>
-                            <p style="font-size:0.6rem; color:var(--store-secondary); margin-top:0.5rem;"><i class="far fa-clock"></i> ${isFinished ? 'Terminó' : 'Termina: ' + end.toLocaleString()}</p>
+                            <p style="font-size:0.6rem; color:var(--store-secondary); margin-top:0.5rem;"><i class="far fa-clock"></i> ${isFinished ? 'Finished' : 'Ends: ' + end.toLocaleString()}</p>
                         </div>
 
                         ${isFinished && winner ? `
-                            <div class="winner-box">🏆 Ganador: ${winner}</div>
+                            <div class="winner-box">🏆 Winner: ${winner}</div>
                         ` : ''}
 
                         ${!isFinished ? `
                             <div style="margin-top:auto;">
-                                <p style="font-size:0.7rem; font-weight:800; color:var(--store-secondary); text-transform:uppercase; margin-bottom:0.5rem;">Pujar Ahora</p>
+                                <p style="font-size:0.7rem; font-weight:800; color:var(--store-secondary); text-transform:uppercase; margin-bottom:0.5rem;">Bid Now</p>
                                 <div class="bid-controls">
                                     ${(a.fixed_increments || [5,10,20,50]).map(inc => `<button class="bid-btn" data-inc="${inc}">+$${inc}</button>`).join('')}
                                 </div>
                                 ${a.allow_free_bids ? `
                                     <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                                        <input type="number" class="free-bid-input" placeholder="Monto" style="flex-grow:1; border:1px solid var(--store-border); border-radius:0.75rem; padding:0.5rem; font-size:0.75rem;">
-                                        <button class="buy-button bid-submit" style="padding:0.5rem 1rem;">Pujar</button>
+                                        <input type="number" class="free-bid-input" placeholder="Amount" style="flex-grow:1; border:1px solid var(--store-border); border-radius:0.75rem; padding:0.5rem; font-size:0.75rem;">
+                                        <button class="buy-button bid-submit" style="padding:0.5rem 1rem;">Bid</button>
                                     </div>
                                 ` : ''}
                             </div>
@@ -685,8 +685,8 @@
         }
 
         async placeBid(auction, amount, whatsapp, supabase) {
-            const name = prompt('Tu Nombre:');
-            const contact = prompt('Tu WhatsApp/Contacto (Para avisarte si ganas):');
+            const name = prompt('Your Name:');
+            const contact = prompt('Your WhatsApp/Contact (To notify you if you win):');
             if (!name || !contact) return;
 
             const { error } = await supabase.from('wisbe_store_bids').insert([{
@@ -696,9 +696,9 @@
                 amount: amount
             }]);
 
-            if (error) alert('Error al pujar: ' + error.message);
+            if (error) alert('Error bidding: ' + error.message);
             else {
-                alert('¡Puja realizada con éxito!');
+                alert('Bid placed successfully!');
                 this.render(); // Refresh
             }
         }
