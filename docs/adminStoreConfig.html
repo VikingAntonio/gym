@@ -31,12 +31,27 @@
                             <i class="fab fa-whatsapp text-emerald-500"></i> Integración WhatsApp
                         </h3>
                         <p class="text-sm text-slate-500 mb-8 leading-relaxed">
-                            Define el número al que llegarán los pedidos del carrito de compras. Incluye el código de país (ej: 521...).
+                            Define los canales donde recibirás los pedidos del carrito.
                         </p>
 
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Número de WhatsApp</label>
-                            <input type="text" id="whatsapp_number" class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold text-lg" placeholder="Ej: 5215512345678">
+                        <div class="space-y-8">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Número de WhatsApp</label>
+                                <div class="relative">
+                                    <i class="fab fa-whatsapp absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                                    <input type="text" id="whatsapp_number" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="Ej: 52 1 55 1234 5678 (Con LADA)">
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-2 italic">No te preocupes por espacios o símbolos, el sistema los limpiará automáticamente.</p>
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Link de Messenger (Opcional)</label>
+                                <div class="relative">
+                                    <i class="fab fa-facebook-messenger absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                                    <input type="text" id="messenger_link" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 font-bold" placeholder="m.me/tu.usuario">
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-2 italic">Ej: https://m.me/tu.nombre.de.usuario</p>
+                            </div>
                         </div>
                     </div>
 
@@ -85,8 +100,10 @@
 
             if (data) {
                 document.getElementById('whatsapp_number').value = data.whatsapp_number || '';
+                document.getElementById('messenger_link').value = data.messenger_link || '';
             } else {
                 document.getElementById('whatsapp_number').value = '';
+                document.getElementById('messenger_link').value = '';
             }
         }
 
@@ -94,6 +111,7 @@
             e.preventDefault();
             const targetId = isAdmin ? (Auth.getSelectedOwnerId() || currentUser.id) : currentUser.id;
             const whatsapp = document.getElementById('whatsapp_number').value;
+            const messenger = document.getElementById('messenger_link').value;
             const btn = document.getElementById('submit-btn');
 
             btn.disabled = true;
@@ -104,6 +122,7 @@
                 .upsert({
                     owner_id: targetId,
                     whatsapp_number: whatsapp,
+                    messenger_link: messenger,
                     updated_at: new Date().toISOString()
                 });
 

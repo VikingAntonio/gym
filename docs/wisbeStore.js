@@ -321,7 +321,7 @@
             }
 
             // Fetch Store Settings
-            const { data: settings } = await supabase.from('wisbe_store_settings').select('whatsapp_number').eq('owner_id', data.id).maybeSingle();
+            const { data: settings } = await supabase.from('wisbe_store_settings').select('whatsapp_number, messenger_link').eq('owner_id', data.id).maybeSingle();
             data.settings = settings || {};
 
             return data;
@@ -334,6 +334,7 @@
     const WisbeCart = {
         items: JSON.parse(localStorage.getItem('wisbe_cart') || '[]'),
         whatsapp: '',
+        messenger: '',
 
         init() {
             if (document.getElementById('wisbe-cart-root')) return;
@@ -380,12 +381,9 @@
             }, 2000);
         },
 
-        checkout() {
+        checkout(channel = 'whatsapp') {
             if (this.items.length === 0) return;
-            if (!this.whatsapp) {
-                this.showToast('Configura tu WhatsApp en el panel.');
-                return;
-            }
+
             const total = this.items.reduce((sum, i) => sum + i.price, 0);
             let text = `🛍️ *Nuevo Pedido - Wisbe Store*\n\n`;
             this.items.forEach((item, index) => {
@@ -393,8 +391,23 @@
             });
             text += `\n💰 *Total: $${total.toFixed(2)}*`;
 
-            const waUrl = `https://wa.me/${this.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
-            window.open(waUrl, '_blank');
+            if (channel === 'whatsapp') {
+                if (!this.whatsapp) {
+                    this.showToast('WhatsApp no configurado.');
+                    return;
+                }
+                const cleanNumber = this.whatsapp.replace(/\D/g, '');
+                const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
+                window.open(waUrl, '_blank');
+            } else {
+                if (!this.messenger) {
+                    this.showToast('Messenger no configurado.');
+                    return;
+                }
+                let cleanMessenger = this.messenger.replace(/^(https?:\/\/)?(www\.)?m\.me\//, '');
+                const messengerUrl = `https://m.me/${cleanMessenger}?text=${encodeURIComponent(text)}`;
+                window.open(messengerUrl, '_blank');
+            }
         },
 
         render() {
@@ -456,9 +469,16 @@
                                 <span>Total</span>
                                 <span>$${total.toFixed(2)}</span>
                             </div>
-                            <button class="checkout-btn" onclick="window.WisbeCart.checkout()" ${this.items.length === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-                                <i class="fab fa-whatsapp"></i> Finalizar Compra
-                            </button>
+                            <div style="display:grid; gap:1rem;">
+                                <button class="checkout-btn" onclick="window.WisbeCart.checkout('whatsapp')" ${this.items.length === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </button>
+                                ${this.messenger ? `
+                                    <button class="checkout-btn" style="background:#0084ff;" onclick="window.WisbeCart.checkout('messenger')" ${this.items.length === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
+                                        <i class="fab fa-facebook-messenger"></i> Messenger
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -487,6 +507,7 @@
 
             // Init Global Cart
             WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
+            WisbeCart.messenger = user.settings?.messenger_link || '';
             WisbeCart.init();
 
             const { data: products } = await supabase.from('wisbe_store_products').select('*').eq('owner_id', user.id).eq('is_active', true).order('created_at', { ascending: false });
@@ -530,6 +551,7 @@
 
             // Init Global Cart
             WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
+            WisbeCart.messenger = user.settings?.messenger_link || '';
             WisbeCart.init();
 
             const { data: promos } = await supabase.from('wisbe_store_promos').select('*').eq('owner_id', user.id).order('created_at', { ascending: false });
@@ -580,6 +602,11 @@
                 container.innerHTML = `<div class="loading">Dominio no encontrado o no configurado.</div>`;
                 return;
             }
+
+            // Init Global Cart (even if just for centering consistency)
+            WisbeCart.whatsapp = user.settings?.whatsapp_number || '';
+            WisbeCart.messenger = user.settings?.messenger_link || '';
+            WisbeCart.init();
 
             const { data: auctions } = await supabase.from('wisbe_store_auctions').select('*, bids:wisbe_store_bids(*)').eq('owner_id', user.id).eq('is_active', true);
             this.renderAuctions(auctions || [], '', supabase);
