@@ -21,15 +21,33 @@
 
     <script>
         (function() {
-            // Obtener el path del usuario (ej: /nombre_usuario_12345678)
-            const path = window.location.pathname.split('/').pop();
+            // Reserved words that should redirect to their .html version instead of a card
+            const reserved = [
+                'index', 'login', 'gym', 'beauty', 'independientes', 'store',
+                'panelWisbe', 'adminUsuarios', 'cards', 'pricing', 'nutricion',
+                'rutinas', 'entrenadores', 'beautyCitas', 'adminStoreConfig',
+                'adminStoreInventory', 'adminStorePromos', 'adminStoreAuctions',
+                'adminEntrenadores', 'adminNutricion', 'adminRutinas', 'tarjetas'
+            ];
 
-            if (path && path !== '404.html' && path !== 'index.html') {
-                // Redirigir a cards.html con el parámetro u
-                window.location.href = '/cards.html?u=' + path;
-            } else {
-                // Si no hay path o es la raíz, ir al inicio
+            // Get path segments and remove empty ones (handles trailing slashes)
+            const segments = window.location.pathname.split('/').filter(p => p.length > 0);
+            const lastSegment = segments[segments.length - 1];
+
+            if (!lastSegment || lastSegment === 'index.html' || lastSegment === '404.html') {
                 window.location.href = '/index.html';
+                return;
+            }
+
+            // Remove .html for check
+            const cleanPath = lastSegment.replace('.html', '');
+
+            if (reserved.includes(cleanPath)) {
+                // If it's a reserved page name without .html, redirect to the .html version
+                window.location.href = '/' + cleanPath + '.html';
+            } else {
+                // Otherwise, treat it as a username for the digital card
+                window.location.href = '/cards.html?u=' + lastSegment;
             }
         })();
     </script>

@@ -144,13 +144,20 @@
     </div>
 
     <script type="module">
-        import { Auth, showPopup } from './assets/js/utils.js';
+        import { Auth, showPopup, supabase } from './assets/js/utils.js';
 
-        // Check if user is already logged in
-        const existingUser = Auth.getUser();
-        if (existingUser) {
-            window.location.href = Auth.getRedirectUrl(existingUser);
-        }
+        // Check if user is already logged in with a real session
+        (async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const existingUser = Auth.getUser();
+
+            if (session && existingUser) {
+                window.location.href = Auth.getRedirectUrl(existingUser);
+            } else if (!session && existingUser) {
+                // Clean up stale local storage if session is gone
+                localStorage.removeItem('gym_user');
+            }
+        })();
 
         let isLogin = true;
         const form = document.getElementById('auth-form');
