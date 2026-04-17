@@ -143,8 +143,14 @@
                             <input type="number" id="price" required class="input" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Duración (min)</label>
-                            <input type="number" id="duration" required class="input" placeholder="30">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Duración</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="duration" required class="input flex-grow" placeholder="30">
+                                <select id="duration-unit" class="input w-24 bg-white cursor-pointer px-2">
+                                    <option value="min">Min</option>
+                                    <option value="hr">Hr</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -328,7 +334,13 @@
                             <option value="cancelled" ${app.status === 'cancelled' ? 'selected' : ''}>Cancelada</option>
                         </select>
                     </td>
-                    <td class="px-6 py-5 text-right">
+                    <td class="px-6 py-5 text-right flex justify-end gap-2">
+                        <a href="https://wa.me/${app.customer_phone?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${app.customer_name}, confirmo tu cita para el día ${app.appointment_date} a las ${app.appointment_time.substring(0,5)} HS. ¡Te esperamos!`)}"
+                           target="_blank"
+                           class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all"
+                           title="Confirmar por WhatsApp">
+                            <i class="fab fa-whatsapp text-sm"></i>
+                        </a>
                         <button onclick="deleteAppointment('${app.id}')" class="w-8 h-8 rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all">
                             <i class="fas fa-trash-alt text-[10px]"></i>
                         </button>
@@ -405,7 +417,15 @@
             document.getElementById('service-id').value = data.id;
             document.getElementById('name').value = data.name;
             document.getElementById('price').value = data.price;
-            document.getElementById('duration').value = data.duration_minutes;
+
+            if (data.duration_minutes >= 60 && data.duration_minutes % 60 === 0) {
+                document.getElementById('duration').value = data.duration_minutes / 60;
+                document.getElementById('duration-unit').value = 'hr';
+            } else {
+                document.getElementById('duration').value = data.duration_minutes;
+                document.getElementById('duration-unit').value = 'min';
+            }
+
             document.getElementById('description').value = data.description || '';
             currentImageUrl = data.image_url;
 
@@ -463,10 +483,14 @@
             serviceForm.onsubmit = async (e) => {
                 e.preventDefault();
                 const id = document.getElementById('service-id').value;
+                let duration = parseInt(document.getElementById('duration').value);
+                const unit = document.getElementById('duration-unit').value;
+                if (unit === 'hr') duration = duration * 60;
+
                 const serviceData = {
                     name: document.getElementById('name').value,
                     price: document.getElementById('price').value,
-                    duration_minutes: document.getElementById('duration').value,
+                    duration_minutes: duration,
                     description: document.getElementById('description').value,
                     image_url: currentImageUrl,
                     owner_id: selectedOwnerId

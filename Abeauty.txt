@@ -127,9 +127,9 @@ BEGIN
     v_open_time := (v_business_hours->v_day_name->>'open')::TIME;
     v_close_time := (v_business_hours->v_day_name->>'close')::TIME;
 
-    IF v_is_active AND v_open_time IS NOT NULL THEN
+    IF v_is_active AND v_open_time IS NOT NULL AND v_close_time IS NOT NULL THEN
         v_current_time := v_open_time;
-        WHILE v_current_time < v_close_time LOOP
+        WHILE v_current_time + interval '30 minutes' <= v_close_time LOOP
             slot_time := v_current_time;
 
             -- Bloque inteligente: Una cita ocupa slots según su duración
