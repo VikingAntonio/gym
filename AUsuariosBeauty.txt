@@ -1,0 +1,17 @@
+# EXPLICACIÓN DE USUARIOS BEAUTY - WISBE
+
+En el sistema actual de Wisbe Beauty, los usuarios que agendan una cita a través del widget en tu dominio (ej. wisbe.xyz/tu_estetica) se manejan de la siguiente manera:
+
+1. ¿DÓNDE SE GUARDAN?
+Los datos de los clientes (Nombre, Email y Teléfono) se guardan directamente en la tabla 'beauty_appointments' de Supabase junto con la información de la cita.
+
+2. ¿POR QUÉ NO SALEN EN "CLIENTES" (beautyUsers.html)?
+Actualmente, el widget de citas NO crea una cuenta de usuario completa (con contraseña) en la tabla 'wisbe_users', sino que simplemente registra los datos de contacto para esa reserva específica.
+
+3. UBICACIÓN EN EL PROYECTO:
+- Base de Datos (Supabase): Tabla 'beauty_appointments'.
+- Archivo de Lógica: 'docs/wisbeBeauty.js' (función setupListeners, evento form.onsubmit).
+- Archivo de Esquema: 'Abeauty.txt'.
+
+4. MEJORA REALIZADA:
+He actualizado 'beautyUsers.html' para que ahora también extraiga y muestre automáticamente a todos los clientes únicos que han agendado citas contigo en la tabla 'beauty_appointments', permitiéndote ver su historial y contactarlos por WhatsApp incluso si no tienen una cuenta registrada en Wisbe.

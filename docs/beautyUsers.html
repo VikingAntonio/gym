@@ -114,19 +114,44 @@
             </td></tr>`;
 
             try {
-                let query = supabase.from('wisbe_users').select('*');
+                // 1. Cargar usuarios registrados en wisbe_users
+                let usersQuery = supabase.from('wisbe_users').select('*').eq('business_unit', 'beauty');
+                if (currentUser.role !== 'gym-admin') usersQuery = usersQuery.eq('owner_id', currentUser.id);
+                const { data: registeredUsers } = await usersQuery;
 
-                // Si no es admin, solo ve sus clientes
-                if (currentUser.role !== 'gym-admin') {
-                    query = query.eq('owner_id', currentUser.id);
-                }
+                // 2. Cargar clientes desde las citas (beauty_appointments)
+                let appointmentsQuery = supabase.from('beauty_appointments').select('customer_name, customer_email, customer_phone');
+                if (currentUser.role !== 'gym-admin') appointmentsQuery = appointmentsQuery.eq('owner_id', currentUser.id);
+                const { data: appointmentsData } = await appointmentsQuery;
 
-                query = query.eq('business_unit', 'beauty');
+                // 3. Unificar y eliminar duplicados por email
+                const clientsMap = new Map();
 
-                const { data, error } = await query.order('created_at', { ascending: false });
-                if (error) throw error;
+                // Primero los de las citas (datos básicos)
+                (appointmentsData || []).forEach(app => {
+                    const email = app.customer_email?.toLowerCase();
+                    if (!email) return;
+                    clientsMap.set(email, {
+                        full_name: app.customer_name,
+                        email: email,
+                        phone: app.customer_phone,
+                        type: 'appointment'
+                    });
+                });
 
-                loadedUsers = data || [];
+                // Luego los registrados (tienen prioridad por ser cuentas reales)
+                (registeredUsers || []).forEach(user => {
+                    const email = user.email?.toLowerCase();
+                    if (!email) return;
+                    clientsMap.set(email, {
+                        id: user.id,
+                        full_name: user.full_name,
+                        email: email,
+                        type: 'registered'
+                    });
+                });
+
+                loadedUsers = Array.from(clientsMap.values());
                 renderUsers(loadedUsers);
             } catch (err) {
                 console.error('Load Error:', err);
@@ -148,6 +173,7 @@
             list.innerHTML = users.map(user => {
                 const safeName = user.full_name || user.email || 'Cliente';
                 const initial = (safeName.charAt(0) || 'C').toUpperCase();
+                const isRegistered = user.type === 'registered';
 
                 return `
                     <tr class="hover:bg-slate-50 transition-colors group">
@@ -163,20 +189,30 @@
                             </div>
                         </td>
                         <td class="px-6 py-5">
-                            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-slate-200">
-                                Cliente
+                            <span class="px-3 py-1 ${isRegistered ? 'bg-pink-100 text-pink-600' : 'bg-slate-100 text-slate-600'} text-[10px] font-black uppercase tracking-widest rounded-full border border-pink-200">
+                                ${isRegistered ? 'CUENTA WISBE' : 'DESDE CITAS'}
                             </span>
                         </td>
                         <td class="px-6 py-5 text-right">
-                            <a href="cards.html?user_id=${user.id}" class="p-2 text-slate-400 hover:text-emerald-600 transition-colors mr-2" title="Gestionar Tarjeta">
-                                <i class="fas fa-id-card"></i>
-                            </a>
-                            <button onclick="editUser('${user.id}')" class="p-2 text-slate-400 hover:text-pink-600 transition-colors mr-2">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="deleteUser('${user.id}')" class="p-2 text-slate-400 hover:text-red-500 transition-colors">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            ${user.phone ? `
+                                <a href="https://wa.me/${user.phone.replace(/[^0-9]/g, '')}" target="_blank" class="p-2 text-emerald-500 hover:scale-110 transition-transform inline-block" title="WhatsApp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                            ` : ''}
+
+                            ${isRegistered ? `
+                                <a href="cards.html?user_id=${user.id}" class="p-2 text-slate-400 hover:text-emerald-600 transition-colors mr-2" title="Gestionar Tarjeta">
+                                    <i class="fas fa-id-card"></i>
+                                </a>
+                                <button onclick="editUser('${user.id}')" class="p-2 text-slate-400 hover:text-pink-600 transition-colors mr-2">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteUser('${user.id}')" class="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : `
+                                <span class="text-[8px] font-black text-slate-300 uppercase italic">Sin Cuenta</span>
+                            `}
                         </td>
                     </tr>
                 `;
