@@ -50,17 +50,17 @@
         .card {
             background: white;
             border-radius: 50px;
-            border: 1px solid var(--slate-50);
+            border: 1px solid var(--slate-100);
             overflow: hidden;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; flex-direction: column;
-            box-shadow: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             position: relative;
         }
 
         .card:hover {
             transform: translateY(-8px);
-            box-shadow: 12px 12px 24px #c2cbd9, -12px -12px 24px #ffffff;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         .card-image {
@@ -114,26 +114,40 @@
             font-size: 12px; font-weight: 900; text-transform: uppercase;
             letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s;
             border: none; text-align: center; background: var(--slate-900); color: white;
-            box-shadow: 4px 4px 8px #d1d9e6;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .btn:hover {
             background: var(--emerald-600);
-            box-shadow: 6px 6px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         /* Modal */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(8px); z-index: 10000;
-            display: none; align-items: center; justify-content: center; padding: 20px;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
         .modal-container {
-            background: white; width: 100%; max-width: 1050px; height: auto; max-height: 90vh;
-            border-radius: 50px; overflow: hidden; display: flex; flex-direction: column;
-            position: relative; animation: modalIn 0.4s ease-out;
-            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+            background: white;
+            width: 100%;
+            max-width: 1050px;
+            max-height: 90vh;
+            border-radius: 50px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            animation: modalIn 0.4s ease-out;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin: auto;
         }
 
         @keyframes modalIn {
@@ -222,12 +236,13 @@
 
         @media (max-width: 768px) {
             .widget-container { padding: 20px 15px; }
-            .grid { gap: 1.5rem; grid-template-columns: 1fr; }
+            .grid { gap: 3.5rem; grid-template-columns: 1fr; }
             .modal-container {
                 width: 95%;
-                max-height: 95vh;
+                max-height: 85vh;
                 border-radius: 30px;
                 margin: auto;
+                position: relative;
             }
             .modal-image-side { height: 200px; }
             .modal-content-side { padding: 1.5rem; }
@@ -385,7 +400,7 @@
                 card.className = 'card';
                 card.style.padding = '2.5rem';
                 card.style.cursor = 'pointer';
-                card.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'; // Subtle shadow, no brilliant glow
+                card.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'; // Subtle shadow, no brilliant glow
                 card.innerHTML = `
                     <div style="width:4rem; height:4rem; background:var(--emerald-50); color:var(--emerald-600); border-radius:1.25rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin-bottom:2rem; border:1px solid var(--emerald-100);"><i class="fas fa-dumbbell"></i></div>
                     <h3 class="card-title" style="margin-bottom:0.5rem">${r.title}</h3>
