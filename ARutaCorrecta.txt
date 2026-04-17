@@ -1,34 +1,36 @@
-SISTEMA DE RUTAS Y AUTENTICACIÓN - WISBE
+SISTEMA DE RUTAS Y AUTENTICACIÓN - WISBE (Actualizado)
 
-Este archivo detalla cómo funcionan las redirecciones y el acceso en la plataforma para asegurar que la configuración en wisbe.xyz sea correcta.
+Este archivo detalla el flujo de navegación y seguridad para asegurar la correcta configuración en wisbe.xyz.
 
-1. AUTENTICACIÓN (docs/login.html)
-   - El script inicial de login.html verifica la sesión real con Supabase usando:
-     `const { data: { session } } = await supabase.auth.getSession();`
-   - Si existe una sesión y hay datos en localStorage ('gym_user'), redirige al dashboard correspondiente.
-   - Si NO hay sesión pero hay datos en localStorage, limpia el localStorage para evitar bucles de redirección (flickering).
+1. FLUJO DE LOGIN (docs/login.html)
+   - Al cargar, login.html realiza una verificación doble:
+     a) `supabase.auth.getSession()` -> Verifica si hay una sesión activa en el servidor.
+     b) `Auth.getUser()` -> Recupera los datos del usuario del localStorage.
+   - Solo si AMBAS coinciden, se redirige al panel.
+   - Si no hay sesión en el servidor pero sí hay datos locales, se limpia el localStorage (`gym_user`) para evitar el error de "parpadeo" o bucle infinito.
 
-2. LÓGICA DE REDIRECCIÓN (docs/assets/js/utils.js -> Auth.getRedirectUrl)
-   - Dependiendo del rol y la unidad de negocio del usuario, se envía a:
-     * gym-admin / unidad 'wisbe' -> panelWisbe.html (Panel Maestro)
-     * beauty / unidad 'beauty' -> beauty.html
-     * freelance / independiente / tienda / construction / school -> independientes.html
-     * gym-owner / otros -> gym.html
+2. DIRECCIONAMIENTO POR ROL/UNIDAD (docs/assets/js/utils.js -> Auth.getRedirectUrl)
+   - El sistema decide a qué página enviarte según tu perfil:
+     * SI eres Admin Global (gym-admin) o unidad 'wisbe' -> panelWisbe.html
+     * SI eres de Belleza (beauty) -> beauty.html
+     * SI eres de Tienda (tienda) -> store.html
+     * SI eres Independiente (freelance, independiente, construction, school) -> independientes.html
+     * CUALQUIER OTRO (gym-owner, etc) -> gym.html (Default)
 
-3. LINKS CORTOS Y 404 (docs/404.html)
-   - El archivo 404.html es el corazón de los links cortos (wisbe.xyz/nombre).
-   - Funciona detectando el nombre al final de la URL.
-   - Si el nombre está en la lista de 'RESERVED' (ej: gym, beauty, independientes), redirige a la página .html correspondiente.
-   - Si NO es una palabra reservada, asume que es un nombre de usuario y redirige a:
-     `cards.html?u=nombre_usuario`
+3. SISTEMA DE LINKS CORTOS / SUBDOMINIOS (docs/404.html)
+   - Wisbe utiliza una técnica de "404 routing" para permitir links como `wisbe.xyz/nombreusuario`.
+   - Cuando el servidor no encuentra el archivo (ej: /juanito), carga `404.html`.
+   - El script en `404.html` analiza la URL:
+     * Si la palabra es "RESERVADA" (gym, beauty, store, independientes, etc.), te lleva a la página `.html` del sistema.
+     * Si NO es reservada, asume que es un nombre de usuario y te redirige a:
+       `cards.html?u=nombreusuario`
+   - IMPORTANTE: Para que esto funcione en wisbe.xyz, el archivo `404.html` DEBE estar en la raíz del hosting y el servidor debe estar configurado para usarlo como página de error.
 
-4. ARCHIVOS CLAVE PARA EL FUNCIONAMIENTO:
-   - docs/index.html: Página de inicio pública.
-   - docs/login.html: Manejo de entrada y registro.
-   - docs/assets/js/utils.js: Contiene el objeto 'Auth' con toda la lógica de seguridad.
-   - docs/assets/js/config.js: Configuración de Supabase (URL y API Key).
-   - docs/404.html: Manejador de rutas para links cortos y corrección de URLs sin .html.
-   - docs/cards.html: Visualizador de tarjetas digitales (usa wisbeCards.js).
-   - docs/wisbeCards.js: Web Component que busca al usuario en la base de datos por su username.
+4. PÁGINA DE GESTIÓN (docs/independientes.html)
+   - Es el centro de mando para usuarios "freelance" o "independientes".
+   - Desde aquí pueden ir a `cards.html` (Editor/Vista) para configurar su tarjeta.
+   - El link que se les asigna (wisbe.xyz/nombre) depende enteramente de que su `username` en la base de datos coincida con el link que están probando.
 
-Si wisbe.xyz/nombre lanza 404 y no redirige, asegúrate de que el servidor (GitHub Pages, Vercel, o Apache) esté configurado para usar docs/404.html como la página de error por defecto.
+5. VERIFICACIÓN DE ARCHIVOS EN REPOSITORIO:
+   - Asegúrate de que todos los archivos dentro de `docs/` estén en la raíz de tu servidor wisbe.xyz (o que el servidor apunte a la carpeta `docs`).
+   - El archivo `404.html` es CRÍTICO para los links cortos. Si no está, verás el error 404 estándar del servidor.
