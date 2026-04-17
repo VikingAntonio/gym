@@ -219,6 +219,24 @@
         }
 
         .loading { padding: 5rem; text-align: center; color: var(--slate-400); font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; font-size: 12px; }
+
+        @media (max-width: 768px) {
+            .widget-container { padding: 20px 15px; }
+            .grid { gap: 1.5rem; grid-template-columns: 1fr; }
+            .modal-container {
+                width: 95%;
+                max-height: 95vh;
+                border-radius: 30px;
+                margin: auto;
+            }
+            .modal-image-side { height: 200px; }
+            .modal-content-side { padding: 1.5rem; }
+            .macro-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+            .modal-image-overlay h2 { font-size: 1.75rem !important; }
+            .section-title { font-size: 0.9rem; }
+            .card-title { font-size: 1.25rem; }
+            .close-btn { top: 1rem; right: 1rem; width: 36px; height: 36px; }
+        }
     `;
 
     function cleanData(data) {
@@ -289,7 +307,9 @@
                 grid.appendChild(card);
             });
             container.appendChild(grid);
-            this.shadowRoot.appendChild(Object.assign(document.createElement('div'), { id: 'modal-root' }));
+            if (!this.shadowRoot.getElementById('modal-root')) {
+                this.shadowRoot.appendChild(Object.assign(document.createElement('div'), { id: 'modal-root' }));
+            }
         }
         openModal(r) {
             const root = this.shadowRoot.getElementById('modal-root');
@@ -365,6 +385,7 @@
                 card.className = 'card';
                 card.style.padding = '2.5rem';
                 card.style.cursor = 'pointer';
+                card.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'; // Subtle shadow, no brilliant glow
                 card.innerHTML = `
                     <div style="width:4rem; height:4rem; background:var(--emerald-50); color:var(--emerald-600); border-radius:1.25rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin-bottom:2rem; border:1px solid var(--emerald-100);"><i class="fas fa-dumbbell"></i></div>
                     <h3 class="card-title" style="margin-bottom:0.5rem">${r.title}</h3>
@@ -372,11 +393,58 @@
                         <span style="background:var(--slate-50); padding:0.25rem 0.5rem; border-radius:4px; border:1px solid var(--slate-100); margin-right:1rem">${r.difficulty_level}</span>
                         <span>${r.plan_duration_weeks} Semanas</span>
                     </div>
-                    <div style="margin-top:auto; padding-top:1.5rem; border-top:1px solid var(--slate-50); color:var(--emerald-600); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.1em;">Explorar Plan <i class="fas fa-chevron-right" style="margin-left:0.5rem"></i></div>
+                    <div class="explorar-btn" style="margin-top:auto; padding-top:1.5rem; border-top:1px solid var(--slate-50); color:var(--emerald-600); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.1em;">Explorar Plan <i class="fas fa-chevron-right" style="margin-left:0.5rem"></i></div>
                 `;
+                card.onclick = () => this.openModal(r);
                 grid.appendChild(card);
             });
             container.appendChild(grid);
+            if (!this.shadowRoot.getElementById('modal-root')) {
+                this.shadowRoot.appendChild(Object.assign(document.createElement('div'), { id: 'modal-root' }));
+            }
+        }
+
+        openModal(r) {
+            const root = this.shadowRoot.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="modal-overlay" id="overlay" style="display:flex">
+                    <div class="modal-container">
+                        <button class="close-btn" id="close-modal">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                        <div class="modal-image-side">
+                            <img src="${r.image_url || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=800'}">
+                            <div class="modal-image-overlay">
+                                <span style="background:var(--emerald-500); color:white; padding:0.4rem 1rem; border-radius:2rem; font-size:9px; font-weight:900; text-transform:uppercase; margin-bottom:0.75rem; width:fit-content; letter-spacing:0.15em;">${r.difficulty_level || 'INTERMEDIO'}</span>
+                                <h2 style="font-size:2.5rem; font-weight:900; color:white; margin:0; line-height:1; letter-spacing:-0.04em;">${r.title}</h2>
+                            </div>
+                        </div>
+                        <div class="modal-content-side">
+                            <div class="macro-grid">
+                                <div class="macro-card"><span class="macro-val">${r.plan_duration_weeks || 0}</span><span class="macro-lbl">Semanas</span></div>
+                                <div class="macro-card"><span class="macro-val dark">${r.difficulty_level || 'N/A'}</span><span class="macro-lbl">Nivel</span></div>
+                                <div class="macro-card"><span class="macro-val dark">${r.category || 'Gym'}</span><span class="macro-lbl">Categoría</span></div>
+                                <div class="macro-card"><span class="macro-val dark"><i class="fas fa-fire"></i></span><span class="macro-lbl">Intensidad</span></div>
+                            </div>
+
+                            <h4 class="section-title"><div class="section-num">01</div> Sobre este Plan</h4>
+                            <p style="color:var(--slate-600); font-size:14px; line-height:1.6; margin-bottom:2rem;">${r.description || 'Este plan está diseñado para maximizar tus resultados mediante una progresión estructurada.'}</p>
+
+                            <h4 class="section-title"><div class="section-num">02</div> Estructura del Plan</h4>
+                            <div class="instructions-box">${cleanData(r.exercises || r.content || 'Consulte con su entrenador para los detalles específicos de los ejercicios.').join('<br>')}</div>
+
+                            <div style="margin-top: 2rem;">
+                                <button class="btn" onclick="window.print()">Descargar PDF del Plan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            root.querySelector('#close-modal').onclick = () => root.innerHTML = '';
+            root.querySelector('#overlay').onclick = (e) => { if(e.target.id === 'overlay') root.innerHTML = ''; };
         }
     }
 

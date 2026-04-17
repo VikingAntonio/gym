@@ -42,8 +42,9 @@
         .service-card {
             background: white; border-radius: 40px; border: 1px solid var(--slate-100); overflow: hidden;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
-        .service-card:hover { transform: translateY(-10px); border-color: var(--pink-200); box-shadow: 0 30px 60px -12px rgba(236, 72, 153, 0.15); }
+        .service-card:hover { transform: translateY(-10px); border-color: var(--pink-200); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .service-img-wrapper { height: 200px; width: 100%; overflow: hidden; position: relative; }
         .service-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s; }
         .service-card:hover .service-img { transform: scale(1.1); }
@@ -61,17 +62,17 @@
         .meta-item i { color: var(--pink-500); }
 
         /* Calendar */
-        .calendar-wrapper { background: var(--slate-50); padding: 3rem; border-radius: 50px; border: 1px solid var(--slate-100); }
+        .calendar-wrapper { background: var(--slate-50); padding: 3rem; border-radius: 50px; border: 1px solid var(--slate-100); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
         .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.75rem; }
 
         .day-btn {
             aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
             border-radius: 24px; border: 1px solid transparent; background: white;
-            cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+            cursor: pointer; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .day-btn:hover:not(:disabled) { background: var(--pink-50); border-color: var(--pink-100); transform: scale(1.05); }
-        .day-btn.selected { background: var(--pink-600); color: white; box-shadow: 0 10px 20px -5px rgba(219, 39, 119, 0.4); }
+        .day-btn.selected { background: var(--pink-600); color: white; box-shadow: 0 4px 6px rgba(219, 39, 119, 0.3); }
         .day-btn:disabled { opacity: 0.2; cursor: not-allowed; background: transparent; border: 1px dashed var(--slate-200); box-shadow: none; }
 
         .day-name { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; opacity: 0.6; }
@@ -88,7 +89,7 @@
         .slot-btn.selected { background: var(--pink-600); color: white; border-color: var(--pink-600); box-shadow: 0 8px 16px -4px rgba(219, 39, 119, 0.3); }
         .slot-btn:disabled { opacity: 0.3; background: var(--slate-100); cursor: not-allowed; border-color: transparent; }
 
-        .form-container { max-width: 550px; margin: 0 auto; background: white; padding: 3rem; border-radius: 50px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05); border: 1px solid var(--slate-100); }
+        .form-container { max-width: 550px; margin: 0 auto; background: white; padding: 3rem; border-radius: 50px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid var(--slate-100); }
         .input-group { margin-bottom: 1.5rem; }
         .label { font-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block; }
         .input {
@@ -115,9 +116,23 @@
 
         .success-box {
             text-align: center; padding: 5rem; background: white; border-radius: 60px; border: 1px solid var(--slate-100);
-            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
-        .success-icon { width: 100px; height: 100px; background: var(--pink-50); color: var(--pink-500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 2.5rem; border: 4px solid white; box-shadow: 0 10px 20px rgba(236, 72, 153, 0.1); }
+        .success-icon { width: 100px; height: 100px; background: var(--pink-50); color: var(--pink-500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 2.5rem; border: 4px solid white; box-shadow: 0 4px 6px rgba(236, 72, 153, 0.1); }
+
+        @media (max-width: 768px) {
+            .step-title { font-size: 1.5rem; }
+            .calendar-wrapper { padding: 1.5rem; border-radius: 30px; }
+            .calendar-grid { gap: 0.4rem; }
+            .day-btn { border-radius: 12px; }
+            .day-num { font-size: 1rem; }
+            .day-name { font-size: 7px; }
+            .slots-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.75rem; }
+            .slot-btn { padding: 0.75rem 0.5rem; font-size: 0.75rem; border-radius: 12px; }
+            .form-container { padding: 2rem; border-radius: 30px; width: 100%; }
+            .success-box { padding: 3rem 1.5rem; border-radius: 40px; }
+            .btn { padding: 1.25rem; font-size: 0.75rem; }
+        }
     `;
 
     class WisbeBeautyCitas extends HTMLElement {
