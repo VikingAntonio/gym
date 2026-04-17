@@ -82,6 +82,17 @@ BEGIN
     FOR pol IN (SELECT policyname FROM pg_policies WHERE schemaname = 'public' AND tablename = 'gym_trainers') LOOP
         EXECUTE format('DROP POLICY IF EXISTS %I ON public.gym_trainers', pol.policyname);
     END LOOP;
+
+    -- Corrección de esquema gym_trainers (AUpdateBDD logic)
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_trainers' AND column_name = 'name')
+       AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_trainers' AND column_name = 'full_name') THEN
+        ALTER TABLE public.gym_trainers RENAME COLUMN name TO full_name;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_trainers' AND column_name = 'full_name') THEN
+        ALTER TABLE public.gym_trainers ADD COLUMN IF NOT EXISTS full_name TEXT;
+    END IF;
+    ALTER TABLE public.gym_trainers ADD COLUMN IF NOT EXISTS whatsapp_url TEXT;
+    ALTER TABLE public.gym_trainers ADD COLUMN IF NOT EXISTS instagram_url TEXT;
 END $$;
 
 CREATE POLICY "Anyone can view trainers" ON public.gym_trainers FOR SELECT USING (true);

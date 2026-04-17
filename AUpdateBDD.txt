@@ -1,0 +1,94 @@
+-- ######################################################
+-- # ACTUALIZACIÓN DE BASE DE DATOS - WISBE             #
+-- ######################################################
+
+-- 1. CORRECCIÓN TABLA gym_trainers
+-- Renombrar columna 'name' a 'full_name' y añadir redes sociales
+DO $$
+BEGIN
+    -- Renombrar 'name' a 'full_name' si existe 'name' y no existe 'full_name'
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_trainers' AND column_name = 'name')
+       AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_trainers' AND column_name = 'full_name') THEN
+        ALTER TABLE public.gym_trainers RENAME COLUMN name TO full_name;
+    END IF;
+
+    -- Asegurar que 'full_name' existe (por si no existía ni 'name')
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_trainers' AND column_name = 'full_name') THEN
+        ALTER TABLE public.gym_trainers ADD COLUMN IF NOT EXISTS full_name TEXT;
+    END IF;
+
+    -- Añadir columnas de redes sociales si no existen
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_trainers' AND column_name = 'whatsapp_url') THEN
+        ALTER TABLE public.gym_trainers ADD COLUMN whatsapp_url TEXT;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'gym_trainers' AND column_name = 'instagram_url') THEN
+        ALTER TABLE public.gym_trainers ADD COLUMN instagram_url TEXT;
+    END IF;
+END $$;
+
+-- 2. ACTUALIZACIÓN DE FUNCIÓN check_beauty_availability
+-- Ajuste para asegurar que el último slot no sobrepase la hora de cierre
+CREATE OR REPLACE FUNCTION public.check_beauty_availability(
+    p_owner_id UUID,
+    p_date DATE
+) RETURNS TABLE (
+    slot_time TIME,
+    is_available BOOLEAN
+) AS $$
+DECLARE
+    v_slots_per_hour INTEGER;
+    v_business_hours JSONB;
+    v_day_name TEXT;
+    v_open_time TIME;
+    v_close_time TIME;
+    v_current_time TIME;
+    v_is_active BOOLEAN;
+BEGIN
+    -- Obtener configuración
+    SELECT slots_per_hour, business_hours INTO v_slots_per_hour, v_business_hours
+    FROM public.beauty_settings WHERE owner_id = p_owner_id;
+
+    IF NOT FOUND THEN
+        v_slots_per_hour := 1;
+        v_business_hours := '{}'::jsonb;
+    END IF;
+
+    -- Obtener día de la semana (independiente del idioma)
+    v_day_name := CASE extract(dow from p_date)
+        WHEN 0 THEN 'sunday'
+        WHEN 1 THEN 'monday'
+        WHEN 2 THEN 'tuesday'
+        WHEN 3 THEN 'wednesday'
+        WHEN 4 THEN 'thursday'
+        WHEN 5 THEN 'friday'
+        WHEN 6 THEN 'saturday'
+    END;
+
+    -- Extraer horario del JSON
+    v_is_active := COALESCE((v_business_hours->v_day_name->>'active')::BOOLEAN, false);
+    v_open_time := (v_business_hours->v_day_name->>'open')::TIME;
+    v_close_time := (v_business_hours->v_day_name->>'close')::TIME;
+
+    IF v_is_active AND v_open_time IS NOT NULL AND v_close_time IS NOT NULL THEN
+        v_current_time := v_open_time;
+        -- WHILE asegura que el slot de 30 min quepa antes del cierre
+        WHILE v_current_time + interval '30 minutes' <= v_close_time LOOP
+            slot_time := v_current_time;
+
+            -- Bloque inteligente de disponibilidad
+            SELECT (count(*) < v_slots_per_hour) INTO is_available
+            FROM public.beauty_appointments a
+            LEFT JOIN public.beauty_services s ON a.service_id = s.id
+            WHERE a.owner_id = p_owner_id
+              AND a.appointment_date = p_date
+              AND v_current_time >= a.appointment_time
+              AND v_current_time < (a.appointment_time + (COALESCE(s.duration_minutes, 30) || ' minutes')::interval)
+              AND a.status != 'cancelled';
+
+            RETURN NEXT;
+            v_current_time := v_current_time + interval '30 minutes';
+        END LOOP;
+    END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

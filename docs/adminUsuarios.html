@@ -155,7 +155,7 @@
                     }
                     // Si el usuario es nuevo o cambió, refrescar
                     if (!currentUser || currentUser.id !== session.user.id) {
-                        Auth.checkAccess(['gym-admin', 'gym-owner']).then(fresh => {
+                        Auth.checkAccess(['gym-admin', 'gym-owner', 'beauty']).then(fresh => {
                             if (fresh) {
                                 currentUser = fresh;
                                 isAdmin = fresh.role === 'gym-admin';
@@ -280,7 +280,7 @@
                                 <span class="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase rounded">${user.business_unit || 'gym'}</span>
                             </td>
                             <td class="px-6 py-5 text-right">
-                                ${isAdmin ? `
+                                ${isAdmin || user.owner_id === currentUser?.id ? `
                                     <a href="cards.html?user_id=${user.id}" class="p-2 text-slate-400 hover:text-emerald-600 transition-colors mr-2" title="Gestionar Tarjeta">
                                         <i class="fas fa-id-card"></i>
                                     </a>
