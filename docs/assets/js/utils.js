@@ -273,8 +273,12 @@ export const Auth = {
             return 'beauty.html';
         }
 
+        if (user.role === 'tienda' || user.business_unit === 'tienda') {
+            return 'store.html';
+        }
+
         // Generic "Independientes" or Card-focused units
-        const cardUnits = ['freelance', 'independiente', 'tienda', 'construction', 'school'];
+        const cardUnits = ['freelance', 'independiente', 'construction', 'school'];
         if (user.role === 'freelance' || cardUnits.includes(user.business_unit)) {
             return 'independientes.html';
         }
