@@ -308,6 +308,23 @@
             100% { transform: scale(1); }
         }
         .pop { animation: cartPop 0.4s ease; }
+
+        @media (max-width: 768px) {
+            .wisbe-store-container, .wisbe-promos-container, .wisbe-auctions-container {
+                margin: 2rem auto;
+                padding: 1rem;
+            }
+            .store-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+            .product-info { padding: 1rem; }
+            .product-title { font-size: 0.9rem; }
+            .product-price { font-size: 1rem; }
+            .buy-button { padding: 0.5rem 0.75rem; font-size: 0.75rem; border-radius: 0.75rem; }
+            .cart-content { padding: 1.5rem; border-radius: 30px; width: 95%; max-height: 85vh; }
+            #wisbe-cart-btn { width: 60px; height: 60px; bottom: 1.5rem; right: 1.5rem; border-radius: 20px; }
+        }
     `;
 
     if (!window.supabase) {
