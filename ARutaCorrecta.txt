@@ -1,0 +1,34 @@
+SISTEMA DE RUTAS Y AUTENTICACIÓN - WISBE
+
+Este archivo detalla cómo funcionan las redirecciones y el acceso en la plataforma para asegurar que la configuración en wisbe.xyz sea correcta.
+
+1. AUTENTICACIÓN (docs/login.html)
+   - El script inicial de login.html verifica la sesión real con Supabase usando:
+     `const { data: { session } } = await supabase.auth.getSession();`
+   - Si existe una sesión y hay datos en localStorage ('gym_user'), redirige al dashboard correspondiente.
+   - Si NO hay sesión pero hay datos en localStorage, limpia el localStorage para evitar bucles de redirección (flickering).
+
+2. LÓGICA DE REDIRECCIÓN (docs/assets/js/utils.js -> Auth.getRedirectUrl)
+   - Dependiendo del rol y la unidad de negocio del usuario, se envía a:
+     * gym-admin / unidad 'wisbe' -> panelWisbe.html (Panel Maestro)
+     * beauty / unidad 'beauty' -> beauty.html
+     * freelance / independiente / tienda / construction / school -> independientes.html
+     * gym-owner / otros -> gym.html
+
+3. LINKS CORTOS Y 404 (docs/404.html)
+   - El archivo 404.html es el corazón de los links cortos (wisbe.xyz/nombre).
+   - Funciona detectando el nombre al final de la URL.
+   - Si el nombre está en la lista de 'RESERVED' (ej: gym, beauty, independientes), redirige a la página .html correspondiente.
+   - Si NO es una palabra reservada, asume que es un nombre de usuario y redirige a:
+     `cards.html?u=nombre_usuario`
+
+4. ARCHIVOS CLAVE PARA EL FUNCIONAMIENTO:
+   - docs/index.html: Página de inicio pública.
+   - docs/login.html: Manejo de entrada y registro.
+   - docs/assets/js/utils.js: Contiene el objeto 'Auth' con toda la lógica de seguridad.
+   - docs/assets/js/config.js: Configuración de Supabase (URL y API Key).
+   - docs/404.html: Manejador de rutas para links cortos y corrección de URLs sin .html.
+   - docs/cards.html: Visualizador de tarjetas digitales (usa wisbeCards.js).
+   - docs/wisbeCards.js: Web Component que busca al usuario en la base de datos por su username.
+
+Si wisbe.xyz/nombre lanza 404 y no redirige, asegúrate de que el servidor (GitHub Pages, Vercel, o Apache) esté configurado para usar docs/404.html como la página de error por defecto.
