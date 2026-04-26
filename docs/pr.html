@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" sizes="1662x604" href="./assets/img/iconwisbe.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/styleGYM.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
@@ -15,7 +16,14 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Prevent body scroll */
+            overflow: hidden;
+            background-color: #f8fafc;
+        }
+
+        /* Sidebar override to match styleGYM.css and user request */
+        #admin-sidebar {
+            top: 20px; /* Adjusting for no-navbar view */
+            height: calc(100vh - 40px);
         }
 
         .service-content {
@@ -33,18 +41,32 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .sidebar-link.active {
+        /* Sidebar Link Styles to match project */
+        .sidebar-item {
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 0.75rem;
+        }
+
+        .sidebar-item:hover {
+            border-color: #3b82f6;
+        }
+
+        .sidebar-item.active {
+            border-color: #3b82f6;
             background-color: #eff6ff;
-            color: #2563eb;
-            border-right: 4px solid #2563eb;
+            border-width: 2px;
         }
 
         .sub-tab.active {
-            background-color: #2563eb;
+            background-color: #3b82f6;
             color: white;
         }
 
-        /* Custom scrollbar for content areas if needed */
         .custom-scroll::-webkit-scrollbar {
             width: 4px;
         }
@@ -58,308 +80,307 @@
 
         @media (max-width: 768px) {
             body {
-                overflow: auto; /* Allow scroll on mobile if content exceeds, but we'll try to fit it */
+                overflow: auto;
             }
-            .main-container {
-                height: auto;
-                min-height: 100vh;
+            #admin-sidebar {
+                position: fixed;
+                top: 0;
+                height: 100vh;
+                z-index: 100;
             }
             .content-area {
-                height: auto;
+                padding-left: 0 !important;
             }
+        }
+
+        /* Main content needs to move when sidebar is open on desktop */
+        .content-area {
+            transition: padding-left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-open .content-area {
+            padding-left: 380px;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="sidebar-open">
 
-    <div class="flex flex-col md:flex-row h-screen main-container">
-
-        <!-- Sidebar / Navigation -->
-        <aside class="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col z-20">
-            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
-                <a href="index.html" class="flex items-center">
-                    <img src="https://wisbe.xyz/assets/img/wisbelogo.png" class="h-8" alt="Wisbe Logo">
-                </a>
-                <button id="mobile-menu-toggle" class="md:hidden text-slate-500">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-
-            <nav id="sidebar-nav" class="flex-grow py-6 overflow-y-auto hidden md:block">
-                <p class="px-6 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Nuestros Servicios</p>
-                <div class="space-y-1">
-                    <button onclick="switchTab('listados')" class="sidebar-link w-full flex items-center px-6 py-4 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all active" data-tab="listados">
-                        <i class="fas fa-map-marker-alt w-6 text-center mr-3 opacity-70"></i>
-                        Listados Locales
-                    </button>
-                    <button onclick="switchTab('ads')" class="sidebar-link w-full flex items-center px-6 py-4 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all" data-tab="ads">
-                        <i class="fab fa-facebook-square w-6 text-center mr-3 opacity-70"></i>
-                        Facebook / Instagram
-                    </button>
-                    <button onclick="switchTab('web')" class="sidebar-link w-full flex items-center px-6 py-4 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all" data-tab="web">
-                        <i class="fas fa-globe w-6 text-center mr-3 opacity-70"></i>
-                        Website / SEO / Google Ads
-                    </button>
-                    <button onclick="switchTab('social')" class="sidebar-link w-full flex items-center px-6 py-4 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all" data-tab="social">
-                        <i class="fas fa-bullhorn w-6 text-center mr-3 opacity-70"></i>
-                        Marketing Redes Sociales
-                    </button>
-                    <button onclick="switchTab('kit')" class="sidebar-link w-full flex items-center px-6 py-4 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all" data-tab="kit">
-                        <i class="fas fa-briefcase w-6 text-center mr-3 opacity-70"></i>
-                        Marketing Kit
-                    </button>
-                </div>
-            </nav>
-
-            <div class="p-6 border-t border-slate-100 hidden md:block">
-                <a href="https://wa.me/#" class="flex items-center justify-center w-full py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
-                    <i class="fab fa-whatsapp mr-2 text-lg"></i> Contactar
+    <!-- Collapsible Sidebar -->
+    <div id="admin-sidebar" class="admin-sidebar-open">
+        <div class="admin-sidebar-tab" id="sidebar-tab">
+            <span class="uppercase font-black tracking-widest">SERVICIOS</span>
+        </div>
+        <div class="admin-sidebar-content">
+            <div class="mb-8">
+                <a href="index.html">
+                    <img src="https://wisbe.xyz/assets/img/wisbelogo.png" class="h-10 mx-auto" alt="Wisbe Logo">
                 </a>
             </div>
-        </aside>
 
-        <!-- Main Content Area -->
-        <main class="flex-grow relative overflow-hidden content-area">
+            <h3 class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-6">Nuestros Servicios</h3>
 
-            <!-- Listados Locales -->
-            <section id="content-listados" class="service-content active p-6 md:p-12 overflow-y-auto h-full custom-scroll">
-                <div class="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-12 h-full lg:justify-center">
-                    <div class="w-full lg:w-1/2 space-y-6">
-                        <span class="inline-block px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100">Visibilidad Local</span>
-                        <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Listados Locales para tu Negocio</h2>
-                        <p class="text-slate-600 text-lg leading-relaxed">
-                            Potenciamos tu presencia en los directorios más importantes. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                        </p>
-                        <ul class="space-y-3">
-                            <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Google Business Profile</li>
-                            <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Directorios Regionales</li>
-                            <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Gestión de Reseñas</li>
-                        </ul>
-                    </div>
-                    <div class="w-full lg:w-1/2">
-                        <div class="aspect-video rounded-[40px] overflow-hidden shadow-2xl border-8 border-white">
-                            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800" alt="Local Listings" class="w-full h-full object-cover">
-                        </div>
-                    </div>
+            <div id="services-list" class="space-y-1 overflow-y-auto flex-grow mb-6 pr-2 custom-scroll">
+                <div onclick="switchTab('listados')" class="sidebar-item active" data-tab="listados">
+                    <span class="block font-bold text-slate-800 text-sm">Listados Locales</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Visibilidad Regional</span>
                 </div>
-            </section>
-
-            <!-- Facebook / Instagram -->
-            <section id="content-ads" class="service-content p-6 md:p-12 overflow-y-auto h-full custom-scroll">
-                <div class="max-w-5xl mx-auto flex flex-col lg:flex-row-reverse items-center gap-12 h-full lg:justify-center">
-                    <div class="w-full lg:w-1/2 space-y-6">
-                        <span class="inline-block px-4 py-1.5 bg-pink-50 text-pink-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-pink-100">Publicidad Social</span>
-                        <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Facebook & Instagram Ads</h2>
-                        <p class="text-slate-600 text-lg leading-relaxed">
-                            Campañas segmentadas para llegar a tu cliente ideal. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                        </p>
-                        <div class="grid grid-cols-2 gap-4 pt-4">
-                            <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                                <i class="fas fa-chart-line text-pink-500 text-2xl mb-3"></i>
-                                <h4 class="font-bold text-sm">ROI Optimizado</h4>
-                            </div>
-                            <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                                <i class="fas fa-users text-pink-500 text-2xl mb-3"></i>
-                                <h4 class="font-bold text-sm">Audiencias Pro</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="w-full lg:w-1/2">
-                        <div class="aspect-square max-w-sm mx-auto rounded-[40px] overflow-hidden shadow-2xl border-8 border-white rotate-3">
-                            <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&q=80&w=800" alt="Social Media Ads" class="w-full h-full object-cover">
-                        </div>
-                    </div>
+                <div onclick="switchTab('ads')" class="sidebar-item" data-tab="ads">
+                    <span class="block font-bold text-slate-800 text-sm">Facebook / Instagram</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Ads & Meta Business</span>
                 </div>
-            </section>
-
-            <!-- Website / SEO -->
-            <section id="content-web" class="service-content p-6 md:p-12 overflow-y-auto h-full custom-scroll">
-                <div class="max-w-6xl mx-auto h-full flex flex-col justify-center">
-                    <div class="text-center mb-12 space-y-4">
-                        <span class="inline-block px-4 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100">Dominio Digital</span>
-                        <h2 class="text-4xl md:text-5xl font-black text-slate-900">Website, SEO & Google Ads</h2>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 space-y-4">
-                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
-                                <i class="fas fa-code"></i>
-                            </div>
-                            <h3 class="text-xl font-bold">Web Design</h3>
-                            <p class="text-sm text-slate-500 leading-relaxed">Sitios web modernos, rápidos y optimizados para conversión.</p>
-                        </div>
-                        <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 space-y-4">
-                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
-                                <i class="fas fa-search"></i>
-                            </div>
-                            <h3 class="text-xl font-bold">SEO Ranking</h3>
-                            <p class="text-sm text-slate-500 leading-relaxed">Posicionamiento orgánico para que tus clientes te encuentren primero.</p>
-                        </div>
-                        <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 space-y-4">
-                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
-                                <i class="fab fa-google"></i>
-                            </div>
-                            <h3 class="text-xl font-bold">Google Ads</h3>
-                            <p class="text-sm text-slate-500 leading-relaxed">Publicidad de búsqueda efectiva para generar leads inmediatos.</p>
-                        </div>
-                    </div>
+                <div onclick="switchTab('web')" class="sidebar-item" data-tab="web">
+                    <span class="block font-bold text-slate-800 text-sm">Website / SEO / Google Ads</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Desarrollo & Ranking</span>
                 </div>
-            </section>
-
-            <!-- Social Media Marketing -->
-            <section id="content-social" class="service-content p-6 md:p-12 overflow-y-auto h-full custom-scroll">
-                <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center h-full">
-                    <div class="order-2 lg:order-1">
-                        <div class="grid grid-cols-2 gap-4">
-                            <img src="https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&q=80&w=400" class="rounded-3xl shadow-lg mt-8" alt="SM 1">
-                            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400" class="rounded-3xl shadow-lg" alt="SM 2">
-                        </div>
-                    </div>
-                    <div class="space-y-6 order-1 lg:order-2">
-                        <span class="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-indigo-100">Social Content</span>
-                        <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Marketing de Redes Sociales</h2>
-                        <p class="text-slate-600 text-lg">
-                            Creamos contenido que conecta con tu audiencia y construye comunidad.
-                        </p>
-                        <div class="space-y-4">
-                            <div class="flex items-start gap-4">
-                                <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">1</div>
-                                <p class="text-slate-600 font-medium">Estrategia de Contenidos Personalizada</p>
-                            </div>
-                            <div class="flex items-start gap-4">
-                                <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">2</div>
-                                <p class="text-slate-600 font-medium">Diseño Gráfico y Edición de Video</p>
-                            </div>
-                            <div class="flex items-start gap-4">
-                                <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">3</div>
-                                <p class="text-slate-600 font-medium">Gestión de Comunidad (Community Manager)</p>
-                            </div>
-                        </div>
-                    </div>
+                <div onclick="switchTab('social')" class="sidebar-item" data-tab="social">
+                    <span class="block font-bold text-slate-800 text-sm">Marketing Redes Sociales</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Contenido & Estrategia</span>
                 </div>
-            </section>
-
-            <!-- Marketing Kit -->
-            <section id="content-kit" class="service-content p-6 md:p-12 overflow-y-auto h-full custom-scroll">
-                <div class="max-w-6xl mx-auto h-full flex flex-col">
-                    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div>
-                            <span class="inline-block px-4 py-1.5 bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-amber-100 mb-4">Material Físico</span>
-                            <h2 class="text-4xl font-black text-slate-900">Marketing Kit Profesional</h2>
-                        </div>
-
-                        <!-- Sub-menu -->
-                        <div class="flex flex-wrap gap-2">
-                            <button onclick="switchSubTab('camisetas')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all active" data-sub="camisetas">Camisetas</button>
-                            <button onclick="switchSubTab('flyers')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="flyers">Flyers</button>
-                            <button onclick="switchSubTab('posters')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="posters">Posters</button>
-                            <button onclick="switchSubTab('stickers')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="stickers">Stickers</button>
-                        </div>
-                    </div>
-
-                    <div id="sub-content-container" class="flex-grow">
-                        <!-- Camisetas -->
-                        <div id="sub-camisetas" class="sub-content flex flex-col lg:flex-row items-center gap-12 py-8">
-                            <div class="w-full lg:w-1/2 space-y-6">
-                                <h3 class="text-3xl font-bold text-slate-800">Camisetas Corporativas</h3>
-                                <p class="text-slate-600 leading-relaxed">
-                                    Diseños exclusivos para tu equipo o eventos. Alta calidad de impresión y materiales duraderos. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                </p>
-                                <div class="p-6 bg-amber-50 rounded-3xl border border-amber-100">
-                                    <p class="text-amber-800 text-sm font-bold"><i class="fas fa-info-circle mr-2"></i> Disponible en varias tallas y colores.</p>
-                                </div>
-                            </div>
-                            <div class="w-full lg:w-1/2">
-                                <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="T-shirts">
-                            </div>
-                        </div>
-
-                        <!-- Flyers -->
-                        <div id="sub-flyers" class="sub-content hidden flex flex-col lg:flex-row items-center gap-12 py-8">
-                            <div class="w-full lg:w-1/2 space-y-6">
-                                <h3 class="text-3xl font-bold text-slate-800">Flyers Impactantes</h3>
-                                <p class="text-slate-600 leading-relaxed">
-                                    Flyers de alta conversión para promocionar tus servicios. Diseño profesional que capta la atención al instante.
-                                </p>
-                            </div>
-                            <div class="w-full lg:w-1/2">
-                                <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="Flyers">
-                            </div>
-                        </div>
-
-                        <!-- Posters -->
-                        <div id="sub-posters" class="sub-content hidden flex flex-col lg:flex-row items-center gap-12 py-8">
-                            <div class="w-full lg:w-1/2 space-y-6">
-                                <h3 class="text-3xl font-bold text-slate-800">Posters de Gran Formato</h3>
-                                <p class="text-slate-600 leading-relaxed">
-                                    Decora tu local con posters que comuniquen tu marca. Impresión de gran formato con colores vibrantes.
-                                </p>
-                            </div>
-                            <div class="w-full lg:w-1/2">
-                                <img src="https://images.unsplash.com/photo-1583508915901-b5f84c1dcde1?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="Posters">
-                            </div>
-                        </div>
-
-                        <!-- Stickers -->
-                        <div id="sub-stickers" class="sub-content hidden flex flex-col lg:flex-row items-center gap-12 py-8">
-                            <div class="w-full lg:w-1/2 space-y-6">
-                                <h3 class="text-3xl font-bold text-slate-800">Stickers & Vinilos</h3>
-                                <p class="text-slate-600 leading-relaxed">
-                                    Stickers personalizados para todo tipo de superficies. Branding en cada detalle.
-                                </p>
-                            </div>
-                            <div class="w-full lg:w-1/2">
-                                <img src="https://images.unsplash.com/photo-1572375927902-1c716d522195?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="Stickers">
-                            </div>
-                        </div>
-                    </div>
+                <div onclick="switchTab('kit')" class="sidebar-item" data-tab="kit">
+                    <span class="block font-bold text-slate-800 text-sm">Marketing Kit</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Material Corporativo</span>
                 </div>
-            </section>
+            </div>
 
-        </main>
+            <div class="pt-6 border-t border-slate-100 mt-auto text-center">
+                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Wisbe Portfolio Pro</p>
+            </div>
+        </div>
     </div>
+
+    <!-- Main Content Area -->
+    <main class="h-screen content-area relative overflow-hidden">
+
+        <!-- Listados Locales -->
+        <section id="content-listados" class="service-content active p-6 md:p-20 overflow-y-auto h-full custom-scroll">
+            <div class="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-12 h-full lg:justify-center">
+                <div class="w-full lg:w-1/2 space-y-6">
+                    <span class="inline-block px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100">Visibilidad Local</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Listados Locales para tu Negocio</h2>
+                    <p class="text-slate-600 text-lg leading-relaxed">
+                        Potenciamos tu presencia en los directorios más importantes. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Google Business Profile</li>
+                        <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Directorios Regionales</li>
+                        <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Gestión de Reseñas</li>
+                    </ul>
+                </div>
+                <div class="w-full lg:w-1/2">
+                    <div class="aspect-video rounded-[40px] overflow-hidden shadow-2xl border-8 border-white">
+                        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800" alt="Local Listings" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Facebook / Instagram -->
+        <section id="content-ads" class="service-content p-6 md:p-20 overflow-y-auto h-full custom-scroll">
+            <div class="max-w-5xl mx-auto flex flex-col lg:flex-row-reverse items-center gap-12 h-full lg:justify-center">
+                <div class="w-full lg:w-1/2 space-y-6">
+                    <span class="inline-block px-4 py-1.5 bg-pink-50 text-pink-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-pink-100">Publicidad Social</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Facebook & Instagram Ads</h2>
+                    <p class="text-slate-600 text-lg leading-relaxed">
+                        Campañas segmentadas para llegar a tu cliente ideal. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 pt-4">
+                        <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                            <i class="fas fa-chart-line text-pink-500 text-2xl mb-3"></i>
+                            <h4 class="font-bold text-sm">ROI Optimizado</h4>
+                        </div>
+                        <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                            <i class="fas fa-users text-pink-500 text-2xl mb-3"></i>
+                            <h4 class="font-bold text-sm">Audiencias Pro</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full lg:w-1/2">
+                    <div class="aspect-square max-w-sm mx-auto rounded-[40px] overflow-hidden shadow-2xl border-8 border-white rotate-3">
+                        <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&q=80&w=800" alt="Social Media Ads" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Website / SEO -->
+        <section id="content-web" class="service-content p-6 md:p-20 overflow-y-auto h-full custom-scroll">
+            <div class="max-w-6xl mx-auto h-full flex flex-col justify-center">
+                <div class="text-center mb-12 space-y-4">
+                    <span class="inline-block px-4 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100">Dominio Digital</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900">Website, SEO & Google Ads</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 space-y-4">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Web Design</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed">Sitios web modernos, rápidos y optimizados para conversión.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 space-y-4">
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">SEO Ranking</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed">Posicionamiento orgánico para que tus clientes te encuentren primero.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 space-y-4">
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fab fa-google"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Google Ads</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed">Publicidad de búsqueda efectiva para generar leads inmediatos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social Media Marketing -->
+        <section id="content-social" class="service-content p-6 md:p-20 overflow-y-auto h-full custom-scroll">
+            <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center h-full">
+                <div class="order-2 lg:order-1">
+                    <div class="grid grid-cols-2 gap-4">
+                        <img src="https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&q=80&w=400" class="rounded-3xl shadow-lg mt-8" alt="SM 1">
+                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400" class="rounded-3xl shadow-lg" alt="SM 2">
+                    </div>
+                </div>
+                <div class="space-y-6 order-1 lg:order-2">
+                    <span class="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-indigo-100">Social Content</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Marketing de Redes Sociales</h2>
+                    <p class="text-slate-600 text-lg">
+                        Creamos contenido que conecta con tu audiencia y construye comunidad.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">1</div>
+                            <p class="text-slate-600 font-medium">Estrategia de Contenidos Personalizada</p>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">2</div>
+                            <p class="text-slate-600 font-medium">Diseño Gráfico y Edición de Video</p>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">3</div>
+                            <p class="text-slate-600 font-medium">Gestión de Comunidad (Community Manager)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Marketing Kit -->
+        <section id="content-kit" class="service-content p-6 md:p-20 overflow-y-auto h-full custom-scroll">
+            <div class="max-w-6xl mx-auto h-full flex flex-col">
+                <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <span class="inline-block px-4 py-1.5 bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-amber-100 mb-4">Material Físico</span>
+                        <h2 class="text-4xl font-black text-slate-900">Marketing Kit Profesional</h2>
+                    </div>
+
+                    <!-- Sub-menu -->
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="switchSubTab('camisetas')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all active" data-sub="camisetas">Camisetas</button>
+                        <button onclick="switchSubTab('flyers')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="flyers">Flyers</button>
+                        <button onclick="switchSubTab('posters')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="posters">Posters</button>
+                        <button onclick="switchSubTab('stickers')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="stickers">Stickers</button>
+                    </div>
+                </div>
+
+                <div id="sub-content-container" class="flex-grow">
+                    <!-- Camisetas -->
+                    <div id="sub-camisetas" class="sub-content flex flex-col lg:flex-row items-center gap-12 py-8">
+                        <div class="w-full lg:w-1/2 space-y-6">
+                            <h3 class="text-3xl font-bold text-slate-800">Camisetas Corporativas</h3>
+                            <p class="text-slate-600 leading-relaxed">
+                                Diseños exclusivos para tu equipo o eventos. Alta calidad de impresión y materiales duraderos. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            </p>
+                            <div class="p-6 bg-amber-50 rounded-3xl border border-amber-100">
+                                <p class="text-amber-800 text-sm font-bold"><i class="fas fa-info-circle mr-2"></i> Disponible en varias tallas y colores.</p>
+                            </div>
+                        </div>
+                        <div class="w-full lg:w-1/2">
+                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="T-shirts">
+                        </div>
+                    </div>
+
+                    <!-- Flyers -->
+                    <div id="sub-flyers" class="sub-content hidden flex flex-col lg:flex-row items-center gap-12 py-8">
+                        <div class="w-full lg:w-1/2 space-y-6">
+                            <h3 class="text-3xl font-bold text-slate-800">Flyers Impactantes</h3>
+                            <p class="text-slate-600 leading-relaxed">
+                                Flyers de alta conversión para promocionar tus servicios. Diseño profesional que capta la atención al instante.
+                            </p>
+                        </div>
+                        <div class="w-full lg:w-1/2">
+                            <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="Flyers">
+                        </div>
+                    </div>
+
+                    <!-- Posters -->
+                    <div id="sub-posters" class="sub-content hidden flex flex-col lg:flex-row items-center gap-12 py-8">
+                        <div class="w-full lg:w-1/2 space-y-6">
+                            <h3 class="text-3xl font-bold text-slate-800">Posters de Gran Formato</h3>
+                            <p class="text-slate-600 leading-relaxed">
+                                Decora tu local con posters que comuniquen tu marca. Impresión de gran formato con colores vibrantes.
+                            </p>
+                        </div>
+                        <div class="w-full lg:w-1/2">
+                            <img src="https://images.unsplash.com/photo-1583508915901-b5f84c1dcde1?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="Posters">
+                        </div>
+                    </div>
+
+                    <!-- Stickers -->
+                    <div id="sub-stickers" class="sub-content hidden flex flex-col lg:flex-row items-center gap-12 py-8">
+                        <div class="w-full lg:w-1/2 space-y-6">
+                            <h3 class="text-3xl font-bold text-slate-800">Stickers & Vinilos</h3>
+                            <p class="text-slate-600 leading-relaxed">
+                                Stickers personalizados para todo tipo de superficies. Branding en cada detalle.
+                            </p>
+                        </div>
+                        <div class="w-full lg:w-1/2">
+                            <img src="https://images.unsplash.com/photo-1572375927902-1c716d522195?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="Stickers">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
 
     <script>
         function switchTab(tabId) {
-            // Hide all content sections
             document.querySelectorAll('.service-content').forEach(section => {
                 section.classList.remove('active');
             });
 
-            // Show target section
             const target = document.getElementById('content-' + tabId);
             if (target) {
                 target.classList.add('active');
-                // Scroll to top of the section
                 target.scrollTop = 0;
             }
 
-            // Update sidebar active state
-            document.querySelectorAll('.sidebar-link').forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('data-tab') === tabId) {
-                    link.classList.add('active');
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-tab') === tabId) {
+                    item.classList.add('active');
                 }
             });
 
-            // On mobile, close menu after selection
+            // Auto-collapse on mobile after selection
             if (window.innerWidth < 768) {
-                document.getElementById('sidebar-nav').classList.add('hidden');
+                toggleSidebar();
             }
         }
 
         function switchSubTab(subId) {
-            // Hide all sub-content
             document.querySelectorAll('.sub-content').forEach(content => {
                 content.classList.add('hidden');
             });
 
-            // Show target sub-content
             const target = document.getElementById('sub-' + subId);
             if (target) {
                 target.classList.remove('hidden');
             }
 
-            // Update sub-tabs active state
             document.querySelectorAll('.sub-tab').forEach(tab => {
                 tab.classList.remove('active');
                 if (tab.getAttribute('data-sub') === subId) {
@@ -368,17 +389,21 @@
             });
         }
 
-        // Mobile Menu Toggle
-        document.getElementById('mobile-menu-toggle').onclick = function() {
-            document.getElementById('sidebar-nav').classList.toggle('hidden');
-        };
+        const sidebar = document.getElementById('admin-sidebar');
+        const tab = document.getElementById('sidebar-tab');
 
-        // Ensure resizing window shows sidebar again if it was hidden on mobile
-        window.onresize = function() {
-            if (window.innerWidth >= 768) {
-                document.getElementById('sidebar-nav').classList.remove('hidden');
-            }
-        };
+        function toggleSidebar() {
+            sidebar.classList.toggle('admin-sidebar-open');
+            sidebar.classList.toggle('admin-sidebar-closed');
+            document.body.classList.toggle('sidebar-open');
+        }
+
+        tab.onclick = toggleSidebar;
+
+        // Start closed on small screens
+        if (window.innerWidth < 1024) {
+            toggleSidebar();
+        }
     </script>
 </body>
 </html>
