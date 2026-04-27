@@ -67,6 +67,29 @@
             color: white;
         }
 
+        /* Language Switch Styles */
+        .lang-switch {
+            display: flex;
+            background: #f1f5f9;
+            padding: 2px;
+            border-radius: 9999px;
+            border: 1px solid #e2e8f0;
+        }
+        .lang-btn {
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: #3b82f6;
+        }
+
         .custom-scroll::-webkit-scrollbar {
             width: 4px;
         }
@@ -109,39 +132,44 @@
         <div class="admin-sidebar-tab" id="sidebar-tab">
             <span class="uppercase font-black tracking-widest">SERVICIOS</span>
         </div>
-        <div class="admin-sidebar-content">
-            <div class="mb-8">
+        <div class="admin-sidebar-content flex flex-col h-full">
+            <div class="mb-8 flex flex-col items-center gap-4">
                 <a href="index.html">
                     <img src="https://wisbe.xyz/assets/img/wisbelogo.png" class="h-10 mx-auto" alt="Wisbe Logo">
                 </a>
+                <!-- Language Switcher -->
+                <div class="lang-switch">
+                    <div onclick="setLanguage('en')" id="lang-en" class="lang-btn active">EN</div>
+                    <div onclick="setLanguage('es')" id="lang-es" class="lang-btn">ES</div>
+                </div>
             </div>
 
-            <h3 class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-6">Nuestros Servicios</h3>
+            <h3 class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-6" data-t="sidebar-title">Our Services</h3>
 
             <div id="services-list" class="space-y-1 overflow-y-auto flex-grow mb-6 pr-2 custom-scroll">
                 <div onclick="switchTab('listados')" class="sidebar-item active" data-tab="listados">
-                    <span class="block font-bold text-slate-800 text-sm">Listados Locales</span>
-                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Visibilidad Regional</span>
+                    <span class="block font-bold text-slate-800 text-sm" data-t="tab-listings">Local Listings</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase" data-t="tab-listings-sub">Regional Visibility</span>
                 </div>
                 <div onclick="switchTab('ads')" class="sidebar-item" data-tab="ads">
-                    <span class="block font-bold text-slate-800 text-sm">Facebook / Instagram</span>
-                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Ads & Meta Business</span>
+                    <span class="block font-bold text-slate-800 text-sm" data-t="tab-ads">Facebook / Instagram</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase" data-t="tab-ads-sub">Ads & Meta Business</span>
                 </div>
                 <div onclick="switchTab('web')" class="sidebar-item" data-tab="web">
-                    <span class="block font-bold text-slate-800 text-sm">Website / SEO / Google Ads</span>
-                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Desarrollo & Ranking</span>
+                    <span class="block font-bold text-slate-800 text-sm" data-t="tab-web">Website / SEO / Google Ads</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase" data-t="tab-web-sub">Development & Ranking</span>
                 </div>
                 <div onclick="switchTab('social')" class="sidebar-item" data-tab="social">
-                    <span class="block font-bold text-slate-800 text-sm">Marketing Redes Sociales</span>
-                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Contenido & Estrategia</span>
+                    <span class="block font-bold text-slate-800 text-sm" data-t="tab-social">Social Media Marketing</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase" data-t="tab-social-sub">Content & Strategy</span>
                 </div>
                 <div onclick="switchTab('kit')" class="sidebar-item" data-tab="kit">
-                    <span class="block font-bold text-slate-800 text-sm">Marketing Kit</span>
-                    <span class="block text-[10px] text-slate-400 font-medium uppercase">Material Corporativo</span>
+                    <span class="block font-bold text-slate-800 text-sm" data-t="tab-kit">Marketing Kit</span>
+                    <span class="block text-[10px] text-slate-400 font-medium uppercase" data-t="tab-kit-sub">Corporate Material</span>
                 </div>
             </div>
 
-            <div class="pt-6 border-t border-slate-100 mt-auto text-center">
+            <div class="pt-6 border-t border-slate-100 mt-auto text-center pb-4">
                 <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Wisbe Portfolio Pro</p>
             </div>
         </div>
@@ -150,24 +178,24 @@
     <!-- Main Content Area -->
     <main class="h-screen content-area relative overflow-hidden">
 
-        <!-- Listados Locales -->
+        <!-- Local Listings -->
         <section id="content-listados" class="service-content active p-6 md:p-20 overflow-y-auto h-full custom-scroll">
             <div class="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-12 h-full lg:justify-center">
                 <div class="w-full lg:w-1/2 space-y-6">
-                    <span class="inline-block px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100">Visibilidad Local</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Listados Locales para tu Negocio</h2>
-                    <p class="text-slate-600 text-lg leading-relaxed">
-                        Potenciamos tu presencia en los directorios más importantes, asegurando que tu negocio sea visible para todos tus clientes locales en todas las plataformas principales.
+                    <span class="inline-block px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100" data-t="listings-badge">Local Visibility</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight" data-t="listings-title">Local Listings for your Business</h2>
+                    <p class="text-slate-600 text-lg leading-relaxed" data-t="listings-desc">
+                        We boost your presence in the most important directories, ensuring your business is visible to all your local customers across all major platforms.
                     </p>
-                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
-                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Google My Business listado</li>
-                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Apple iMaps Listados</li>
-                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Yelp Listados</li>
-                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Bing Listados</li>
-                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> TripAdvisor Listados</li>
-                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> All Menu Listados</li>
-                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Food Booking Listados</li>
-                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Otros listados para negocios</li>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2" id="listings-list">
+                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Google My Business listing</li>
+                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Apple iMaps Listings</li>
+                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Yelp Listings</li>
+                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Bing Listings</li>
+                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> TripAdvisor Listings</li>
+                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> All Menu Listings</li>
+                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Food Booking Listings</li>
+                        <li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> Other listings for businesses</li>
                     </ul>
                 </div>
                 <div class="w-full lg:w-1/2">
@@ -182,19 +210,19 @@
         <section id="content-ads" class="service-content p-6 md:p-20 overflow-y-auto h-full custom-scroll">
             <div class="max-w-5xl mx-auto flex flex-col lg:flex-row-reverse items-center gap-12 h-full lg:justify-center">
                 <div class="w-full lg:w-1/2 space-y-6">
-                    <span class="inline-block px-4 py-1.5 bg-pink-50 text-pink-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-pink-100">Publicidad Social</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Facebook & Instagram Ads</h2>
-                    <p class="text-slate-600 text-lg leading-relaxed">
-                        Potenciamos tu marca con campañas de publicidad pagada y estrategias avanzadas en Meta Business para maximizar tu impacto.
+                    <span class="inline-block px-4 py-1.5 bg-pink-50 text-pink-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-pink-100" data-t="ads-badge">Social Advertising</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight" data-t="ads-title">Facebook & Instagram Ads</h2>
+                    <p class="text-slate-600 text-lg leading-relaxed" data-t="ads-desc">
+                        We boost your brand with paid advertising campaigns and advanced strategies in Meta Business to maximize your impact.
                     </p>
                     <div class="grid grid-cols-2 gap-4 pt-4">
                         <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                             <i class="fas fa-ad text-pink-500 text-2xl mb-3"></i>
-                            <h4 class="font-bold text-sm">Publicidad Pagada</h4>
+                            <h4 class="font-bold text-sm" data-t="ads-card-1">Paid Ads</h4>
                         </div>
                         <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                             <i class="fas fa-briefcase text-pink-500 text-2xl mb-3"></i>
-                            <h4 class="font-bold text-sm">Meta Business</h4>
+                            <h4 class="font-bold text-sm" data-t="ads-card-2">Meta Business</h4>
                         </div>
                     </div>
                 </div>
@@ -210,24 +238,24 @@
         <section id="content-web" class="service-content p-6 md:p-20 overflow-y-auto h-full custom-scroll">
             <div class="max-w-6xl mx-auto h-full flex flex-col justify-center">
                 <div class="text-center mb-12 space-y-4">
-                    <span class="inline-block px-4 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100">Dominio Digital</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-slate-900">Website, SEO & Google Ads</h2>
+                    <span class="inline-block px-4 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100" data-t="web-badge">Digital Domain</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900" data-t="web-title">Website, SEO & Google Ads</h2>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 space-y-4">
                         <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
                             <i class="fas fa-code"></i>
                         </div>
-                        <h3 class="text-xl font-bold">Web Design</h3>
-                        <p class="text-sm text-slate-500 leading-relaxed">Sitio web deluxe, hosting y dominio.</p>
+                        <h3 class="text-xl font-bold" data-t="web-card-1-title">Web Design</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed" data-t="web-card-1-desc">Deluxe website, hosting and domain.</p>
                     </div>
                     <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 space-y-4">
                         <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
                             <i class="fas fa-search"></i>
                         </div>
-                        <h3 class="text-xl font-bold">SEO Ranking</h3>
-                        <ul class="text-sm text-slate-500 leading-relaxed list-disc list-inside">
-                            <li>Investigación de palabras clave</li>
+                        <h3 class="text-xl font-bold" data-t="web-card-2-title">SEO Ranking</h3>
+                        <ul class="text-sm text-slate-500 leading-relaxed list-disc list-inside" id="seo-list">
+                            <li>Keyword Research</li>
                             <li>SEO</li>
                         </ul>
                     </div>
@@ -235,12 +263,12 @@
                         <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
                             <i class="fab fa-google"></i>
                         </div>
-                        <h3 class="text-xl font-bold">Google Ads</h3>
-                        <ul class="text-sm text-slate-500 leading-relaxed list-disc list-inside">
-                            <li>Configuración y estructuración de la cuenta</li>
-                            <li>Creación de campañas y anuncios</li>
-                            <li>Optimización continua de campañas y anuncios</li>
-                            <li>Inversión ilimitada en Adwords y Ads</li>
+                        <h3 class="text-xl font-bold" data-t="web-card-3-title">Google Ads</h3>
+                        <ul class="text-sm text-slate-500 leading-relaxed list-disc list-inside" id="google-ads-list">
+                            <li>Account setup and structuring</li>
+                            <li>Creation of campaigns and ads</li>
+                            <li>Continuous optimization of campaigns and ads</li>
+                            <li>Unlimited investment in Adwords and Ads</li>
                         </ul>
                     </div>
                 </div>
@@ -257,23 +285,23 @@
                     </div>
                 </div>
                 <div class="space-y-6 order-1 lg:order-2">
-                    <span class="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-indigo-100">Social Content</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Marketing de Redes Sociales</h2>
-                    <p class="text-slate-600 text-lg">
-                        Creamos contenido estratégico que conecta con tu audiencia. Disfruta de nuestro servicio <span class="text-indigo-600 font-black">GRATIS durante los primeros 3 meses</span>.
+                    <span class="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-indigo-100" data-t="social-badge">Social Content</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight" data-t="social-title">Social Media Marketing</h2>
+                    <p class="text-slate-600 text-lg" data-t="social-desc">
+                        We create strategic content that connects with your audience.
                     </p>
-                    <div class="space-y-4">
+                    <div class="space-y-4" id="social-points">
                         <div class="flex items-start gap-4">
                             <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">1</div>
-                            <p class="text-slate-600 font-medium">4 publicaciones mensuales para promocionar tu solución de pedidos en línea.</p>
+                            <p class="text-slate-600 font-medium">4 monthly posts to promote your online ordering solution.</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">2</div>
-                            <p class="text-slate-600 font-medium">Creación de nuevo contenido de diseño para publicar en redes sociales o imprimir.</p>
+                            <p class="text-slate-600 font-medium">Creation of new design content to post on social media or print.</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">3</div>
-                            <p class="text-slate-600 font-medium">Video de 30 segundos con todas tus promociones.</p>
+                            <p class="text-slate-600 font-medium">30-second video with all your promotions.</p>
                         </div>
                     </div>
                 </div>
@@ -285,68 +313,74 @@
             <div class="max-w-6xl mx-auto h-full flex flex-col">
                 <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <span class="inline-block px-4 py-1.5 bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-amber-100 mb-4">Material Físico</span>
-                        <h2 class="text-4xl font-black text-slate-900">Marketing Kit Profesional</h2>
+                        <span class="inline-block px-4 py-1.5 bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-amber-100 mb-4" data-t="kit-badge">Physical Material</span>
+                        <h2 class="text-4xl font-black text-slate-900" data-t="kit-title">Marketing Kit</h2>
                     </div>
 
                     <!-- Sub-menu -->
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="switchSubTab('starter')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all active" data-sub="starter">Starter</button>
-                        <button onclick="switchSubTab('premium')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="premium">Premium</button>
-                        <button onclick="switchSubTab('deluxe')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="deluxe">Deluxe</button>
+                        <button onclick="switchSubTab('restaurante')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all active" data-sub="restaurante" data-t="sub-restaurante">Restaurante</button>
+                        <button onclick="switchSubTab('beauty')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="beauty" data-t="sub-beauty">Beauty</button>
+                        <button onclick="switchSubTab('gym')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="gym" data-t="sub-gym">Gym</button>
+                        <button onclick="switchSubTab('custom')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="custom" data-t="sub-custom">Custom</button>
                     </div>
                 </div>
 
                 <div id="sub-content-container" class="flex-grow">
-                    <!-- Starter -->
-                    <div id="sub-starter" class="sub-content flex flex-col lg:flex-row items-center gap-12 py-8">
-                        <div class="w-full lg:w-1/2 space-y-6">
-                            <h3 class="text-3xl font-bold text-slate-800">Starter Marketing Kit <span class="text-amber-600">$399</span></h3>
-                            <ul class="space-y-3">
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 2 Sheet Posters (7.12x10.27")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 25 Table QR Codes (5.08x7.83")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 25 Flyers (3.96x5.15")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 360 Stickers (2x2" - 15 sheets)</li>
-                            </ul>
-                        </div>
-                        <div class="w-full lg:w-1/2">
-                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="Starter Kit">
+                    <!-- Restaurante -->
+                    <div id="sub-restaurante" class="sub-content py-8 space-y-12">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <!-- Starter -->
+                            <div class="space-y-4">
+                                <h3 class="text-xl font-bold text-slate-800" id="kit-starter-title">Starter Marketing Kit <span class="text-amber-600">$399</span></h3>
+                                <ul class="space-y-2 text-sm text-slate-600 font-medium" id="kit-starter-list">
+                                    <li>- 2 Sheet Posters (7.12x10.27")</li>
+                                    <li>- 25 Table QR Codes (5.08x7.83")</li>
+                                    <li>- 25 Flyers (3.96x5.15")</li>
+                                    <li>- 360 Stickers (2x2" - 15 sheets)</li>
+                                </ul>
+                            </div>
+                            <!-- Premium -->
+                            <div class="space-y-4">
+                                <h3 class="text-xl font-bold text-slate-800" id="kit-premium-title">Premium Marketing Kit <span class="text-amber-600">$555.04</span></h3>
+                                <ul class="space-y-2 text-sm text-slate-600 font-medium" id="kit-premium-list">
+                                    <li>- 35 Table QR Codes (5.08x7.83")</li>
+                                    <li>- 2 Door Posters (27x40")</li>
+                                    <li>- 4 Sheet Posters (7.12x10.27")</li>
+                                    <li>- 480 Stickers (20 sheets)</li>
+                                    <li>- 50 Promotional Cards (3.5x2")</li>
+                                </ul>
+                            </div>
+                            <!-- Deluxe -->
+                            <div class="space-y-4">
+                                <h3 class="text-xl font-bold text-slate-800" id="kit-deluxe-title">Deluxe Marketing Kit <span class="text-amber-600">$1372.48</span></h3>
+                                <ul class="space-y-2 text-sm text-slate-600 font-medium" id="kit-deluxe-list">
+                                    <li>- 100 Promotional Cards (3.5x2")</li>
+                                    <li>- 100 Flyers (3.96x5.15")</li>
+                                    <li>- 2 Door Posters (27x40")</li>
+                                    <li>- 6 Sheet Posters (7.12x10.27")</li>
+                                    <li>- 40 Table QR Codes (5.08x7.83")</li>
+                                    <li>- 600 Stickers (20 sheets)</li>
+                                    <li>- 15 Physical Menus (8.5x14" - 8.5x11")</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Premium -->
-                    <div id="sub-premium" class="sub-content hidden flex flex-col lg:flex-row items-center gap-12 py-8">
-                        <div class="w-full lg:w-1/2 space-y-6">
-                            <h3 class="text-3xl font-bold text-slate-800">Premium Marketing Kit <span class="text-amber-600">$555.04</span></h3>
-                            <ul class="space-y-3">
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 35 Table QR Codes (5.08x7.83")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 2 Door Posters (27x40")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 4 Sheet Posters (7.12x10.27")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 480 Stickers (20 sheets)</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 50 Promotional Cards (3.5x2")</li>
-                            </ul>
-                        </div>
-                        <div class="w-full lg:w-1/2">
-                            <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="Premium Kit">
+                    <!-- Other subtabs (empty structure as requested) -->
+                    <div id="sub-beauty" class="sub-content hidden py-8">
+                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="kit-beauty-soon">
+                            Beauty Content Coming Soon
                         </div>
                     </div>
-
-                    <!-- Deluxe -->
-                    <div id="sub-deluxe" class="sub-content hidden flex flex-col lg:flex-row items-center gap-12 py-8">
-                        <div class="w-full lg:w-1/2 space-y-6">
-                            <h3 class="text-3xl font-bold text-slate-800">Deluxe Marketing Kit <span class="text-amber-600">$1372.48</span></h3>
-                            <ul class="space-y-3">
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 100 Promotional Cards (3.5x2")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 100 Flyers (3.96x5.15")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 2 Door Posters (27x40")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 6 Sheet Posters (7.12x10.27")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 40 Table QR Codes (5.08x7.83")</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 600 Stickers (20 sheets)</li>
-                                <li class="flex items-center text-slate-700 font-medium"><i class="fas fa-check-circle text-amber-500 mr-3"></i> 15 Physical Menus (8.5x14" - 8.5x11")</li>
-                            </ul>
+                    <div id="sub-gym" class="sub-content hidden py-8">
+                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="kit-gym-soon">
+                            Gym Content Coming Soon
                         </div>
-                        <div class="w-full lg:w-1/2">
-                            <img src="https://images.unsplash.com/photo-1583508915901-b5f84c1dcde1?auto=format&fit=crop&q=80&w=800" class="w-full h-80 object-cover rounded-[40px] shadow-2xl" alt="Deluxe Kit">
+                    </div>
+                    <div id="sub-custom" class="sub-content hidden py-8">
+                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="kit-custom-soon">
+                            Custom Content Coming Soon
                         </div>
                     </div>
                 </div>
@@ -356,6 +390,261 @@
     </main>
 
     <script>
+        const translations = {
+            es: {
+                'sidebar-title': 'Nuestros Servicios',
+                'tab-listings': 'Listados Locales',
+                'tab-listings-sub': 'Visibilidad Regional',
+                'tab-ads': 'Facebook / Instagram',
+                'tab-ads-sub': 'Ads & Meta Business',
+                'tab-web': 'Website / SEO / Google Ads',
+                'tab-web-sub': 'Desarrollo & Ranking',
+                'tab-social': 'Marketing Redes Sociales',
+                'tab-social-sub': 'Contenido & Estrategia',
+                'tab-kit': 'Marketing Kit',
+                'tab-kit-sub': 'Material Corporativo',
+
+                'listings-badge': 'Visibilidad Local',
+                'listings-title': 'Listados Locales para tu Negocio',
+                'listings-desc': 'Potenciamos tu presencia en los directorios más importantes, asegurando que tu negocio sea visible para todos tus clientes locales en todas las plataformas principales.',
+                'listings-list': [
+                    'Google My Business listado',
+                    'Apple iMaps Listados',
+                    'Yelp Listados',
+                    'Bing Listados',
+                    'TripAdvisor Listados',
+                    'All Menu Listados',
+                    'Food Booking Listados',
+                    'Otros listados para negocios'
+                ],
+
+                'ads-badge': 'Publicidad Social',
+                'ads-title': 'Facebook & Instagram Ads',
+                'ads-desc': 'Potenciamos tu marca con campañas de publicidad pagada y estrategias avanzadas en Meta Business para maximizar tu impacto.',
+                'ads-card-1': 'Publicidad Pagada',
+                'ads-card-2': 'Meta Business',
+
+                'web-badge': 'Dominio Digital',
+                'web-title': 'Website, SEO & Google Ads',
+                'web-card-1-title': 'Web Design',
+                'web-card-1-desc': 'Sitio web deluxe, hosting y dominio.',
+                'web-card-2-title': 'SEO Ranking',
+                'seo-list': [
+                    'Investigación de palabras clave',
+                    'SEO'
+                ],
+                'web-card-3-title': 'Google Ads',
+                'google-ads-list': [
+                    'Configuración y estructuración de la cuenta',
+                    'Creación de campañas y anuncios',
+                    'Optimización continua de campañas y anuncios',
+                    'Inversión ilimitada en Adwords y Ads'
+                ],
+
+                'social-badge': 'Contenido Social',
+                'social-title': 'Marketing de Redes Sociales',
+                'social-desc': 'Creamos contenido estratégico que conecta con tu audiencia.',
+                'social-points': [
+                    '4 publicaciones mensuales para promocionar tu solución de pedidos en línea.',
+                    'Creación de nuevo contenido de diseño para publicar en redes sociales o imprimir.',
+                    'Video de 30 segundos con todas tus promociones.'
+                ],
+
+                'kit-badge': 'Material Físico',
+                'kit-title': 'Marketing Kit',
+                'sub-restaurante': 'Restaurante',
+                'sub-beauty': 'Beauty',
+                'sub-gym': 'Gym',
+                'sub-custom': 'Custom',
+                'kit-beauty-soon': 'Contenido Beauty Próximamente',
+                'kit-gym-soon': 'Contenido Gym Próximamente',
+                'kit-custom-soon': 'Contenido Custom Próximamente',
+
+                'kit-starter-title': 'Starter Marketing Kit <span class="text-amber-600">$399</span>',
+                'kit-starter-list': [
+                    '- 2 Sheet Posters (7.12x10.27")',
+                    '- 25 Table QR Codes (5.08x7.83")',
+                    '- 25 Flyers (3.96x5.15")',
+                    '- 360 Stickers (2x2" - 15 hojas)'
+                ],
+                'kit-premium-title': 'Premium Marketing Kit <span class="text-amber-600">$555.04</span>',
+                'kit-premium-list': [
+                    '- 35 Table QR Codes (5.08x7.83")',
+                    '- 2 Door Posters (27x40")',
+                    '- 4 Sheet Posters (7.12x10.27")',
+                    '- 480 Stickers (20 hojas)',
+                    '- 50 Promotional Cards (3.5x2")'
+                ],
+                'kit-deluxe-title': 'Deluxe Marketing Kit <span class="text-amber-600">$1372.48</span>',
+                'kit-deluxe-list': [
+                    '- 100 Promotional Cards (3.5x2")',
+                    '- 100 Flyers (3.96x5.15")',
+                    '- 2 Door Posters (27x40")',
+                    '- 6 Sheet Posters (7.12x10.27")',
+                    '- 40 Table QR Codes (5.08x7.83")',
+                    '- 600 Stickers (20 hojas)',
+                    '- 15 Menús Físicos (8.5x14" - 8.5x11")'
+                ]
+            },
+            en: {
+                'sidebar-title': 'Our Services',
+                'tab-listings': 'Local Listings',
+                'tab-listings-sub': 'Regional Visibility',
+                'tab-ads': 'Facebook / Instagram',
+                'tab-ads-sub': 'Ads & Meta Business',
+                'tab-web': 'Website / SEO / Google Ads',
+                'tab-web-sub': 'Development & Ranking',
+                'tab-social': 'Social Media Marketing',
+                'tab-social-sub': 'Content & Strategy',
+                'tab-kit': 'Marketing Kit',
+                'tab-kit-sub': 'Corporate Material',
+
+                'listings-badge': 'Local Visibility',
+                'listings-title': 'Local Listings for your Business',
+                'listings-desc': 'We boost your presence in the most important directories, ensuring your business is visible to all your local customers across all major platforms.',
+                'listings-list': [
+                    'Google My Business listing',
+                    'Apple iMaps Listings',
+                    'Yelp Listings',
+                    'Bing Listings',
+                    'TripAdvisor Listings',
+                    'All Menu Listings',
+                    'Food Booking Listings',
+                    'Other listings for businesses'
+                ],
+
+                'ads-badge': 'Social Advertising',
+                'ads-title': 'Facebook & Instagram Ads',
+                'ads-desc': 'We boost your brand with paid advertising campaigns and advanced strategies in Meta Business to maximize your impact.',
+                'ads-card-1': 'Paid Ads',
+                'ads-card-2': 'Meta Business',
+
+                'web-badge': 'Digital Domain',
+                'web-title': 'Website, SEO & Google Ads',
+                'web-card-1-title': 'Web Design',
+                'web-card-1-desc': 'Deluxe website, hosting and domain.',
+                'web-card-2-title': 'SEO Ranking',
+                'seo-list': [
+                    'Keyword Research',
+                    'SEO'
+                ],
+                'web-card-3-title': 'Google Ads',
+                'google-ads-list': [
+                    'Account setup and structuring',
+                    'Creation of campaigns and ads',
+                    'Continuous optimization of campaigns and ads',
+                    'Unlimited investment in Adwords and Ads'
+                ],
+
+                'social-badge': 'Social Content',
+                'social-title': 'Social Media Marketing',
+                'social-desc': 'We create strategic content that connects with your audience.',
+                'social-points': [
+                    '4 monthly posts to promote your online ordering solution.',
+                    'Creation of new design content to post on social media or print.',
+                    '30-second video with all your promotions.'
+                ],
+
+                'kit-badge': 'Physical Material',
+                'kit-title': 'Marketing Kit',
+                'sub-restaurante': 'Restaurante',
+                'sub-beauty': 'Beauty',
+                'sub-gym': 'Gym',
+                'sub-custom': 'Custom',
+                'kit-beauty-soon': 'Beauty Content Coming Soon',
+                'kit-gym-soon': 'Gym Content Coming Soon',
+                'kit-custom-soon': 'Custom Content Coming Soon',
+
+                'kit-starter-title': 'Starter Marketing Kit <span class="text-amber-600">$399</span>',
+                'kit-starter-list': [
+                    '- 2 Sheet Posters (7.12x10.27")',
+                    '- 25 Table QR Codes (5.08x7.83")',
+                    '- 25 Flyers (3.96x5.15")',
+                    '- 360 Stickers (2x2" - 15 sheets)'
+                ],
+                'kit-premium-title': 'Premium Marketing Kit <span class="text-amber-600">$555.04</span>',
+                'kit-premium-list': [
+                    '- 35 Table QR Codes (5.08x7.83")',
+                    '- 2 Door Posters (27x40")',
+                    '- 4 Sheet Posters (7.12x10.27")',
+                    '- 480 Stickers (20 sheets)',
+                    '- 50 Promotional Cards (3.5x2")'
+                ],
+                'kit-deluxe-title': 'Deluxe Marketing Kit <span class="text-amber-600">$1372.48</span>',
+                'kit-deluxe-list': [
+                    '- 100 Promotional Cards (3.5x2")',
+                    '- 100 Flyers (3.96x5.15")',
+                    '- 2 Door Posters (27x40")',
+                    '- 6 Sheet Posters (7.12x10.27")',
+                    '- 40 Table QR Codes (5.08x7.83")',
+                    '- 600 Stickers (20 sheets)',
+                    '- 15 Physical Menus (8.5x14" - 8.5x11")'
+                ]
+            }
+        };
+
+        let currentLang = 'en';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+
+            // Update switch UI
+            document.getElementById('lang-en').classList.remove('active');
+            document.getElementById('lang-es').classList.remove('active');
+            document.getElementById('lang-' + lang).classList.add('active');
+
+            // Update simple text fields
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                if (translations[lang][key]) {
+                    el.innerText = translations[lang][key];
+                }
+            });
+
+            // Update lists
+            const t = translations[lang];
+
+            // Local Listings
+            const listingsUl = document.getElementById('listings-list');
+            if (listingsUl) {
+                listingsUl.innerHTML = t['listings-list'].map(item =>
+                    `<li class="flex items-center text-slate-700 font-medium text-sm"><i class="fas fa-check-circle text-blue-500 mr-3"></i> ${item}</li>`
+                ).join('');
+            }
+
+            // SEO List
+            const seoUl = document.getElementById('seo-list');
+            if (seoUl) {
+                seoUl.innerHTML = t['seo-list'].map(item => `<li>${item}</li>`).join('');
+            }
+
+            // Google Ads List
+            const gadsUl = document.getElementById('google-ads-list');
+            if (gadsUl) {
+                gadsUl.innerHTML = t['google-ads-list'].map(item => `<li>${item}</li>`).join('');
+            }
+
+            // Social Points
+            const socialPoints = document.getElementById('social-points');
+            if (socialPoints) {
+                socialPoints.innerHTML = t['social-points'].map((item, index) => `
+                    <div class="flex items-start gap-4">
+                        <div class="mt-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px] flex-shrink-0">${index + 1}</div>
+                        <p class="text-slate-600 font-medium">${item}</p>
+                    </div>
+                `).join('');
+            }
+
+            // Marketing Kit Details
+            document.getElementById('kit-starter-title').innerHTML = t['kit-starter-title'];
+            document.getElementById('kit-premium-title').innerHTML = t['kit-premium-title'];
+            document.getElementById('kit-deluxe-title').innerHTML = t['kit-deluxe-title'];
+
+            document.getElementById('kit-starter-list').innerHTML = t['kit-starter-list'].map(item => `<li>${item}</li>`).join('');
+            document.getElementById('kit-premium-list').innerHTML = t['kit-premium-list'].map(item => `<li>${item}</li>`).join('');
+            document.getElementById('kit-deluxe-list').innerHTML = t['kit-deluxe-list'].map(item => `<li>${item}</li>`).join('');
+        }
+
         function switchTab(tabId) {
             document.querySelectorAll('.service-content').forEach(section => {
                 section.classList.remove('active');
@@ -413,6 +702,9 @@
         if (window.innerWidth < 1024) {
             toggleSidebar();
         }
+
+        // Initialize language
+        setLanguage('en');
     </script>
 </body>
 </html>
