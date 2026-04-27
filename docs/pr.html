@@ -67,26 +67,80 @@
             color: white;
         }
 
-        /* Language Switch Styles */
-        .lang-switch {
+        /* Language Switch Styles - Top Right Toggle */
+        .top-lang-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
             display: flex;
-            background: #f1f5f9;
-            padding: 2px;
-            border-radius: 9999px;
-            border: 1px solid #e2e8f0;
-        }
-        .lang-btn {
-            padding: 4px 12px;
-            border-radius: 9999px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .lang-btn.active {
+            align-items: center;
+            gap: 12px;
             background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 8px 16px;
+            border-radius: 9999px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f1f5f9;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3b82f6;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #3b82f6;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .lang-label {
+            font-size: 11px;
+            font-weight: 900;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .lang-label.active {
             color: #3b82f6;
         }
 
@@ -127,6 +181,16 @@
 </head>
 <body class="sidebar-open">
 
+    <!-- Top Language Toggle -->
+    <div class="top-lang-toggle">
+        <span class="lang-label" id="label-en">EN</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="langToggle" onchange="toggleLanguage()">
+            <span class="slider"></span>
+        </label>
+        <span class="lang-label" id="label-es">ES</span>
+    </div>
+
     <!-- Collapsible Sidebar -->
     <div id="admin-sidebar" class="admin-sidebar-open">
         <div class="admin-sidebar-tab" id="sidebar-tab">
@@ -137,11 +201,6 @@
                 <a href="index.html">
                     <img src="https://wisbe.xyz/assets/img/wisbelogo.png" class="h-10 mx-auto" alt="Wisbe Logo">
                 </a>
-                <!-- Language Switcher -->
-                <div class="lang-switch">
-                    <div onclick="setLanguage('en')" id="lang-en" class="lang-btn active">EN</div>
-                    <div onclick="setLanguage('es')" id="lang-es" class="lang-btn">ES</div>
-                </div>
             </div>
 
             <h3 class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-6" data-t="sidebar-title">Our Services</h3>
@@ -208,28 +267,9 @@
 
         <!-- Facebook / Instagram -->
         <section id="content-ads" class="service-content p-6 md:p-20 overflow-y-auto h-full custom-scroll">
-            <div class="max-w-5xl mx-auto flex flex-col lg:flex-row-reverse items-center gap-12 h-full lg:justify-center">
-                <div class="w-full lg:w-1/2 space-y-6">
-                    <span class="inline-block px-4 py-1.5 bg-pink-50 text-pink-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-pink-100" data-t="ads-badge">Social Advertising</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight" data-t="ads-title">Facebook & Instagram Ads</h2>
-                    <p class="text-slate-600 text-lg leading-relaxed" data-t="ads-desc">
-                        We boost your brand with paid advertising campaigns and advanced strategies in Meta Business to maximize your impact.
-                    </p>
-                    <div class="grid grid-cols-2 gap-4 pt-4">
-                        <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                            <i class="fas fa-ad text-pink-500 text-2xl mb-3"></i>
-                            <h4 class="font-bold text-sm" data-t="ads-card-1">Paid Ads</h4>
-                        </div>
-                        <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                            <i class="fas fa-briefcase text-pink-500 text-2xl mb-3"></i>
-                            <h4 class="font-bold text-sm" data-t="ads-card-2">Meta Business</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="w-full lg:w-1/2">
-                    <div class="aspect-square max-w-sm mx-auto rounded-[40px] overflow-hidden shadow-2xl border-8 border-white rotate-3">
-                        <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&q=80&w=800" alt="Social Media Ads" class="w-full h-full object-cover">
-                    </div>
+            <div class="max-w-5xl mx-auto flex flex-col items-center justify-center h-full">
+                <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="coming-soon">
+                    Content Coming Soon
                 </div>
             </div>
         </section>
@@ -319,16 +359,23 @@
 
                     <!-- Sub-menu -->
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="switchSubTab('restaurante')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all active" data-sub="restaurante" data-t="sub-restaurante">Restaurante</button>
-                        <button onclick="switchSubTab('beauty')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="beauty" data-t="sub-beauty">Beauty</button>
-                        <button onclick="switchSubTab('gym')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="gym" data-t="sub-gym">Gym</button>
-                        <button onclick="switchSubTab('custom')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="custom" data-t="sub-custom">Custom</button>
+                        <button onclick="switchSubTab('camisetas')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all active" data-sub="camisetas" data-t="sub-camisetas">Camisetas</button>
+                        <button onclick="switchSubTab('flyers')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="flyers" data-t="sub-flyers">Flyers</button>
+                        <button onclick="switchSubTab('posters')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="posters" data-t="sub-posters">Posters</button>
+                        <button onclick="switchSubTab('stickers')" class="sub-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all" data-sub="stickers" data-t="sub-stickers">Stickers</button>
                     </div>
                 </div>
 
                 <div id="sub-content-container" class="flex-grow">
-                    <!-- Restaurante -->
-                    <div id="sub-restaurante" class="sub-content py-8 space-y-12">
+                    <!-- Camisetas -->
+                    <div id="sub-camisetas" class="sub-content py-8">
+                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="coming-soon">
+                            Content Coming Soon
+                        </div>
+                    </div>
+
+                    <!-- Flyers (Containing Kits) -->
+                    <div id="sub-flyers" class="sub-content hidden py-8 space-y-12">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <!-- Starter -->
                             <div class="space-y-4">
@@ -367,20 +414,15 @@
                         </div>
                     </div>
 
-                    <!-- Other subtabs (empty structure as requested) -->
-                    <div id="sub-beauty" class="sub-content hidden py-8">
-                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="kit-beauty-soon">
-                            Beauty Content Coming Soon
+                    <!-- Other subtabs -->
+                    <div id="sub-posters" class="sub-content hidden py-8">
+                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="coming-soon">
+                            Content Coming Soon
                         </div>
                     </div>
-                    <div id="sub-gym" class="sub-content hidden py-8">
-                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="kit-gym-soon">
-                            Gym Content Coming Soon
-                        </div>
-                    </div>
-                    <div id="sub-custom" class="sub-content hidden py-8">
-                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="kit-custom-soon">
-                            Custom Content Coming Soon
+                    <div id="sub-stickers" class="sub-content hidden py-8">
+                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="coming-soon">
+                            Content Coming Soon
                         </div>
                     </div>
                 </div>
@@ -452,13 +494,11 @@
 
                 'kit-badge': 'Material Físico',
                 'kit-title': 'Marketing Kit',
-                'sub-restaurante': 'Restaurante',
-                'sub-beauty': 'Beauty',
-                'sub-gym': 'Gym',
-                'sub-custom': 'Custom',
-                'kit-beauty-soon': 'Contenido Beauty Próximamente',
-                'kit-gym-soon': 'Contenido Gym Próximamente',
-                'kit-custom-soon': 'Contenido Custom Próximamente',
+                'sub-camisetas': 'Camisetas',
+                'sub-flyers': 'Flyers',
+                'sub-posters': 'Posters',
+                'sub-stickers': 'Stickers',
+                'coming-soon': 'Contenido Próximamente',
 
                 'kit-starter-title': 'Starter Marketing Kit <span class="text-amber-600">$399</span>',
                 'kit-starter-list': [
@@ -547,13 +587,11 @@
 
                 'kit-badge': 'Physical Material',
                 'kit-title': 'Marketing Kit',
-                'sub-restaurante': 'Restaurante',
-                'sub-beauty': 'Beauty',
-                'sub-gym': 'Gym',
-                'sub-custom': 'Custom',
-                'kit-beauty-soon': 'Beauty Content Coming Soon',
-                'kit-gym-soon': 'Gym Content Coming Soon',
-                'kit-custom-soon': 'Custom Content Coming Soon',
+                'sub-camisetas': 'Camisetas',
+                'sub-flyers': 'Flyers',
+                'sub-posters': 'Posters',
+                'sub-stickers': 'Stickers',
+                'coming-soon': 'Content Coming Soon',
 
                 'kit-starter-title': 'Starter Marketing Kit <span class="text-amber-600">$399</span>',
                 'kit-starter-list': [
@@ -585,13 +623,28 @@
 
         let currentLang = 'en';
 
+        function toggleLanguage() {
+            const isChecked = document.getElementById('langToggle').checked;
+            setLanguage(isChecked ? 'es' : 'en');
+        }
+
         function setLanguage(lang) {
             currentLang = lang;
 
-            // Update switch UI
-            document.getElementById('lang-en').classList.remove('active');
-            document.getElementById('lang-es').classList.remove('active');
-            document.getElementById('lang-' + lang).classList.add('active');
+            // Update Toggle UI
+            const toggle = document.getElementById('langToggle');
+            const labelEn = document.getElementById('label-en');
+            const labelEs = document.getElementById('label-es');
+
+            if (lang === 'es') {
+                toggle.checked = true;
+                labelEn.classList.remove('active');
+                labelEs.classList.add('active');
+            } else {
+                toggle.checked = false;
+                labelEn.classList.add('active');
+                labelEs.classList.remove('active');
+            }
 
             // Update simple text fields
             document.querySelectorAll('[data-t]').forEach(el => {
