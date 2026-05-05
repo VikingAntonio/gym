@@ -551,6 +551,14 @@
 
             try {
                 const tex = await viewer.createTexture(url);
+
+                // Reset texture transformation to avoid "weird rotations"
+                if (tex && tex.sampler) {
+                    tex.sampler.setRotation(0);
+                    tex.sampler.setOffset({ u: 0, v: 0 });
+                    tex.sampler.setScale({ u: 1, v: 1 });
+                }
+
                 let mat;
                 const model = viewer.model;
 
