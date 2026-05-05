@@ -336,7 +336,7 @@
     "accessors" : [
         {
             "componentType" : 5126,
-            "count" : 66979,
+            "count" : 65554,
             "max" : [
                 0.3245379626750946,
                 0.16308236122131348,
@@ -351,12 +351,12 @@
         },
         {
             "componentType" : 5126,
-            "count" : 66979,
+            "count" : 65554,
             "type" : "VEC3"
         },
         {
             "componentType" : 5126,
-            "count" : 66979,
+            "count" : 65554,
             "type" : "VEC2"
         },
         {
@@ -366,7 +366,7 @@
         },
         {
             "componentType" : 5126,
-            "count" : 83326,
+            "count" : 65627,
             "max" : [
                 0.3245282769203186,
                 0.16118291020393372,
@@ -381,12 +381,12 @@
         },
         {
             "componentType" : 5126,
-            "count" : 83326,
+            "count" : 65627,
             "type" : "VEC3"
         },
         {
             "componentType" : 5126,
-            "count" : 83326,
+            "count" : 65627,
             "type" : "VEC2"
         },
         {
@@ -396,7 +396,7 @@
         },
         {
             "componentType" : 5126,
-            "count" : 71965,
+            "count" : 40824,
             "max" : [
                 0.24423092603683472,
                 0.16115614771842957,
@@ -411,12 +411,12 @@
         },
         {
             "componentType" : 5126,
-            "count" : 71965,
+            "count" : 40824,
             "type" : "VEC3"
         },
         {
             "componentType" : 5126,
-            "count" : 71965,
+            "count" : 40824,
             "type" : "VEC2"
         },
         {
@@ -426,7 +426,7 @@
         },
         {
             "componentType" : 5126,
-            "count" : 59954,
+            "count" : 41426,
             "max" : [
                 0.23289091885089874,
                 0.16106659173965454,
@@ -441,12 +441,12 @@
         },
         {
             "componentType" : 5126,
-            "count" : 59954,
+            "count" : 41426,
             "type" : "VEC3"
         },
         {
             "componentType" : 5126,
-            "count" : 59954,
+            "count" : 41426,
             "type" : "VEC2"
         },
         {
@@ -458,23 +458,23 @@
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 319473,
+            "byteLength" : 305171,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 476753,
-            "byteOffset" : 319476
+            "byteLength" : 345191,
+            "byteOffset" : 305172
         },
         {
             "buffer" : 0,
-            "byteLength" : 487871,
-            "byteOffset" : 796232
+            "byteLength" : 270680,
+            "byteOffset" : 650364
         },
         {
             "buffer" : 0,
-            "byteLength" : 355644,
-            "byteOffset" : 1284104
+            "byteLength" : 239120,
+            "byteOffset" : 921044
         }
     ],
     "samplers" : [
@@ -485,7 +485,7 @@
     ],
     "buffers" : [
         {
-            "byteLength" : 1639748,
+            "byteLength" : 1160164,
             "uri" : "shirt.bin"
         }
     ]
