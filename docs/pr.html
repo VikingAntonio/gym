@@ -177,7 +177,58 @@
         .sidebar-open .content-area {
             padding-left: 380px;
         }
+
+        /* 3D Viewer Styles */
+        model-viewer {
+            width: 100%;
+            height: 400px;
+            background-color: transparent;
+            --progress-bar-color: #3b82f6;
+        }
+
+        .texture-switcher {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 12px 4px;
+            scrollbar-width: none;
+        }
+
+        .texture-switcher::-webkit-scrollbar {
+            display: none;
+        }
+
+        .texture-option {
+            flex: 0 0 64px;
+            height: 64px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .texture-option.active {
+            border-color: #3b82f6;
+            transform: scale(1.1);
+        }
+
+        .current-texture-label {
+            font-size: 10px;
+            font-weight: 900;
+            color: #2563eb;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.5rem;
+            display: block;
+            height: 1rem;
+        }
     </style>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="sidebar-open">
 
@@ -369,60 +420,94 @@
                 <div id="sub-content-container" class="flex-grow">
                     <!-- Camisetas -->
                     <div id="sub-camisetas" class="sub-content py-8">
-                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="coming-soon">
-                            Content Coming Soon
+                        <div class="flex flex-col lg:flex-row items-center gap-12">
+                            <div class="w-full lg:w-2/3 bg-white rounded-[40px] p-6 shadow-xl border border-slate-100">
+                                <model-viewer id="shirt-viewer" src="./assets/img/shirt.gltf" camera-controls auto-rotate></model-viewer>
+                            </div>
+                            <div class="w-full lg:w-1/3">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Personaliza tu diseño</span>
+                                <div id="shirt-switcher" class="texture-switcher"></div>
+                                <span id="shirt-label" class="current-texture-label"></span>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Flyers (Containing Kits) -->
                     <div id="sub-flyers" class="sub-content hidden py-8 space-y-12">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <!-- Starter -->
-                            <div class="space-y-4">
-                                <h3 class="text-xl font-bold text-slate-800" id="kit-starter-title">Starter Marketing Kit <span class="text-amber-600">$399</span></h3>
-                                <ul class="space-y-2 text-sm text-slate-600 font-medium" id="kit-starter-list">
-                                    <li>- 2 Sheet Posters (7.12x10.27")</li>
-                                    <li>- 25 Table QR Codes (5.08x7.83")</li>
-                                    <li>- 25 Flyers (3.96x5.15")</li>
-                                    <li>- 360 Stickers (2x2" - 15 sheets)</li>
-                                </ul>
+                        <div class="flex flex-col xl:flex-row gap-12">
+                            <div class="w-full xl:w-1/2">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <!-- Starter -->
+                                    <div class="space-y-4">
+                                        <h3 class="text-xl font-bold text-slate-800" id="kit-starter-title">Starter Marketing Kit <span class="text-amber-600">$399</span></h3>
+                                        <ul class="space-y-2 text-sm text-slate-600 font-medium" id="kit-starter-list">
+                                            <li>- 2 Sheet Posters (7.12x10.27")</li>
+                                            <li>- 25 Table QR Codes (5.08x7.83")</li>
+                                            <li>- 25 Flyers (3.96x5.15")</li>
+                                            <li>- 360 Stickers (2x2" - 15 sheets)</li>
+                                        </ul>
+                                    </div>
+                                    <!-- Premium -->
+                                    <div class="space-y-4">
+                                        <h3 class="text-xl font-bold text-slate-800" id="kit-premium-title">Premium Marketing Kit <span class="text-amber-600">$555.04</span></h3>
+                                        <ul class="space-y-2 text-sm text-slate-600 font-medium" id="kit-premium-list">
+                                            <li>- 35 Table QR Codes (5.08x7.83")</li>
+                                            <li>- 2 Door Posters (27x40")</li>
+                                            <li>- 4 Sheet Posters (7.12x10.27")</li>
+                                            <li>- 480 Stickers (20 sheets)</li>
+                                            <li>- 50 Promotional Cards (3.5x2")</li>
+                                        </ul>
+                                    </div>
+                                    <!-- Deluxe -->
+                                    <div class="space-y-4">
+                                        <h3 class="text-xl font-bold text-slate-800" id="kit-deluxe-title">Deluxe Marketing Kit <span class="text-amber-600">$1372.48</span></h3>
+                                        <ul class="space-y-2 text-sm text-slate-600 font-medium" id="kit-deluxe-list">
+                                            <li>- 100 Promotional Cards (3.5x2")</li>
+                                            <li>- 100 Flyers (3.96x5.15")</li>
+                                            <li>- 2 Door Posters (27x40")</li>
+                                            <li>- 6 Sheet Posters (7.12x10.27")</li>
+                                            <li>- 40 Table QR Codes (5.08x7.83")</li>
+                                            <li>- 600 Stickers (20 sheets)</li>
+                                            <li>- 15 Physical Menus (8.5x14" - 8.5x11")</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
-                            <!-- Premium -->
-                            <div class="space-y-4">
-                                <h3 class="text-xl font-bold text-slate-800" id="kit-premium-title">Premium Marketing Kit <span class="text-amber-600">$555.04</span></h3>
-                                <ul class="space-y-2 text-sm text-slate-600 font-medium" id="kit-premium-list">
-                                    <li>- 35 Table QR Codes (5.08x7.83")</li>
-                                    <li>- 2 Door Posters (27x40")</li>
-                                    <li>- 4 Sheet Posters (7.12x10.27")</li>
-                                    <li>- 480 Stickers (20 sheets)</li>
-                                    <li>- 50 Promotional Cards (3.5x2")</li>
-                                </ul>
-                            </div>
-                            <!-- Deluxe -->
-                            <div class="space-y-4">
-                                <h3 class="text-xl font-bold text-slate-800" id="kit-deluxe-title">Deluxe Marketing Kit <span class="text-amber-600">$1372.48</span></h3>
-                                <ul class="space-y-2 text-sm text-slate-600 font-medium" id="kit-deluxe-list">
-                                    <li>- 100 Promotional Cards (3.5x2")</li>
-                                    <li>- 100 Flyers (3.96x5.15")</li>
-                                    <li>- 2 Door Posters (27x40")</li>
-                                    <li>- 6 Sheet Posters (7.12x10.27")</li>
-                                    <li>- 40 Table QR Codes (5.08x7.83")</li>
-                                    <li>- 600 Stickers (20 sheets)</li>
-                                    <li>- 15 Physical Menus (8.5x14" - 8.5x11")</li>
-                                </ul>
+                            <div class="w-full xl:w-1/2 flex flex-col items-center">
+                                <div class="w-full bg-white rounded-[40px] p-6 shadow-xl border border-slate-100">
+                                    <model-viewer id="flyer-viewer" src="./assets/img/flyer.gltf" camera-controls auto-rotate></model-viewer>
+                                </div>
+                                <div class="w-full max-w-md mt-6">
+                                    <div id="flyer-switcher" class="texture-switcher justify-center"></div>
+                                    <span id="flyer-label" class="current-texture-label text-center"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Other subtabs -->
                     <div id="sub-posters" class="sub-content hidden py-8">
-                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="coming-soon">
-                            Content Coming Soon
+                        <div class="flex flex-col lg:flex-row items-center gap-12">
+                            <div class="w-full lg:w-2/3 bg-white rounded-[40px] p-6 shadow-xl border border-slate-100">
+                                <model-viewer id="poster-viewer" src="./assets/img/poster.gltf" camera-controls auto-rotate></model-viewer>
+                            </div>
+                            <div class="w-full lg:w-1/3">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Personaliza tu diseño</span>
+                                <div id="poster-switcher" class="texture-switcher"></div>
+                                <span id="poster-label" class="current-texture-label"></span>
+                            </div>
                         </div>
                     </div>
                     <div id="sub-stickers" class="sub-content hidden py-8">
-                        <div class="p-20 border-2 border-dashed border-slate-200 rounded-[40px] text-center text-slate-400 font-bold uppercase tracking-widest" data-t="coming-soon">
-                            Content Coming Soon
+                        <div class="flex flex-col lg:flex-row items-center gap-12">
+                            <div class="w-full lg:w-2/3 bg-white rounded-[40px] p-6 shadow-xl border border-slate-100">
+                                <model-viewer id="sticker-viewer" src="./assets/img/sticker.gltf" camera-controls auto-rotate></model-viewer>
+                            </div>
+                            <div class="w-full lg:w-1/3">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Personaliza tu diseño</span>
+                                <div id="sticker-switcher" class="texture-switcher"></div>
+                                <span id="sticker-label" class="current-texture-label"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -430,6 +515,74 @@
         </section>
 
     </main>
+
+    <script type="module">
+        import { supabase } from './assets/js/utils.js';
+
+        const keys = ['shirt', 'flyer', 'poster', 'sticker'];
+
+        async function loadTextures(key) {
+            const viewer = document.getElementById(`${key}-viewer`);
+            const switcher = document.getElementById(`${key}-switcher`);
+            const label = document.getElementById(`${key}-label`);
+
+            const { data, error } = await supabase
+                .from('wisbe_render_textures')
+                .select('*')
+                .eq('gltf_key', key)
+                .order('created_at', { ascending: true });
+
+            if (error || !data || data.length === 0) return;
+
+            switcher.innerHTML = data.map((t, i) => `
+                <div class="texture-option ${i === 0 ? 'active' : ''}"
+                     style="background-image: url('${t.texture_url}')"
+                     onclick="window.applyTexture('${key}', '${t.texture_url}', '${t.label}', this)">
+                </div>
+            `).join('');
+
+            // Apply first texture
+            if (data[0]) {
+                window.applyTexture(key, data[0].texture_url, data[0].label);
+            }
+        }
+
+        window.applyTexture = async (key, url, labelText, element) => {
+            const viewer = document.getElementById(`${key}-viewer`);
+            const label = document.getElementById(`${key}-label`);
+
+            if (label) label.textContent = labelText;
+
+            if (element) {
+                const switcher = element.parentElement;
+                switcher.querySelectorAll('.texture-option').forEach(opt => opt.classList.remove('active'));
+                element.classList.add('active');
+            }
+
+            if (!viewer.model) {
+                viewer.addEventListener('load', () => window.applyTexture(key, url, labelText, element), { once: true });
+                return;
+            }
+
+            try {
+                const tex = await viewer.createTexture(url);
+                let mat;
+                const model = viewer.model;
+
+                if (key === 'sticker') mat = model.materials.find(m => m.name === 'texturaCircle');
+                else mat = model.materials.find(m => m.pbrMetallicRoughness.baseColorTexture);
+
+                if (mat && mat.pbrMetallicRoughness.baseColorTexture) {
+                    mat.pbrMetallicRoughness.baseColorTexture.setTexture(tex);
+                }
+            } catch (e) {
+                console.error('Error applying texture:', e);
+            }
+        };
+
+        // Initialize
+        keys.forEach(key => loadTextures(key));
+    </script>
 
     <script>
         const translations = {
@@ -722,7 +875,7 @@
             }
         }
 
-        function switchSubTab(subId) {
+        window.switchSubTab = (subId) => {
             document.querySelectorAll('.sub-content').forEach(content => {
                 content.classList.add('hidden');
             });

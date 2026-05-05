@@ -92,3 +92,16 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 3. TABLA PARA TEXTURAS 3D WISBE
+CREATE TABLE IF NOT EXISTS public.wisbe_render_textures (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    gltf_key TEXT NOT NULL,
+    label TEXT NOT NULL,
+    texture_url TEXT NOT NULL
+);
+ALTER TABLE public.wisbe_render_textures ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Permitir lectura pública de texturas" ON public.wisbe_render_textures FOR SELECT USING (true);
+CREATE POLICY "Permitir inserción a usuarios autenticados" ON public.wisbe_render_textures FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Permitir eliminación a usuarios autenticados" ON public.wisbe_render_textures FOR DELETE USING (auth.role() = 'authenticated');
