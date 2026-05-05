@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-key="title">Product Customizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="./assets/css/badge.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Global Styles & Variables --- */
+:root {
+    --primary-color: #ff6600;
+    --primary-color-dark: #e65c00;
+    --dark-blue: #0a192f;
+    --light-slate: #ccd6f6;
+    --slate: #8892b0;
+    --white: #ffffff;
+    --background-color: #f0f2f5;
+    --card-background: #ffffff;
+    --font-family: 'Poppins', sans-serif;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--dark-blue);
+    line-height: 1.6;
+}
+
+/* --- Layout --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Header & Footer --- */
+.main-header, .main-footer {
+    padding: 20px 0;
+    background-color: var(--card-background);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.main-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* --- Language Switch --- */
+.language-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lang-label {
+    font-weight: 600;
+    color: var(--slate);
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 28px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+.logo {
+    width: 150px;
+    height: auto;
+}
+
+.main-footer {
+    text-align: center;
+    margin-top: 60px;
+    color: var(--slate);
+    border-top: 1px solid #e0e0e0;
+}
+
+/* --- Showcase Section --- */
+.showcase-section {
+    padding: 40px 0;
+}
+
+.showcase-section h2 {
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: 700;
+    margin-bottom: 60px;
+}
+
+/* --- Chessboard Grid --- */
+.chessboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: center;
+}
+
+.full-width-cell {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.text-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    background-color: var(--card-background);
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.6s ease-out, box-shadow 0.3s ease;
+}
+
+.model-cell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 450px;
+    background-color: var(--card-background);
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.6s ease-out, box-shadow 0.3s ease;
+    padding-bottom: 20px;
+}
+
+.text-cell:hover, .model-cell:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+}
+
+.text-content {
+    padding: 40px;
+    text-align: center;
+}
+
+.text-content h2 {
+    font-size: 1.8em;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.text-content p {
+    color: var(--slate);
+    font-size: 1em;
+}
+
+model-viewer {
+    width: 100%;
+    height: 350px;
+    --progress-bar-color: var(--primary-color);
+}
+
+#slideshow-canvas {
+    width: 100%;
+    height: 350px;
+    display: block;
+}
+
+/* --- Texture Switcher --- */
+.switcher-wrapper {
+    width: 95%;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 15px;
+    position: relative;
+}
+
+.nav-btn {
+    background-color: var(--white);
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    color: var(--dark-blue);
+    flex-shrink: 0;
+    z-index: 5;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 0;
+}
+
+.nav-btn:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+.texture-switcher {
+    flex-grow: 1;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 5px;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+
+.texture-switcher::-webkit-scrollbar {
+    display: none;
+}
+
+.texture-option {
+    flex: 0 0 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.texture-option:hover {
+    transform: scale(1.1);
+}
+
+.texture-option.active {
+    border-color: var(--primary-color);
+}
+
+.current-label {
+    font-size: 0.9em;
+    color: var(--primary-color);
+    margin-top: 5px;
+    height: 1.5em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* --- Zoom Toggle Button --- */
+.zoom-toggle {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23333"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M12 10h-2v2H9v-2H7V9h2V7h1v2h2v1z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 24px;
+    transition: background-color 0.3s, transform 0.3s;
+    z-index: 10;
+}
+
+/* --- Search Bar --- */
+.search-container {
+    text-align: center;
+    margin: 30px auto;
+    max-width: 500px;
+    padding: 0 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 25px;
+    border-radius: 30px;
+    border: 2px solid #ddd;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(255, 102, 0, 0.15);
+}
+
+/* --- Popup Modal --- */
+.model-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+.model-popup.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-container {
+    position: relative;
+    width: 95%;
+    max-width: 1250px;
+    height: 85%;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.7);
+    transform: scale(0.7) translateY(100px);
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+}
+
+.model-popup.active .popup-container {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.popup-container.closing {
+    transform: scale(0.7) translateY(100px);
+    opacity: 0;
+}
+
+.popup-left {
+    flex: 1.6;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-width: 0;
+    padding: 30px;
+}
+
+/* Overlaid Nav Buttons in Popup */
+.popup-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    color: var(--primary-color);
+}
+
+.popup-nav-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.popup-nav-btn.prev { left: 20px; }
+.popup-nav-btn.next { right: 20px; }
+
+.popup-right {
+    flex: 1;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: 1px solid #f2f2f2;
+    background: #fafafa;
+    min-width: 0;
+}
+
+.popup-right h2 {
+    font-size: 2.8em;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    margin-top: 0;
+    font-weight: 700;
+    letter-spacing: -1px;
+    transform: translateX(30px);
+    opacity: 0;
+    transition: all 0.5s ease 0.2s;
+}
+
+.model-popup.active .popup-right h2 {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.popup-right p {
+    color: var(--slate);
+    font-size: 1.2em;
+    line-height: 1.7;
+    margin-bottom: 0;
+    transform: translateX(30px);
+    opacity: 0;
+    transition: all 0.5s ease 0.3s;
+}
+
+.model-popup.active .popup-right p {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.close-popup {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: background 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.close-popup:hover {
+    background: #f0f0f0;
+    transform: rotate(90deg);
+}
+
+#popupViewer {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 992px) {
+    .chessboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .chessboard-grid > div {
+        order: unset !important;
+    }
+    .popup-container {
+        flex-direction: column;
+        height: 90%;
+    }
+    .popup-left {
+        flex: 1;
+    }
+    .popup-right {
+        flex: none;
+        padding: 20px;
+        border-left: none;
+        border-top: 1px solid #eee;
+    }
+    .popup-right h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+    .popup-right p {
+        font-size: 0.9em;
+        margin-bottom: 15px;
+    }
+}
+    </style>
+</head>
+<body>
+    <img id="login-icon" class="login-icon" src="./assets/img/user.svg">
+    <div id="user-badge" class="user-badge hidden" style="position: fixed;">
+        <div id="badge-username"></div>
+        <div id="badge-role"></div>
+    </div>
+    <div id="badge-menu" class="hidden">
+        <button id="logout-btn" class="logout-btn">Cerrar sesión</button>
+    </div>
+
+    <div class="neo-nav-container">
+        <button id="neoNavBack" class="neo-nav-btn">
+            <svg viewBox="0 0 24 24" class="neo-nav-icon">
+                <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button id="neoNavHome" class="neo-nav-btn">
+            <svg viewBox="0 0 24 24" class="neo-nav-icon">
+                <path d="M3 11l9-7 9 7v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4H9v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </div>
+
+    <menutech-themes></menutech-themes>
+    <menutech-chatbot></menutech-chatbot>
+
+    <header class="main-header">
+        <div class="container">
+            <img src="https://menutech.services/assets/img/logomt.png" alt="Logo MenuTech" class="logo">
+            <div class="language-switch">
+                <span class="lang-label">ES</span>
+                <label class="switch">
+                    <input type="checkbox" id="language-toggle" checked>
+                    <span class="slider round"></span>
+                </label>
+                <span class="lang-label">EN</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-section" style="text-align: center; padding: 60px 0; background-color: var(--card-background);">
+            <div class="container">
+                <h1 data-key="heroTitle">Visualize Your Designs Instantly</h1>
+                <p data-key="heroSubtitle">Explore our customizable products with high-quality textures.</p>
+            </div>
+        </section>
+
+        <div class="search-container">
+            <input type="text" id="productSearch" class="search-input" placeholder="Buscar productos, diseños..." data-key="searchPlaceholder">
+        </div>
+
+        <section class="showcase-section">
+            <div class="container">
+                <h2 style="color: #e65c00;" data-key="productsTitle">Our Products</h2>
+                <div class="chessboard-grid">
+                    <!-- Fila 1 -->
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="flyerTitle">Dynamic Flyers</h2>
+                            <p data-key="flyerDesc">Capture your customers' attention with flyers that come to life. Ideal for events and promotions.</p>
+                        </div>
+                    </div>
+                    <div class="model-cell" data-key="flyer">
+                        <model-viewer id="flyer-viewer" src="./assets/img/flyer.gltf" alt="Modelo 3D de un flyer" camera-controls disable-zoom></model-viewer>
+                        <button class="zoom-toggle" data-viewer-id="flyer-viewer" aria-label="Toggle Zoom"></button>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="flyer">❮</button>
+                            <div class="texture-switcher" id="flyer-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="flyer">❯</button>
+                        </div>
+                        <div class="current-label" id="flyer-label"></div>
+                    </div>
+
+                    <!-- Fila 2 -->
+                    <div class="model-cell" data-key="poster">
+                        <model-viewer id="poster-viewer" src="./assets/img/poster.gltf" alt="Modelo 3D de un póster" camera-controls disable-zoom></model-viewer>
+                        <button class="zoom-toggle" data-viewer-id="poster-viewer" aria-label="Toggle Zoom"></button>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="poster">❮</button>
+                            <div class="texture-switcher" id="poster-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="poster">❯</button>
+                        </div>
+                        <div class="current-label" id="poster-label"></div>
+                    </div>
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="posterTitle">High-Impact Posters</h2>
+                            <p data-key="posterDesc">Transform any wall into an art gallery with our customizable posters.</p>
+                        </div>
+                    </div>
+
+                    <!-- Fila 3 -->
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="shirtTitle">Stylish Shirts</h2>
+                            <p data-key="shirtDesc">Wear your ideas. Customize every detail and create unique garments that represent your brand.</p>
+                        </div>
+                    </div>
+                    <div class="model-cell" data-key="shirt">
+                        <model-viewer id="camisa-viewer" src="./assets/img/shirt.gltf" alt="Modelo 3D de una camisa" camera-controls disable-zoom></model-viewer>
+                        <button class="zoom-toggle" data-viewer-id="camisa-viewer" aria-label="Toggle Zoom"></button>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="shirt">❮</button>
+                            <div class="texture-switcher" id="shirt-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="shirt">❯</button>
+                        </div>
+                        <div class="current-label" id="shirt-label"></div>
+                    </div>
+
+                    <!-- Fila 4 -->
+                    <div class="model-cell" data-key="sticker">
+                        <model-viewer id="sticker-viewer" src="./assets/img/sticker.gltf" alt="Modelo 3D de un sticker" camera-controls disable-zoom></model-viewer>
+                        <button class="zoom-toggle" data-viewer-id="sticker-viewer" aria-label="Toggle Zoom"></button>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="sticker">❮</button>
+                            <div class="texture-switcher" id="sticker-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="sticker">❯</button>
+                        </div>
+                        <div class="current-label" id="sticker-label"></div>
+                    </div>
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="stickerTitle">Creative Stickers</h2>
+                            <p data-key="stickerDesc">Add a personal touch to your belongings. Perfect for laptops, bottles, and more.</p>
+                        </div>
+                    </div>
+
+                    <!-- Fila 5 -->
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="qrTitle">QR Table Signage</h2>
+                            <p data-key="qrDesc">Modernize your business with interactive signage. Connect with your customers in an innovative way.</p>
+                        </div>
+                    </div>
+                    <div class="model-cell" data-key="tableqr">
+                        <model-viewer id="tableqr-viewer" src="./assets/models/tableQR.gltf" alt="Modelo 3D de un código QR de mesa" camera-controls disable-zoom></model-viewer>
+                        <button class="zoom-toggle" data-viewer-id="tableqr-viewer" aria-label="Toggle Zoom"></button>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="tableqr">❮</button>
+                            <div class="texture-switcher" id="tableqr-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="tableqr">❯</button>
+                        </div>
+                        <div class="current-label" id="tableqr-label"></div>
+                    </div>
+
+                    <!-- Fila 6 - XBanner -->
+                    <div class="model-cell" data-key="xbanner">
+                        <model-viewer id="xbanner-viewer" src="./assets/img/xbanner.gltf" alt="Modelo 3D de un xbanner" camera-controls disable-zoom></model-viewer>
+                        <button class="zoom-toggle" data-viewer-id="xbanner-viewer" aria-label="Toggle Zoom"></button>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="xbanner">❮</button>
+                            <div class="texture-switcher" id="xbanner-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="xbanner">❯</button>
+                        </div>
+                        <div class="current-label" id="xbanner-label"></div>
+                    </div>
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="xbannerTitle">X-Banners</h2>
+                            <p data-key="xbannerDesc">Ideal for events and promotions, our x-banners are easy to transport and assemble.</p>
+                        </div>
+                    </div>
+
+                    <!-- Fila 7 - Flag -->
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="flagTitle">Promotional Flags</h2>
+                            <p data-key="flagDesc">Make your brand stand out at any event with our customizable promotional flags.</p>
+                        </div>
+                    </div>
+                    <div class="model-cell" data-key="flag">
+                        <model-viewer id="flag-viewer" src="./assets/img/flag.gltf" alt="Modelo 3D de una bandera" camera-controls disable-zoom></model-viewer>
+                        <button class="zoom-toggle" data-viewer-id="flag-viewer" aria-label="Toggle Zoom"></button>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="flag">❮</button>
+                            <div class="texture-switcher" id="flag-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="flag">❯</button>
+                        </div>
+                        <div class="current-label" id="flag-label"></div>
+                    </div>
+
+                    <!-- Fila 8 - Banner -->
+                    <div class="model-cell" data-key="banner">
+                        <model-viewer id="banner-viewer" src="./assets/img/banner.gltf" alt="Modelo 3D de un banner" camera-controls disable-zoom></model-viewer>
+                        <button class="zoom-toggle" data-viewer-id="banner-viewer" aria-label="Toggle Zoom"></button>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="banner">❮</button>
+                            <div class="texture-switcher" id="banner-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="banner">❯</button>
+                        </div>
+                        <div class="current-label" id="banner-label"></div>
+                    </div>
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="bannerTitle">Banners</h2>
+                            <p data-key="bannerDesc">Ideal for events and promotions, our banners are easy to transport and assemble.</p>
+                        </div>
+                    </div>
+
+                    <!-- Fila 9 - Astickers -->
+                    <div class="model-cell" data-key="astickers">
+                        <model-viewer id="astickers-viewer" src="./assets/img/Astickers.gltf" alt="Modelo 3D de un paquete de stickers" camera-controls disable-zoom></model-viewer>
+                        <button class="zoom-toggle" data-viewer-id="astickers-viewer" aria-label="Toggle Zoom"></button>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="astickers">❮</button>
+                            <div class="texture-switcher" id="astickers-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="astickers">❯</button>
+                        </div>
+                        <div class="current-label" id="astickers-label"></div>
+                    </div>
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="astickersTitle">Sticker Packs</h2>
+                            <p data-key="astickersDesc">Versatile sticker collections to promote your brand in multiple places.</p>
+                        </div>
+                    </div>
+
+                    <!-- Fila 10 - Slideshow -->
+                    <div class="text-cell">
+                        <div class="text-content">
+                            <h2 data-key="slideshowTitle">Slideshow</h2>
+                            <p data-key="slideshowDesc">Display dishes or promotions in an attractive way. Designed to catch attention instantly.</p>
+                        </div>
+                    </div>
+                    <div class="model-cell" data-key="slideshow">
+                        <canvas id="slideshow-canvas"></canvas>
+                        <button id="slideshow-zoom-toggle" class="zoom-toggle" aria-label="Toggle Zoom"></button>
+                        <div id="slideshow-error-overlay" class="error-overlay"></div>
+                        <video id="video-texture" loop muted autoplay playsinline crossOrigin="anonymous" style="display:none;" src="./assets/img/slideshow.mp4"></video>
+                        <div class="switcher-wrapper">
+                            <button class="nav-btn prev-btn" data-key="slideshow">❮</button>
+                            <div class="texture-switcher" id="slideshow-switcher"></div>
+                            <button class="nav-btn next-btn" data-key="slideshow">❯</button>
+                        </div>
+                        <div class="current-label" id="slideshow-label"></div>
+                    </div>
+
+                    <!-- Fila 10 - menutech-menu -->
+                    <div class="full-width-cell">
+                        <menutech-menu id="restaurant-menu" class="menutech-menu-container" imagenes="./assets/img/m1.png,https://vikingantonio.github.io/cabanamenu/assets/img/2.jpg,https://vikingantonio.github.io/cabanamenu/assets/img/3.jpg,https://vikingantonio.github.io/cabanamenu/assets/img/4.jpg,https://vikingantonio.github.io/cabanamenu/assets/img/9.jpg,https://vikingantonio.github.io/cabanamenu/assets/img/10.jpg,https://vikingantonio.github.io/cabanamenu/assets/img/11.jpg,https://vikingantonio.github.io/cabanamenu/assets/img/12.jpg"></menutech-menu>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p data-key="footerText">&copy; 2026 MenuTech Services. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Popup Modal -->
+    <div id="modelPopup" class="model-popup">
+        <div class="popup-container" id="popupContainer">
+            <button id="closePopup" class="close-popup">✕</button>
+
+            <div class="popup-left" id="popupModelContainer">
+                <button class="popup-nav-btn prev" id="popupPrev">❮</button>
+                <button class="popup-nav-btn next" id="popupNext">❯</button>
+
+                <model-viewer id="popupViewer" camera-controls auto-rotate shadow-intensity="1" exposure="1" style="flex-grow: 1; width: 100%;"></model-viewer>
+                <canvas id="popupSlideshowCanvas" style="width: 100%; height: 100%; display: none;"></canvas>
+                <img id="popupImage" style="max-width: 90%; max-height: 90%; display: none; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 10px;">
+
+                <!-- Thumbnail Strip -->
+                <div id="popupSwitcherContainer" class="model-cell" style="box-shadow: none; min-height: auto; width: 80%; background: transparent; padding: 0; margin-top: 10px;">
+                    <div class="texture-switcher" id="popup-switcher" style="justify-content: center;"></div>
+                    <div class="current-label" id="popup-label"></div>
+                </div>
+            </div>
+
+            <div class="popup-right">
+                <h2 id="popupTitle">Product Name</h2>
+                <p id="popupDescription">Product description goes here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="./assets/js/slideshow-viewer.js"></script>
+    <script src="./assets/js/badge.js"></script>
+    <script src="https://menutech.xyz/menutechUI.min.js"></script>
+    <script src="./assets/js/renderer.js"></script>
+
+    <script>
+        const translations = {
+            en: {
+                title: "Product Customizer",
+                heroTitle: "Visualize Your Designs Instantly",
+                heroSubtitle: "Explore our customizable products with high-quality textures.",
+                productsTitle: "Our Products",
+                flyerTitle: "Flyers",
+                flyerDesc: "They allow you to communicate promotions, events, or new menu items in a direct and effective way.",
+                posterTitle: "Posters",
+                posterDesc: "They help highlight key offers inside the restaurant and influence customer purchasing decisions.",
+                shirtTitle: "T-Shirts",
+                shirtDesc: "They project a professional image and turn staff into a visible extension of the brand.",
+                stickerTitle: "Stickers",
+                stickerDesc: "They keep the brand present on packaging and takeout orders, reinforcing brand recall.",
+                qrTitle: "Table QR",
+                qrDesc: "They provide easy access to menus and promotions, improving customer experience and service efficiency.",
+                xbannerTitle: "X-Banners",
+                xbannerDesc: "They are ideal for clearly communicating promotions or updates in strategic spaces.",
+                flagTitle: "Advertising Flags",
+                flagDesc: "They increase restaurant visibility and attract attention from a distance.",
+                bannerTitle: "Banners",
+                bannerDesc: "They showcase promotions or featured dishes and capture customers from outside the venue.",
+                astickersTitle: "Sticker Packs",
+                astickersDesc: "Versatile sticker collections to promote your brand in multiple places.",
+                slideshowTitle: "Slideshow",
+                slideshowDesc: "Display dishes or promotions in an attractive way. Designed to catch attention instantly.",
+                footerText: "© 2026 Menutech. All rights reserved.",
+                searchPlaceholder: "Search products, designs..."
+            },
+            es: {
+                title: "Personalizador de Productos",
+                heroTitle: "Visualiza tus Diseños al Instante",
+                heroSubtitle: "Explora nuestros productos personalizables con texturas de alta calidad.",
+                productsTitle: "Nuestros Productos",
+                flyerTitle: "Flyers",
+                flyerDesc: "Permite comunicar promociones, eventos o nuevos platillos de forma directa y efectiva.",
+                posterTitle: "Pósters",
+                posterDesc: "Ayudan a destacar ofertas clave dentro del restaurante e influyen en la decisión de compra del cliente.",
+                shirtTitle: "Camisas",
+                shirtDesc: "Proyectan una imagen profesional y convierten al personal en una extensión visible de la marca.",
+                stickerTitle: "Stickers",
+                stickerDesc: "Mantienen la marca presente en empaques y pedidos para llevar, reforzando el recuerdo del restaurante.",
+                qrTitle: "QR de Mesa",
+                qrDesc: "Facilitan el acceso al menú y promociones, mejorando la experiencia del cliente y la eficiencia del servicio.",
+                xbannerTitle: "Banners en X",
+                xbannerDesc: "Son ideales para comunicar promociones o novedades de forma clara en espacios estratégicos.",
+                flagTitle: "Banderas Publicitarias",
+                flagDesc: "Aumentan la visibilidad del restaurante y atraen la atención desde la distancia.",
+                bannerTitle: "Banners",
+                bannerDesc: "Comunican promociones o platillos destacados y captan clientes desde el exterior del local.",
+                astickersTitle: "Paquete de Stickers",
+                astickersDesc: "Colecciones versátiles de stickers para promocionar tu marca en múltiples lugares.",
+                slideshowTitle: "Slideshow",
+                slideshowDesc: "Muestra platillos o promociones de forma atractiva. Pensado para llamar la atención al instante.",
+                footerText: "© 2026 Menutech. Todos los derechos reservados.",
+                searchPlaceholder: "Buscar productos, diseños..."
+            }
+        };
+
+        function setLanguage(lang) {
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+        }
+
+        document.getElementById('language-toggle').addEventListener('change', (e) => {
+            setLanguage(e.target.checked ? 'en' : 'es');
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setLanguage('en');
+
+            const DEFAULT_TEXTURES = {
+                flyer: './assets/img/flyer.png',
+                poster: './assets/img/poster.png',
+                shirt: './assets/img/shirt.png',
+                sticker: './assets/img/stickers.png',
+                tableqr: './assets/models/tableQR2.png',
+                xbanner: './assets/img/xbanner.png',
+                flag: './assets/img/flag.png',
+                banner: './assets/img/banner.png',
+                astickers: './assets/img/Cylinder.png',
+                slideshow: './assets/img/slideshow.png'
+            };
+
+            let supabase = null;
+            let allTextures = [];
+            let texturesByGltf = {};
+            let currentIndices = {};
+            let closeTimeout;
+
+            async function initSupabase() {
+                if (window.supabase) {
+                    supabase = window.supabase;
+                } else {
+                    const SUPABASE_URL = 'https://ojpyfjgkffmzwvukjagf.supabase.co';
+                    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qcHlmamdrZmZtend2dWtqYWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNDIwMzYsImV4cCI6MjA3OTcxODAzNn0.dlVYmoMumBse_O1PLBx0FeNITqY4YktefD6l_uonSgo';
+                    const { createClient } = await import('https://esm.sh/@supabase/supabase-js');
+                    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    window.supabase = supabase;
+                }
+            }
+
+            async function loadTextures() {
+                await initSupabase();
+
+                // Initialize with defaults
+                texturesByGltf = {};
+                Object.keys(DEFAULT_TEXTURES).forEach(key => {
+                    texturesByGltf[key] = [{
+                        label: 'Menutech',
+                        texture_url: DEFAULT_TEXTURES[key],
+                        gltf_key: key
+                    }];
+                    currentIndices[key] = 0;
+                });
+
+                const { data, error } = await supabase.from('render3d_textures').select('*').order('created_at', { ascending: true });
+
+                if (!error && data) {
+                    allTextures = data;
+                    data.forEach(t => {
+                        if (texturesByGltf[t.gltf_key]) {
+                            texturesByGltf[t.gltf_key].push(t);
+                        }
+                    });
+                }
+
+                // Render all
+                Object.keys(texturesByGltf).forEach(key => {
+                    renderSwitcher(key, texturesByGltf[key]);
+                    updateModelUI(key);
+                });
+            }
+
+            function renderSwitcher(key, textures) {
+                const switcher = document.getElementById(`${key}-switcher`);
+                if (!switcher) return;
+                switcher.innerHTML = '';
+                textures.forEach((t, i) => {
+                    const opt = document.createElement('div');
+                    opt.className = 'texture-option';
+                    opt.style.backgroundImage = `url('${t.texture_url}')`;
+                    opt.onclick = () => {
+                        currentIndices[key] = i;
+                        updateModelUI(key);
+                    };
+                    switcher.appendChild(opt);
+                });
+            }
+
+            function updateModelUI(key) {
+                const textures = texturesByGltf[key];
+                if (!textures || textures.length === 0) return;
+
+                const current = textures[currentIndices[key]];
+                const viewer = document.getElementById(`${key}-viewer`);
+                const label = document.getElementById(`${key}-label`);
+                const switcher = document.getElementById(`${key}-switcher`);
+
+                if (label) label.textContent = current.label;
+                if (switcher) {
+                    switcher.querySelectorAll('.texture-option').forEach((opt, i) => {
+                        opt.classList.toggle('active', i === currentIndices[key]);
+                    });
+                }
+
+                if (viewer) applyTexture(viewer, key, current.texture_url);
+                if (key === 'slideshow' && window.updateSlideshowTexture) {
+                    window.updateSlideshowTexture(current.texture_url);
+                }
+
+                // Update popup if it's open for this product
+                const popup = document.getElementById('modelPopup');
+                const popupViewer = document.getElementById('popupViewer');
+                if (popup.classList.contains('active') && popupViewer.dataset.currentKey === key) {
+                    applyTexture(popupViewer, key, current.texture_url);
+                }
+            }
+
+            async function applyTexture(viewer, key, url) {
+                const model = viewer.model;
+                if (!model) {
+                    viewer.addEventListener('load', () => applyTexture(viewer, key, url), { once: true });
+                    return;
+                }
+                try {
+                    const tex = await viewer.createTexture(url);
+                    let mat;
+                    if (key === 'sticker' || key === 'astickers') mat = model.materials.find(m => m.name === 'texturaCircle');
+                    else if (key === 'xbanner') mat = model.materials.find(m => m.name === 'Poster');
+                    else if (key === 'flag') mat = model.materials.find(m => m.name === 'flag');
+                    else if (key === 'banner') mat = model.materials.find(m => m.name === 'Ad_16_Promo');
+                    else mat = model.materials.find(m => m.pbrMetallicRoughness.baseColorTexture);
+
+                    if (mat && mat.pbrMetallicRoughness.baseColorTexture) {
+                        mat.pbrMetallicRoughness.baseColorTexture.setTexture(tex);
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            document.querySelectorAll('.prev-btn').forEach(btn => {
+                btn.onclick = () => {
+                    const key = btn.dataset.key;
+                    const list = texturesByGltf[key];
+                    if (list) {
+                        currentIndices[key] = (currentIndices[key] - 1 + list.length) % list.length;
+                        updateModelUI(key);
+                    }
+                };
+            });
+
+            document.querySelectorAll('.next-btn').forEach(btn => {
+                btn.onclick = () => {
+                    const key = btn.dataset.key;
+                    const list = texturesByGltf[key];
+                    if (list) {
+                        currentIndices[key] = (currentIndices[key] + 1) % list.length;
+                        updateModelUI(key);
+                    }
+                };
+            });
+
+            loadTextures();
+
+            // --- Search Logic ---
+            const searchInput = document.getElementById('productSearch');
+            searchInput.addEventListener('input', () => {
+                const term = searchInput.value.toLowerCase();
+                const gridItems = document.querySelectorAll('.chessboard-grid > div');
+
+                // We group by pairs (text cell + model cell)
+                for (let i = 0; i < gridItems.length - 1; i += 2) {
+                    let cell1 = gridItems[i];
+                    let cell2 = gridItems[i+1];
+
+                    if (!cell1 || !cell2 || cell1.classList.contains('full-width-cell')) continue;
+
+                    let textCell, modelCell;
+                    if (cell1.classList.contains('text-cell')) {
+                        textCell = cell1;
+                        modelCell = cell2;
+                    } else {
+                        textCell = cell2;
+                        modelCell = cell1;
+                    }
+
+                    const title = textCell.querySelector('h2')?.textContent.toLowerCase() || "";
+                    const desc = textCell.querySelector('p')?.textContent.toLowerCase() || "";
+                    const key = modelCell.dataset.key || "";
+
+                    const textures = texturesByGltf[key] || [];
+                    const textureMatch = textures.some(t => t.label.toLowerCase().includes(term));
+
+                    const isMatch = title.includes(term) || desc.includes(term) || textureMatch;
+
+                    textCell.style.display = isMatch ? 'flex' : 'none';
+                    modelCell.style.display = isMatch ? 'flex' : 'none';
+                }
+            });
+
+            // --- Popup Logic ---
+            const popup = document.getElementById('modelPopup');
+            const popupContainer = document.getElementById('popupContainer');
+            const popupViewer = document.getElementById('popupViewer');
+            const closePopup = document.getElementById('closePopup');
+            const popupLabel = document.getElementById('popup-label');
+            const popupSwitcher = document.getElementById('popup-switcher');
+            const popupTitle = document.getElementById('popupTitle');
+            const popupDescription = document.getElementById('popupDescription');
+
+            document.querySelectorAll('.zoom-toggle').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.stopPropagation();
+                    clearTimeout(closeTimeout);
+                    popup.style.opacity = '';
+                    popup.style.pointerEvents = '';
+                    const vid = btn.dataset.viewerId || (btn.id === 'slideshow-zoom-toggle' ? 'slideshow' : null);
+                    const mainCell = btn.closest('.model-cell');
+                    const key = mainCell.dataset.key;
+                    const popupImage = document.getElementById('popupImage');
+
+                    // Find corresponding text cell to get title/description
+                    // The layout is Chessboard, so text-cell is usually before or after model-cell
+                    const grid = document.querySelector('.chessboard-grid');
+                    const cells = Array.from(grid.children);
+                    const index = cells.indexOf(mainCell);
+                    let textCell = cells[index - 1]?.classList.contains('text-cell') ? cells[index - 1] : cells[index + 1];
+
+                    if (textCell) {
+                        popupTitle.textContent = textCell.querySelector('h2').textContent;
+                        popupDescription.textContent = textCell.querySelector('p').textContent;
+                    }
+
+                    if (key === 'slideshow') {
+                        popupViewer.style.display = 'none';
+                        popupImage.style.display = 'none';
+                        const canvas = document.getElementById('popupSlideshowCanvas');
+                        canvas.style.display = 'block';
+                        if (window.initPopupSlideshow) window.initPopupSlideshow(canvas);
+                    } else {
+                        const mainViewer = document.getElementById(vid);
+                        popupViewer.src = mainViewer.src;
+                        popupViewer.style.display = 'block';
+                        popupImage.style.display = 'none';
+                        document.getElementById('popupSlideshowCanvas').style.display = 'none';
+                    }
+
+                    popupViewer.dataset.currentKey = key;
+
+                    popup.classList.add('active');
+                    popupContainer.classList.remove('closing');
+                    document.body.style.overflow = 'hidden';
+
+                    renderPopupSwitcher(key);
+                    updatePopupUI(key);
+                };
+            });
+
+            function renderPopupSwitcher(key) {
+                const textures = texturesByGltf[key] || [];
+                popupSwitcher.innerHTML = '';
+                textures.forEach((t, i) => {
+                    const opt = document.createElement('div');
+                    opt.className = 'texture-option';
+                    opt.style.backgroundImage = `url('${t.texture_url}')`;
+                    opt.onclick = () => {
+                        currentIndices[key] = i;
+                        updateModelUI(key);
+                        updatePopupUI(key);
+                    };
+                    popupSwitcher.appendChild(opt);
+                });
+            }
+
+            function updatePopupUI(key) {
+                const textures = texturesByGltf[key];
+                if (!textures || textures.length === 0) {
+                    popupLabel.textContent = '';
+                    return;
+                }
+                const current = textures[currentIndices[key]];
+                popupLabel.textContent = current.label;
+
+                popupSwitcher.querySelectorAll('.texture-option').forEach((opt, i) => {
+                    opt.classList.toggle('active', i === currentIndices[key]);
+                });
+
+                if (key !== 'slideshow') {
+                    applyTexture(popupViewer, key, current.texture_url);
+                } else {
+                    if (window.updatePopupSlideshowTexture) {
+                        window.updatePopupSlideshowTexture(current.texture_url);
+                    } else {
+                        // Fallback if slideshow script not ready for popup
+                        document.getElementById('popupImage').src = current.texture_url;
+                        document.getElementById('popupImage').style.display = 'block';
+                        document.getElementById('popupSlideshowCanvas').style.display = 'none';
+                    }
+                }
+            }
+
+            document.getElementById('popupPrev').onclick = () => {
+                const key = popupViewer.dataset.currentKey;
+                const list = texturesByGltf[key];
+                if (list) {
+                    currentIndices[key] = (currentIndices[key] - 1 + list.length) % list.length;
+                    updateModelUI(key);
+                    updatePopupUI(key);
+                }
+            };
+
+            document.getElementById('popupNext').onclick = () => {
+                const key = popupViewer.dataset.currentKey;
+                const list = texturesByGltf[key];
+                if (list) {
+                    currentIndices[key] = (currentIndices[key] + 1) % list.length;
+                    updateModelUI(key);
+                    updatePopupUI(key);
+                }
+            };
+
+            const handleClose = () => {
+                popupContainer.classList.add('closing');
+                popup.style.opacity = '0';
+                popup.style.pointerEvents = 'none';
+
+                // Wait for animation to finish
+                closeTimeout = setTimeout(() => {
+                    popup.classList.remove('active');
+                    popup.style.opacity = '';
+                    popup.style.pointerEvents = '';
+                    popupContainer.classList.remove('closing');
+                    document.body.style.overflow = 'auto';
+                    popupViewer.src = "";
+
+                    // Cleanup Three.js loop if it was slideshow
+                    if (window.cleanupPopupSlideshow) window.cleanupPopupSlideshow();
+                }, 400);
+            };
+
+            closePopup.onclick = handleClose;
+            popup.onclick = (e) => {
+                if (e.target === popup) handleClose();
+            };
+
+        });
+    </script>
+</body>
+</html>
