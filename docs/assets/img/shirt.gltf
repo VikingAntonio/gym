@@ -16,9 +16,7 @@
                 10,
                 11,
                 12,
-                13,
-                14,
-                15
+                13
             ]
         }
     ],
@@ -132,34 +130,6 @@
         },
         {
             "name" : "Camera.003",
-            "rotation" : [
-                0.483536034822464,
-                0.33687159419059753,
-                -0.20870360732078552,
-                0.7804827094078064
-            ],
-            "translation" : [
-                7.358891487121582,
-                4.958309173583984,
-                6.925790786743164
-            ]
-        },
-        {
-            "name" : "Light.004",
-            "rotation" : [
-                0.16907575726509094,
-                0.7558803558349609,
-                -0.27217137813568115,
-                0.570947527885437
-            ],
-            "translation" : [
-                4.076245307922363,
-                5.903861999511719,
-                -1.0054539442062378
-            ]
-        },
-        {
-            "name" : "Camera.004",
             "rotation" : [
                 0.483536034822464,
                 0.33687159419059753,
@@ -355,7 +325,7 @@
         {
             "bufferView" : 8,
             "componentType" : 5126,
-            "count" : 39989,
+            "count" : 36285,
             "max" : [
                 0.24423092603683472,
                 0.16115614771842957,
@@ -371,13 +341,13 @@
         {
             "bufferView" : 9,
             "componentType" : 5126,
-            "count" : 39989,
+            "count" : 36285,
             "type" : "VEC3"
         },
         {
             "bufferView" : 10,
             "componentType" : 5126,
-            "count" : 39989,
+            "count" : 36285,
             "type" : "VEC2"
         },
         {
@@ -464,43 +434,43 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 479868,
+            "byteLength" : 435420,
             "byteOffset" : 7039632
         },
         {
             "buffer" : 0,
-            "byteLength" : 479868,
-            "byteOffset" : 7519500
+            "byteLength" : 435420,
+            "byteOffset" : 7475052
         },
         {
             "buffer" : 0,
-            "byteLength" : 319912,
-            "byteOffset" : 7999368
+            "byteLength" : 290280,
+            "byteOffset" : 7910472
         },
         {
             "buffer" : 0,
             "byteLength" : 346632,
-            "byteOffset" : 8319280
+            "byteOffset" : 8200752
         },
         {
             "buffer" : 0,
             "byteLength" : 497112,
-            "byteOffset" : 8665912
+            "byteOffset" : 8547384
         },
         {
             "buffer" : 0,
             "byteLength" : 497112,
-            "byteOffset" : 9163024
+            "byteOffset" : 9044496
         },
         {
             "buffer" : 0,
             "byteLength" : 331408,
-            "byteOffset" : 9660136
+            "byteOffset" : 9541608
         },
         {
             "buffer" : 0,
             "byteLength" : 443916,
-            "byteOffset" : 9991544
+            "byteOffset" : 9873016
         }
     ],
     "samplers" : [
@@ -511,7 +481,7 @@
     ],
     "buffers" : [
         {
-            "byteLength" : 10435460,
+            "byteLength" : 10316932,
             "uri" : "shirt.bin"
         }
     ]
