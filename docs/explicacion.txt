@@ -1,5 +1,5 @@
 EXPLICACIÓN DE ELEMENTOS - PLATAFORMA CORE
-
+ddd
 SISTEMA DE NUTRICIÓN (RECETAS)
 ------------------------------
 Cada receta está diseñada para proporcionar información nutricional precisa y facilitar la preparación:
