@@ -7,12 +7,16 @@
     <link rel="icon" type="image/png" sizes="1662x604" href="./assets/img/iconwisbe.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="./assets/css/styleGYM.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+
+        :root {
+            --primary: #3b82f6;
+            --border: #e2e8f0;
+        }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -20,10 +24,69 @@
             background-color: #f8fafc;
         }
 
-        /* Sidebar override to match styleGYM.css and user request */
+        /* Sidebar and styles extracted from styleGYM.css */
         #admin-sidebar {
+            position: fixed;
             top: 20px; /* Adjusting for no-navbar view */
+            left: 0;
+            z-index: 1000;
+            display: flex;
             height: calc(100vh - 40px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .admin-sidebar-closed {
+            left: -380px !important;
+        }
+
+        .admin-sidebar-open {
+            left: 0 !important;
+        }
+
+        .admin-sidebar-content {
+            width: 380px; /* Made bigger */
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0 40px 40px 0;
+            box-shadow: 20px 0 60px rgba(0,0,0,0.1);
+            border: 2px solid var(--border);
+            border-left: none;
+            display: flex;
+            flex-direction: column;
+            min-height: 85vh; /* Increased height */
+        }
+
+        .admin-sidebar-tab {
+            width: 40px; /* Thinner by default */
+            height: 160px;
+            background: var(--primary);
+            border-radius: 0 24px 24px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 10px 0 30px rgba(59, 130, 246, 0.3);
+            position: absolute;
+            right: -40px; /* Match thinner width */
+            top: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .admin-sidebar-tab:hover {
+            width: 60px; /* Expands on hover */
+            right: -60px;
+        }
+
+        .admin-sidebar-tab span {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            color: white;
+            font-weight: 900;
+            font-size: 14px;
+            letter-spacing: 2px;
+            transform: rotate(180deg);
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .service-content {
